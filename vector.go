@@ -55,25 +55,37 @@ func NewVector() *Vector {
 	return &Vector{}
 }
 
-func (vec *Vector) Parse(s []byte) error {
+func (vec *Vector) Parse(s []byte) (err error) {
 	if len(s) == 0 {
-		return ErrEmptySrc
+		err = ErrEmptySrc
+		return
 	}
 	vec.s = s
 	h := (*reflect.SliceHeader)(unsafe.Pointer(&vec.s))
 	vec.a = uint64(h.Data)
 
-	return nil
+	offset := 0
+	for offset < len(vec.s) {
+		val := vec.getVal()
+		offset, err = vec.parse(offset, val)
+		if err != nil {
+			return err
+		}
+		vec.v[vec.l-1] = *val
+		vec.r = append(vec.r, vec.l-1)
+	}
+
+	return
 }
 
-func (vec *Vector) getVal() (r Val) {
+func (vec *Vector) getVal() (r *Val) {
 	if vec.l < len(vec.v) {
-		r = vec.v[vec.l]
+		r = &vec.v[vec.l]
 		r.Reset()
 		vec.l++
 	} else {
-		r = Val{t: TypeUnk}
-		vec.v = append(vec.v, r)
+		r = &Val{t: TypeUnk}
+		vec.v = append(vec.v, *r)
 		vec.l++
 	}
 	return
@@ -92,20 +104,22 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 	case vec.s[offset] == '[':
 	case vec.s[offset] == '"':
 		v.t = TypeStr
-		v.v.o = uint64(offset + 1)
+		v.v.o = vec.a + uint64(offset+1)
 		e := bytealg.IndexAt(vec.s, bQuote, offset+1)
 		if vec.s[e-1] != '\\' {
 			v.v.l = e - offset - 1
+			offset += e + 1
 		} else {
 			_ = vec.s[len(vec.s)-1]
 			for i := e; i < len(vec.s); {
 				i = bytealg.IndexAt(vec.s, bQuote, i+1)
 				e = i
-				if vec.s[e-1] == '\\' {
+				if vec.s[e-1] != '\\' {
 					break
 				}
 			}
 			v.v.l = e - offset - 1
+			offset += e + 1
 		}
 	case isDigit(vec.s[offset]):
 		if len(vec.s[offset:0]) > 0 {
