@@ -16,6 +16,11 @@ var (
 	scalarNum2  = []byte("3.7e-5")
 	scalarTrue  = []byte("true")
 	scalarFalse = []byte("false")
+
+	arr0 = []byte(`[1, 2, 3, 4, 5]`)
+	arr1 = []byte(`["foo", "bar", "string"]`)
+	arr2 = []byte(`[3.14156, 6.23e-4]`)
+	arr3 = []byte(`["quoted \"str\" value", null, "foo"]`)
 )
 
 var (
@@ -72,6 +77,32 @@ func testScalar(t testing.TB) {
 	}
 }
 
+func testArr(t testing.TB) {
+	vec.Reset()
+	_ = vec.Parse(arr0)
+	if vec.v[0].t != TypeArr || vec.l != 6 || len(vec.v[0].r) != 5 {
+		t.Error("arr 0 mismatch")
+	}
+
+	vec.Reset()
+	_ = vec.Parse(arr1)
+	if vec.v[0].t != TypeArr || vec.l != 3 || len(vec.v[0].r) != 2 {
+		t.Error("arr 1 mismatch")
+	}
+
+	vec.Reset()
+	_ = vec.Parse(arr2)
+	if vec.v[0].t != TypeArr || vec.l != 2 || len(vec.v[0].r) != 1 {
+		t.Error("arr 2 mismatch")
+	}
+
+	vec.Reset()
+	_ = vec.Parse(arr3)
+	if vec.v[0].t != TypeArr || vec.l != 3 || len(vec.v[0].r) != 2 {
+		t.Error("arr 3 mismatch")
+	}
+}
+
 func TestVector_ParseScalar(t *testing.T) {
 	testScalar(t)
 }
@@ -81,4 +112,8 @@ func BenchmarkVector_ParseScalar(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		testScalar(b)
 	}
+}
+
+func TestVector_ParseArr(t *testing.T) {
+	testArr(t)
 }

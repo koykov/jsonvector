@@ -29,12 +29,6 @@ type Vector struct {
 	r []int
 }
 
-type Val struct {
-	t    Type
-	k, v memseq
-	r    []int
-}
-
 var (
 	bNull  = []byte("null")
 	bTrue  = []byte("true")
@@ -44,6 +38,7 @@ var (
 	ErrEmptySrc = errors.New("can't parse empty source")
 	ErrUnexpId  = errors.New("unexpected identifier")
 	ErrUnexpEOF = errors.New("unexpected end of file")
+	ErrEOA      = errors.New("end of array")
 )
 
 func NewVector() *Vector {
@@ -62,12 +57,13 @@ func (vec *Vector) Parse(s []byte) (err error) {
 	offset := 0
 	for offset < len(vec.s) {
 		val := vec.getVal()
+		i := len(vec.v) - 1
 		offset, err = vec.parse(offset, val)
 		if err != nil {
 			return err
 		}
-		vec.v[vec.l-1] = *val
-		vec.r = append(vec.r, vec.l-1)
+		vec.v[i] = *val
+		vec.r = append(vec.r, i)
 	}
 
 	return
@@ -87,6 +83,7 @@ func (vec *Vector) getVal() (r *Val) {
 }
 
 func (vec *Vector) parse(offset int, v *Val) (int, error) {
+	var err error
 	switch {
 	case vec.s[offset] == 'n':
 		if len(vec.s[offset:]) > 3 && bytes.Equal(bNull, vec.s[offset:offset+4]) {
@@ -97,6 +94,10 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 		}
 	case vec.s[offset] == '{':
 	case vec.s[offset] == '[':
+		v.t = TypeArr
+		offset, err = vec.parseA(offset, v)
+	case vec.s[offset] == ']':
+		return offset, ErrEOA
 	case vec.s[offset] == '"':
 		v.t = TypeStr
 		v.v.o = vec.a + uint64(offset+1)
@@ -126,8 +127,8 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 				}
 			}
 			v.t = TypeNum
-			v.v.set(vec.a+uint64(offset), i)
-			offset += i
+			v.v.set(vec.a+uint64(offset), i-offset)
+			offset = i
 		} else {
 			return offset, ErrUnexpEOF
 		}
@@ -148,6 +149,29 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 	}
+	return offset, err
+}
+
+func (vec *Vector) parseA(offset int, v *Val) (int, error) {
+	offset++
+	var err error
+	for offset < len(vec.s) {
+		if vec.s[offset] == ']' {
+			offset++
+			break
+		}
+		c := vec.getVal()
+		i := len(vec.v) - 1
+		offset, err = vec.parse(offset, c)
+		if err == ErrEOA {
+			break
+		}
+		for vec.s[offset] == ',' || vec.s[offset] == ' ' {
+			offset++
+		}
+		vec.v[i] = *c
+		v.r = append(v.r, len(vec.v)-1)
+	}
 	return offset, nil
 }
 
@@ -156,13 +180,6 @@ func (vec *Vector) Reset() {
 	vec.a = 0
 	vec.l = 0
 	vec.r = vec.r[:0]
-}
-
-func (v *Val) Reset() {
-	v.t = TypeUnk
-	v.k.set(0, 0)
-	v.v.set(0, 0)
-	v.r = v.r[:0]
 }
 
 func isDigit(c byte) bool {
