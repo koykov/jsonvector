@@ -35,15 +35,10 @@ type Val struct {
 	r    []int
 }
 
-type memseq struct {
-	o uint64
-	l int
-}
-
 var (
 	bNull  = []byte("null")
 	bTrue  = []byte("true")
-	bFalse = []byte("true")
+	bFalse = []byte("false")
 	bQuote = []byte(`"`)
 
 	ErrEmptySrc = errors.New("can't parse empty source")
@@ -122,13 +117,16 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 			offset += e + 1
 		}
 	case isDigit(vec.s[offset]):
-		if len(vec.s[offset:0]) > 0 {
+		if len(vec.s[offset:]) > 0 {
 			i := offset
 			for isDigitDot(vec.s[i]) {
 				i++
+				if i == len(vec.s) {
+					break
+				}
 			}
 			v.t = TypeNum
-			v.v.set(vec.a+uint64(offset), 4)
+			v.v.set(vec.a+uint64(offset), i)
 			offset += i
 		} else {
 			return offset, ErrUnexpEOF
@@ -142,7 +140,7 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 	case vec.s[offset] == 'f':
-		if len(vec.s[offset:]) > 4 && bytes.Equal(bFalse, vec.s[offset:offset+4]) {
+		if len(vec.s[offset:]) > 4 && bytes.Equal(bFalse, vec.s[offset:offset+5]) {
 			v.t = TypeBool
 			v.v.set(vec.a+uint64(offset), 5)
 			offset += 5
@@ -165,10 +163,6 @@ func (v *Val) Reset() {
 	v.k.set(0, 0)
 	v.v.set(0, 0)
 	v.r = v.r[:0]
-}
-
-func (m *memseq) set(o uint64, l int) {
-	m.o, m.l = o, l
 }
 
 func isDigit(c byte) bool {
