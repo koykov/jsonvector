@@ -104,7 +104,7 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 		e := bytealg.IndexAt(vec.s, bQuote, offset+1)
 		if vec.s[e-1] != '\\' {
 			v.v.l = e - offset - 1
-			offset += e + 1
+			offset = e + 1
 		} else {
 			_ = vec.s[len(vec.s)-1]
 			for i := e; i < len(vec.s); {

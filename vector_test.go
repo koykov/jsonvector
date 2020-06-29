@@ -86,19 +86,19 @@ func testArr(t testing.TB) {
 
 	vec.Reset()
 	_ = vec.Parse(arr1)
-	if vec.v[0].t != TypeArr || vec.l != 3 || len(vec.v[0].r) != 2 {
+	if vec.v[0].t != TypeArr || vec.l != 4 || len(vec.v[0].r) != 3 {
 		t.Error("arr 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr2)
-	if vec.v[0].t != TypeArr || vec.l != 2 || len(vec.v[0].r) != 1 {
+	if vec.v[0].t != TypeArr || vec.l != 3 || len(vec.v[0].r) != 2 {
 		t.Error("arr 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr3)
-	if vec.v[0].t != TypeArr || vec.l != 3 || len(vec.v[0].r) != 2 {
+	if vec.v[0].t != TypeArr || vec.l != 4 || len(vec.v[0].r) != 3 {
 		t.Error("arr 3 mismatch")
 	}
 }
@@ -116,4 +116,11 @@ func BenchmarkVector_ParseScalar(b *testing.B) {
 
 func TestVector_ParseArr(t *testing.T) {
 	testArr(t)
+}
+
+func BenchmarkVector_ParseArr(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testArr(b)
+	}
 }
