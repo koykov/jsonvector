@@ -57,13 +57,14 @@ func (vec *Vector) Parse(s []byte) (err error) {
 	offset := 0
 	for offset < len(vec.s) {
 		val := vec.getVal()
-		i := len(vec.v) - 1
+		i := vec.l - 1
+		vec.r = append(vec.r, i)
 		offset, err = vec.parse(offset, val)
 		if err != nil {
 			return err
 		}
+		val.cs = i
 		vec.v[i] = *val
-		vec.r = append(vec.r, i)
 	}
 
 	return
@@ -153,6 +154,7 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 }
 
 func (vec *Vector) parseA(offset int, v *Val) (int, error) {
+	v.cs = vec.l - 1
 	offset++
 	var err error
 	for offset < len(vec.s) {
@@ -161,7 +163,9 @@ func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 			break
 		}
 		c := vec.getVal()
-		i := len(vec.v) - 1
+		i := vec.l - 1
+		vec.r = append(vec.r, i)
+		v.ce = i
 		offset, err = vec.parse(offset, c)
 		if err == ErrEOA {
 			break
@@ -170,7 +174,6 @@ func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 			offset++
 		}
 		vec.v[i] = *c
-		v.r = append(v.r, len(vec.v)-1)
 	}
 	return offset, nil
 }

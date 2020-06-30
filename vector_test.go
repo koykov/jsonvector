@@ -80,25 +80,25 @@ func testScalar(t testing.TB) {
 func testArr(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(arr0)
-	if vec.v[0].t != TypeArr || vec.l != 6 || len(vec.v[0].r) != 5 {
+	if vec.v[0].t != TypeArr || vec.l != 6 || vec.v[0].ce-vec.v[0].cs != 5 {
 		t.Error("arr 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr1)
-	if vec.v[0].t != TypeArr || vec.l != 4 || len(vec.v[0].r) != 3 {
+	if vec.v[0].t != TypeArr || vec.l != 4 || vec.v[0].ce-vec.v[0].cs != 3 {
 		t.Error("arr 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr2)
-	if vec.v[0].t != TypeArr || vec.l != 3 || len(vec.v[0].r) != 2 {
+	if vec.v[0].t != TypeArr || vec.l != 3 || vec.v[0].ce-vec.v[0].cs != 2 {
 		t.Error("arr 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr3)
-	if vec.v[0].t != TypeArr || vec.l != 4 || len(vec.v[0].r) != 3 {
+	if vec.v[0].t != TypeArr || vec.l != 4 || vec.v[0].ce-vec.v[0].cs != 3 {
 		t.Error("arr 3 mismatch")
 	}
 }
