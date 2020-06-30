@@ -58,12 +58,10 @@ func (vec *Vector) Parse(s []byte) (err error) {
 	for offset < len(vec.s) {
 		val := vec.getVal()
 		i := vec.l - 1
-		vec.r = append(vec.r, i)
 		offset, err = vec.parse(offset, val)
 		if err != nil {
 			return err
 		}
-		val.cs = i
 		vec.v[i] = *val
 	}
 
