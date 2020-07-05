@@ -22,11 +22,11 @@ const (
 )
 
 type Vector struct {
-	s []byte
-	a uint64
-	v []Val
-	l int
-	r []int
+	s    []byte
+	a    uint64
+	v    []Val
+	l    int
+	r, c []int
 }
 
 var (
@@ -58,6 +58,7 @@ func (vec *Vector) Parse(s []byte) (err error) {
 	for offset < len(vec.s) {
 		val := vec.getVal()
 		i := vec.l - 1
+		vec.r = append(vec.r, i)
 		offset, err = vec.parse(offset, val)
 		if err != nil {
 			return err
@@ -162,7 +163,7 @@ func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 		}
 		c := vec.getVal()
 		i := vec.l - 1
-		vec.r = append(vec.r, i)
+		vec.c = append(vec.c, i)
 		v.ce = i
 		offset, err = vec.parse(offset, c)
 		if err == ErrEOA {
@@ -181,6 +182,7 @@ func (vec *Vector) Reset() {
 	vec.a = 0
 	vec.l = 0
 	vec.r = vec.r[:0]
+	vec.c = vec.c[:0]
 }
 
 func isDigit(c byte) bool {
