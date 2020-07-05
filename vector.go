@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/fastconv"
 )
 
 type Type int
@@ -56,7 +57,7 @@ func (vec *Vector) Parse(s []byte) (err error) {
 
 	offset := 0
 	for offset < len(vec.s) {
-		val := vec.getVal()
+		val := vec.newVal()
 		i := vec.l - 1
 		vec.r = append(vec.r, i)
 		offset, err = vec.parse(offset, val)
@@ -69,7 +70,34 @@ func (vec *Vector) Parse(s []byte) (err error) {
 	return
 }
 
-func (vec *Vector) getVal() (r *Val) {
+func (vec *Vector) Len() int {
+	return len(vec.r)
+}
+
+func (vec *Vector) Get(keys ...string) *Val {
+	if len(keys) == 0 {
+		if vec.Len() > 0 {
+			return &vec.v[0]
+		}
+		return nil
+	}
+
+	root := fastconv.S2B(keys[0])
+	tail := keys[1:]
+	_ = vec.v[vec.l-1]
+	for _, v := range vec.v {
+		if bytes.Equal(root, v.v.Bytes()) {
+			if len(tail) == 0 {
+				return &v
+			} else {
+				return v.Get(vec, tail...)
+			}
+		}
+	}
+	return nil
+}
+
+func (vec *Vector) newVal() (r *Val) {
 	if vec.l < len(vec.v) {
 		r = &vec.v[vec.l]
 		r.Reset()
@@ -161,7 +189,7 @@ func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 			offset++
 			break
 		}
-		c := vec.getVal()
+		c := vec.newVal()
 		i := vec.l - 1
 		vec.c = append(vec.c, i)
 		v.ce = i

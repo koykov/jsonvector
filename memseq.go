@@ -3,6 +3,8 @@ package jsonvector
 import (
 	"reflect"
 	"unsafe"
+
+	"github.com/koykov/fastconv"
 )
 
 type memseq struct {
@@ -21,4 +23,8 @@ func (m *memseq) Bytes() []byte {
 		Cap:  m.l,
 	}
 	return *(*[]byte)(unsafe.Pointer(&h))
+}
+
+func (m *memseq) String() string {
+	return fastconv.B2S(m.Bytes())
 }
