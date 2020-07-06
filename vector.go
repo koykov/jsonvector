@@ -86,11 +86,12 @@ func (vec *Vector) Get(keys ...string) *Val {
 	tail := keys[1:]
 	_ = vec.v[vec.l-1]
 	for _, v := range vec.v {
-		if bytes.Equal(root, v.v.Bytes()) {
+		if bytes.Equal(root, v.k.Bytes()) {
 			if len(tail) == 0 {
 				return &v
 			} else {
-				return v.Get(vec, tail...)
+				v.p = vec
+				return v.Get(tail...)
 			}
 		}
 	}
@@ -206,6 +207,13 @@ func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 }
 
 func (vec *Vector) Reset() {
+	if vec.l == 0 {
+		return
+	}
+	_ = vec.v[vec.l-1]
+	for i := 0; i < vec.l; i++ {
+		vec.v[i].p = nil
+	}
 	vec.s = nil
 	vec.a = 0
 	vec.l = 0

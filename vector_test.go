@@ -36,43 +36,43 @@ func testScalar(t testing.TB) {
 
 	vec.Reset()
 	_ = vec.Parse(scalarStr)
-	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStr, bQuote), vec.v[0].v.Bytes()) {
+	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStr, bQuote), vec.Get().Bytes()) {
 		t.Error("str mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarStrQ)
-	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStrQ, bQuote), vec.v[0].v.Bytes()) {
+	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStrQ, bQuote), vec.Get().Bytes()) {
 		t.Error("quoted str mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum0)
-	if vec.v[0].t != TypeNum || !bytes.Equal(scalarNum0, vec.v[0].v.Bytes()) {
+	if vec.v[0].t != TypeNum || vec.Get().Int() != 123456 {
 		t.Error("num 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum1)
-	if vec.v[0].t != TypeNum || !bytes.Equal(scalarNum1, vec.v[0].v.Bytes()) {
+	if vec.v[0].t != TypeNum || vec.Get().Float() != 123.456 {
 		t.Error("num 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum2)
-	if vec.v[0].t != TypeNum || !bytes.Equal(scalarNum2, vec.v[0].v.Bytes()) {
+	if vec.v[0].t != TypeNum || vec.Get().Float() != 3.7e-5 {
 		t.Error("num 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarTrue)
-	if vec.v[0].t != TypeBool || !bytes.Equal(bTrue, vec.v[0].v.Bytes()) {
+	if vec.v[0].t != TypeBool || vec.Get().Bool() != true {
 		t.Error("bool true mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarFalse)
-	if vec.v[0].t != TypeBool || !bytes.Equal(bFalse, vec.v[0].v.Bytes()) {
+	if vec.v[0].t != TypeBool || vec.Get().Bool() != false {
 		t.Error("bool false mismatch")
 	}
 }
@@ -80,25 +80,29 @@ func testScalar(t testing.TB) {
 func testArr(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(arr0)
-	if vec.v[0].t != TypeArr || vec.l != 6 || vec.v[0].ce-vec.v[0].cs != 5 {
+	v := vec.Get()
+	if v.Type() != TypeArr || v.Len() != 5 {
 		t.Error("arr 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr1)
-	if vec.v[0].t != TypeArr || vec.l != 4 || vec.v[0].ce-vec.v[0].cs != 3 {
+	v = vec.Get()
+	if v.Type() != TypeArr || v.Len() != 3 {
 		t.Error("arr 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr2)
-	if vec.v[0].t != TypeArr || vec.l != 3 || vec.v[0].ce-vec.v[0].cs != 2 {
+	v = vec.Get()
+	if v.Type() != TypeArr || v.Len() != 2 {
 		t.Error("arr 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr3)
-	if vec.v[0].t != TypeArr || vec.l != 4 || vec.v[0].ce-vec.v[0].cs != 3 {
+	v = vec.Get()
+	if v.Type() != TypeArr || v.Len() != 3 {
 		t.Error("arr 3 mismatch")
 	}
 }
