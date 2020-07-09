@@ -21,6 +21,11 @@ var (
 	arr1 = []byte(`["foo", "bar", "string"]`)
 	arr2 = []byte(`[3.14156, 6.23e-4]`)
 	arr3 = []byte(`["quoted \"str\" value", null, "foo"]`)
+
+	obj0 = []byte(`{"a": 1, "b": 2, "c": 3}`)
+	obj1 = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
+	obj2 = []byte(`{"key0": "\"quoted\"", "key1": "str"}`)
+	obj3 = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
 )
 
 var (
@@ -107,8 +112,21 @@ func testArr(t testing.TB) {
 	}
 }
 
+func testObj(t testing.TB) {
+	vec.Reset()
+	_ = vec.Parse(obj0)
+}
+
 func TestVector_ParseScalar(t *testing.T) {
 	testScalar(t)
+}
+
+func TestVector_ParseArr(t *testing.T) {
+	testArr(t)
+}
+
+func TestVector_ParseObj(t *testing.T) {
+	testObj(t)
 }
 
 func BenchmarkVector_ParseScalar(b *testing.B) {
@@ -116,10 +134,6 @@ func BenchmarkVector_ParseScalar(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		testScalar(b)
 	}
-}
-
-func TestVector_ParseArr(t *testing.T) {
-	testArr(t)
 }
 
 func BenchmarkVector_ParseArr(b *testing.B) {

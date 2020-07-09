@@ -84,13 +84,14 @@ func (vec *Vector) Get(keys ...string) *Val {
 
 	root := fastconv.S2B(keys[0])
 	tail := keys[1:]
-	_ = vec.v[vec.l-1]
-	for _, v := range vec.v {
+	_ = vec.r[len(vec.r)-1]
+	for i := 0; i < len(vec.r); i++ {
+		v := &vec.v[i]
 		if bytes.Equal(root, v.k.Bytes()) {
 			if len(tail) == 0 {
-				return &v
+				return v
 			} else {
-				v.p = vec
+				v.p = vec.ptr()
 				return v.Get(tail...)
 			}
 		}
@@ -122,6 +123,8 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 	case vec.s[offset] == '{':
+		v.t = TypeObj
+		offset, err = vec.parseO(offset, v)
 	case vec.s[offset] == '[':
 		v.t = TypeArr
 		offset, err = vec.parseA(offset, v)
@@ -181,6 +184,67 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 	return offset, err
 }
 
+func (vec *Vector) parseO(offset int, v *Val) (int, error) {
+	v.cs = vec.l - 1
+	offset++
+	var err error
+	for offset < len(vec.s) {
+		if vec.s[offset] == '}' {
+			offset++
+			break
+		}
+		// Parse key.
+		if vec.s[offset] != '"' {
+			return offset, ErrUnexpId
+		}
+		offset++
+		c := vec.newVal()
+		i := vec.l - 1
+		vec.c = append(vec.c, i)
+		v.ce = i
+		c.k.o = vec.a + uint64(offset)
+		e := bytealg.IndexAt(vec.s, bQuote, offset)
+		if vec.s[e-1] != '\\' {
+			c.k.l = e - offset - 1
+			offset = e + 1
+		} else {
+			_ = vec.s[len(vec.s)-1]
+			for i := e; i < len(vec.s); {
+				i = bytealg.IndexAt(vec.s, bQuote, i+1)
+				e = i
+				if vec.s[e-1] != '\\' {
+					break
+				}
+			}
+			c.k.l = e - offset - 1
+			offset += e + 1
+		}
+		// Parse value.
+		for vec.s[offset] == ' ' {
+			offset++
+		}
+		if vec.s[offset] == ':' {
+			offset++
+		} else {
+			return offset, ErrUnexpId
+		}
+		for vec.s[offset] == ' ' {
+			offset++
+		}
+		offset, err = vec.parse(offset, c)
+		for vec.s[offset] == ' ' {
+			offset++
+		}
+		if vec.s[offset] == ',' {
+			offset++
+			continue
+		} else {
+			return offset, ErrUnexpId
+		}
+	}
+	return offset, err
+}
+
 func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 	v.cs = vec.l - 1
 	offset++
@@ -212,13 +276,17 @@ func (vec *Vector) Reset() {
 	}
 	_ = vec.v[vec.l-1]
 	for i := 0; i < vec.l; i++ {
-		vec.v[i].p = nil
+		vec.v[i].p = 0
 	}
 	vec.s = nil
 	vec.a = 0
 	vec.l = 0
 	vec.r = vec.r[:0]
 	vec.c = vec.c[:0]
+}
+
+func (vec *Vector) ptr() uintptr {
+	return uintptr(unsafe.Pointer(vec))
 }
 
 func isDigit(c byte) bool {

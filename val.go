@@ -3,13 +3,14 @@ package jsonvector
 import (
 	"bytes"
 	"strconv"
+	"unsafe"
 
 	"github.com/koykov/fastconv"
 )
 
 type Val struct {
 	t      Type
-	p      *Vector
+	p      uintptr
 	k, v   memseq
 	cs, ce int
 	Err    error
@@ -23,8 +24,12 @@ func (v *Val) Get(keys ...string) *Val {
 	if len(keys) == 0 {
 		return v
 	}
+	vec := v.vec()
+	if vec == nil {
+		return v
+	}
 	for i := v.cs; i < v.ce; i++ {
-		c := v.p.v[i]
+		c := vec.v[i]
 		if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
 			if len(keys[1:]) == 0 {
 				return &c
@@ -87,4 +92,11 @@ func (v *Val) Reset() {
 	v.k.set(0, 0)
 	v.v.set(0, 0)
 	v.cs, v.ce = 0, 0
+}
+
+func (v *Val) vec() *Vector {
+	if v.p == 0 {
+		return nil
+	}
+	return (*Vector)(unsafe.Pointer(v.p))
 }
