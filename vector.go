@@ -23,11 +23,13 @@ const (
 )
 
 type Vector struct {
-	s    []byte
-	a    uint64
-	v    []Val
-	l    int
-	r, c []int
+	s []byte
+	a uint64
+	v []Val
+	l int
+	// Registry.
+	r  [][]int
+	rl int
 }
 
 var (
@@ -60,8 +62,8 @@ func (vec *Vector) Parse(s []byte) (err error) {
 	for offset < len(vec.s) {
 		val := vec.newVal()
 		i := vec.l - 1
-		vec.r = append(vec.r, i)
-		offset, err = vec.parse(offset, val)
+		vec.reg(0, i)
+		offset, err = vec.parse(0, offset, val)
 		if err != nil {
 			return err
 		}
@@ -113,7 +115,7 @@ func (vec *Vector) newVal() (r *Val) {
 	return
 }
 
-func (vec *Vector) parse(offset int, v *Val) (int, error) {
+func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 	var err error
 	switch {
 	case vec.s[offset] == 'n':
@@ -125,10 +127,10 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 		}
 	case vec.s[offset] == '{':
 		v.t = TypeObj
-		offset, err = vec.parseO(offset, v)
+		offset, err = vec.parseO(depth+1, offset, v)
 	case vec.s[offset] == '[':
 		v.t = TypeArr
-		offset, err = vec.parseA(offset, v)
+		offset, err = vec.parseA(depth+1, offset, v)
 	case vec.s[offset] == ']':
 		return offset, ErrEOA
 	case vec.s[offset] == '"':
@@ -185,8 +187,8 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 	return offset, err
 }
 
-func (vec *Vector) parseO(offset int, v *Val) (int, error) {
-	v.cs = len(vec.c)
+func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
+	v.cs = vec.regLen(depth)
 	offset++
 	var err error
 	for offset < len(vec.s) {
@@ -204,8 +206,7 @@ func (vec *Vector) parseO(offset int, v *Val) (int, error) {
 		offset++
 		c := vec.newVal()
 		i := vec.l - 1
-		vec.c = append(vec.c, i)
-		v.ce = len(vec.c)
+		v.ce = vec.reg(depth, i)
 		c.k.o = vec.a + uint64(offset)
 		e := bytealg.IndexAt(vec.s, bQuote, offset)
 		if vec.s[e-1] != '\\' {
@@ -235,7 +236,7 @@ func (vec *Vector) parseO(offset int, v *Val) (int, error) {
 		for vec.s[offset] == ' ' {
 			offset++
 		}
-		offset, err = vec.parse(offset, c)
+		offset, err = vec.parse(depth+1, offset, c)
 		if err == ErrEOO {
 			err = nil
 			break
@@ -248,8 +249,9 @@ func (vec *Vector) parseO(offset int, v *Val) (int, error) {
 	return offset, err
 }
 
-func (vec *Vector) parseA(offset int, v *Val) (int, error) {
-	v.cs = len(vec.c)
+func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
+	// v.cs = len(vec.c)
+	v.cs = vec.regLen(depth)
 	offset++
 	var err error
 	for offset < len(vec.s) {
@@ -259,9 +261,8 @@ func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 		}
 		c := vec.newVal()
 		i := vec.l - 1
-		vec.c = append(vec.c, i)
-		v.ce = len(vec.c)
-		offset, err = vec.parse(offset, c)
+		v.ce = vec.reg(depth, i)
+		offset, err = vec.parse(depth+1, offset, c)
 		if err == ErrEOA {
 			err = nil
 			break
@@ -285,12 +286,33 @@ func (vec *Vector) Reset() {
 	vec.s = nil
 	vec.a = 0
 	vec.l = 0
-	vec.r = vec.r[:0]
-	vec.c = vec.c[:0]
+	for i := 0; i < vec.rl; i++ {
+		vec.r = vec.r[:0]
+	}
+	vec.rl = 0
 }
 
 func (vec *Vector) ptr() uintptr {
 	return uintptr(unsafe.Pointer(vec))
+}
+
+func (vec *Vector) reg(depth, idx int) int {
+	if len(vec.r) <= depth {
+		vec.r = append(vec.r, nil)
+		vec.rl++
+	}
+	if vec.rl <= depth {
+		vec.rl++
+	}
+	vec.r[depth] = append(vec.r[depth], idx)
+	return len(vec.r[depth])
+}
+
+func (vec *Vector) regLen(depth int) int {
+	if len(vec.r) <= depth {
+		return 0
+	}
+	return len(vec.r[depth])
 }
 
 func isDigit(c byte) bool {
