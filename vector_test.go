@@ -34,49 +34,49 @@ var (
 
 func testScalar(t testing.TB) {
 	vec.Reset()
-	_ = vec.Parse(scalarNull)
+	_ = vec.Parse(scalarNull, false)
 	if vec.v[0].t != TypeNull {
 		t.Error("null mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarStr)
+	_ = vec.Parse(scalarStr, false)
 	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStr, bQuote), vec.Get().Bytes()) {
 		t.Error("str mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarStrQ)
+	_ = vec.Parse(scalarStrQ, false)
 	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStrQ, bQuote), vec.Get().Bytes()) {
 		t.Error("quoted str mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarNum0)
+	_ = vec.Parse(scalarNum0, false)
 	if vec.v[0].t != TypeNum || vec.Get().Int() != 123456 {
 		t.Error("num 0 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarNum1)
+	_ = vec.Parse(scalarNum1, false)
 	if vec.v[0].t != TypeNum || vec.Get().Float() != 123.456 {
 		t.Error("num 1 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarNum2)
+	_ = vec.Parse(scalarNum2, false)
 	if vec.v[0].t != TypeNum || vec.Get().Float() != 3.7e-5 {
 		t.Error("num 2 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarTrue)
+	_ = vec.Parse(scalarTrue, false)
 	if vec.v[0].t != TypeBool || vec.Get().Bool() != true {
 		t.Error("bool true mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarFalse)
+	_ = vec.Parse(scalarFalse, false)
 	if vec.v[0].t != TypeBool || vec.Get().Bool() != false {
 		t.Error("bool false mismatch")
 	}
@@ -84,28 +84,28 @@ func testScalar(t testing.TB) {
 
 func testArr(t testing.TB) {
 	vec.Reset()
-	_ = vec.Parse(arr0)
+	_ = vec.Parse(arr0, false)
 	v := vec.Get()
 	if v.Type() != TypeArr || v.Len() != 5 {
 		t.Error("arr 0 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(arr1)
+	_ = vec.Parse(arr1, false)
 	v = vec.Get()
 	if v.Type() != TypeArr || v.Len() != 3 {
 		t.Error("arr 1 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(arr2)
+	_ = vec.Parse(arr2, false)
 	v = vec.Get()
 	if v.Type() != TypeArr || v.Len() != 2 {
 		t.Error("arr 2 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(arr3)
+	_ = vec.Parse(arr3, false)
 	v = vec.Get()
 	if v.Type() != TypeArr || v.Len() != 3 {
 		t.Error("arr 3 mismatch")
@@ -114,28 +114,28 @@ func testArr(t testing.TB) {
 
 func testObj(t testing.TB) {
 	vec.Reset()
-	_ = vec.Parse(obj0)
+	_ = vec.Parse(obj0, false)
 	v := vec.Get()
 	if v.Type() != TypeObj && v.Len() != 3 {
 		t.Error("obj 0 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(obj1)
+	_ = vec.Parse(obj1, false)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 3 {
 		t.Error("obj 1 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(obj2)
+	_ = vec.Parse(obj2, false)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 2 {
 		t.Error("obj 2 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(obj3)
+	_ = vec.Parse(obj3, false)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 2 {
 		t.Error("obj 3 mismatch")

@@ -49,10 +49,15 @@ func NewVector() *Vector {
 	return &Vector{}
 }
 
-func (vec *Vector) Parse(s []byte) (err error) {
+func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 	if len(s) == 0 {
 		err = ErrEmptySrc
 		return
+	}
+	if copy {
+		vec.s = append(vec.s[:0], s...)
+	} else {
+		vec.s = s
 	}
 	vec.s = s
 	h := (*reflect.SliceHeader)(unsafe.Pointer(&vec.s))
@@ -71,6 +76,10 @@ func (vec *Vector) Parse(s []byte) (err error) {
 	}
 
 	return
+}
+
+func (vec *Vector) ParseStr(s string, copy bool) error {
+	return vec.Parse(fastconv.S2B(s), copy)
 }
 
 func (vec *Vector) Len() int {
@@ -288,7 +297,7 @@ func (vec *Vector) Reset() {
 	vec.a = 0
 	vec.l = 0
 	for i := 0; i < vec.rl; i++ {
-		vec.r = vec.r[:0]
+		vec.r[i] = vec.r[i][:0]
 	}
 	vec.rl = 0
 }
