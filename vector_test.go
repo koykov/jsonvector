@@ -24,7 +24,7 @@ var (
 
 	obj0 = []byte(`{"a": 1, "b": 2, "c": 3}`)
 	obj1 = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
-	obj2 = []byte(`{"key0": "\"quoted\"", "key1": "str"}`)
+	obj2 = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
 	obj3 = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
 )
 
@@ -115,6 +115,31 @@ func testArr(t testing.TB) {
 func testObj(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(obj0)
+	v := vec.Get()
+	if v.Type() != TypeObj && v.Len() != 3 {
+		t.Error("obj 0 mismatch")
+	}
+
+	vec.Reset()
+	_ = vec.Parse(obj1)
+	v = vec.Get()
+	if v.Type() != TypeObj && v.Len() != 3 {
+		t.Error("obj 1 mismatch")
+	}
+
+	vec.Reset()
+	_ = vec.Parse(obj2)
+	v = vec.Get()
+	if v.Type() != TypeObj && v.Len() != 2 {
+		t.Error("obj 2 mismatch")
+	}
+
+	vec.Reset()
+	_ = vec.Parse(obj3)
+	v = vec.Get()
+	if v.Type() != TypeObj && v.Len() != 2 {
+		t.Error("obj 3 mismatch")
+	}
 }
 
 func TestVector_ParseScalar(t *testing.T) {
@@ -140,5 +165,12 @@ func BenchmarkVector_ParseArr(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		testArr(b)
+	}
+}
+
+func BenchmarkVector_ParseObj(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testObj(b)
 	}
 }

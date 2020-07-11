@@ -40,6 +40,7 @@ var (
 	ErrUnexpId  = errors.New("unexpected identifier")
 	ErrUnexpEOF = errors.New("unexpected end of file")
 	ErrEOA      = errors.New("end of array")
+	ErrEOO      = errors.New("end of object")
 )
 
 func NewVector() *Vector {
@@ -185,13 +186,16 @@ func (vec *Vector) parse(offset int, v *Val) (int, error) {
 }
 
 func (vec *Vector) parseO(offset int, v *Val) (int, error) {
-	v.cs = vec.l - 1
+	v.cs = len(vec.c)
 	offset++
 	var err error
 	for offset < len(vec.s) {
 		if vec.s[offset] == '}' {
 			offset++
 			break
+		}
+		for vec.s[offset] == ' ' {
+			offset++
 		}
 		// Parse key.
 		if vec.s[offset] != '"' {
@@ -201,11 +205,11 @@ func (vec *Vector) parseO(offset int, v *Val) (int, error) {
 		c := vec.newVal()
 		i := vec.l - 1
 		vec.c = append(vec.c, i)
-		v.ce = i
+		v.ce = len(vec.c)
 		c.k.o = vec.a + uint64(offset)
 		e := bytealg.IndexAt(vec.s, bQuote, offset)
 		if vec.s[e-1] != '\\' {
-			c.k.l = e - offset - 1
+			c.k.l = e - offset
 			offset = e + 1
 		} else {
 			_ = vec.s[len(vec.s)-1]
@@ -216,7 +220,7 @@ func (vec *Vector) parseO(offset int, v *Val) (int, error) {
 					break
 				}
 			}
-			c.k.l = e - offset - 1
+			c.k.l = e - offset
 			offset += e + 1
 		}
 		// Parse value.
@@ -232,21 +236,20 @@ func (vec *Vector) parseO(offset int, v *Val) (int, error) {
 			offset++
 		}
 		offset, err = vec.parse(offset, c)
-		for vec.s[offset] == ' ' {
+		if err == ErrEOO {
+			err = nil
+			break
+		}
+		for vec.s[offset] == ',' || vec.s[offset] == ' ' {
 			offset++
 		}
-		if vec.s[offset] == ',' {
-			offset++
-			continue
-		} else {
-			return offset, ErrUnexpId
-		}
+		vec.v[i] = *c
 	}
 	return offset, err
 }
 
 func (vec *Vector) parseA(offset int, v *Val) (int, error) {
-	v.cs = vec.l - 1
+	v.cs = len(vec.c)
 	offset++
 	var err error
 	for offset < len(vec.s) {
@@ -257,9 +260,10 @@ func (vec *Vector) parseA(offset int, v *Val) (int, error) {
 		c := vec.newVal()
 		i := vec.l - 1
 		vec.c = append(vec.c, i)
-		v.ce = i
+		v.ce = len(vec.c)
 		offset, err = vec.parse(offset, c)
 		if err == ErrEOA {
+			err = nil
 			break
 		}
 		for vec.s[offset] == ',' || vec.s[offset] == ' ' {
