@@ -60,7 +60,7 @@ func (vec *Vector) Parse(s []byte) (err error) {
 
 	offset := 0
 	for offset < len(vec.s) {
-		val := vec.newVal()
+		val := vec.newVal(0)
 		i := vec.l - 1
 		vec.reg(0, i)
 		offset, err = vec.parse(0, offset, val)
@@ -102,7 +102,7 @@ func (vec *Vector) Get(keys ...string) *Val {
 	return nil
 }
 
-func (vec *Vector) newVal() (r *Val) {
+func (vec *Vector) newVal(depth int) (r *Val) {
 	if vec.l < len(vec.v) {
 		r = &vec.v[vec.l]
 		r.Reset()
@@ -112,6 +112,7 @@ func (vec *Vector) newVal() (r *Val) {
 		vec.v = append(vec.v, *r)
 		vec.l++
 	}
+	r.d = depth
 	return
 }
 
@@ -204,7 +205,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 		offset++
-		c := vec.newVal()
+		c := vec.newVal(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
 		c.k.o = vec.a + uint64(offset)
@@ -259,7 +260,7 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 			offset++
 			break
 		}
-		c := vec.newVal()
+		c := vec.newVal(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
 		offset, err = vec.parse(depth+1, offset, c)

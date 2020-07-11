@@ -10,6 +10,7 @@ import (
 
 type Val struct {
 	t      Type
+	d      int
 	p      uintptr
 	k, v   memseq
 	cs, ce int
