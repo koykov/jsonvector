@@ -86,28 +86,28 @@ func testArr(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(arr0, false)
 	v := vec.Get()
-	if v.Type() != TypeArr || v.Len() != 5 {
+	if v.Type() != TypeArr || v.Len() != 5 || vec.Get("1").Int() != 2 {
 		t.Error("arr 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr1, false)
 	v = vec.Get()
-	if v.Type() != TypeArr || v.Len() != 3 {
+	if v.Type() != TypeArr || v.Len() != 3 || !bytes.Equal(vec.Get("1").Bytes(), []byte("bar")) {
 		t.Error("arr 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr2, false)
 	v = vec.Get()
-	if v.Type() != TypeArr || v.Len() != 2 {
+	if v.Type() != TypeArr || v.Len() != 2 || vec.Get("0").Float() != 3.14156 {
 		t.Error("arr 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr3, false)
 	v = vec.Get()
-	if v.Type() != TypeArr || v.Len() != 3 {
+	if v.Type() != TypeArr || v.Len() != 3 || vec.Get("1").Type() != TypeNull {
 		t.Error("arr 3 mismatch")
 	}
 }
@@ -116,21 +116,21 @@ func testObj(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(obj0, false)
 	v := vec.Get()
-	if v.Type() != TypeObj && v.Len() != 3 {
+	if v.Type() != TypeObj && v.Len() != 3 || vec.Get("b").Int() != 2 {
 		t.Error("obj 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(obj1, false)
 	v = vec.Get()
-	if v.Type() != TypeObj && v.Len() != 3 {
+	if v.Type() != TypeObj && v.Len() != 3 || vec.Get("c").String() != "string" {
 		t.Error("obj 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(obj2, false)
 	v = vec.Get()
-	if v.Type() != TypeObj && v.Len() != 2 {
+	if v.Type() != TypeObj && v.Len() != 2 || vec.Get("key0").String() != "\"quoted\"" {
 		t.Error("obj 2 mismatch")
 	}
 

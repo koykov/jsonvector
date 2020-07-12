@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"reflect"
+	"strconv"
 	"unsafe"
 
 	"github.com/koykov/bytealg"
@@ -83,7 +84,7 @@ func (vec *Vector) ParseStr(s string, copy bool) error {
 }
 
 func (vec *Vector) Len() int {
-	return len(vec.r)
+	return vec.l
 }
 
 func (vec *Vector) Get(keys ...string) *Val {
@@ -94,19 +95,79 @@ func (vec *Vector) Get(keys ...string) *Val {
 		return nil
 	}
 
-	root := fastconv.S2B(keys[0])
-	tail := keys[1:]
-	_ = vec.r[len(vec.r)-1]
-	for i := 0; i < len(vec.r); i++ {
-		v := &vec.v[i]
-		if bytes.Equal(root, v.k.Bytes()) {
-			if len(tail) == 0 {
-				return v
-			} else {
-				v.p = vec.ptr()
-				return v.Get(tail...)
-			}
+	r := &vec.v[0]
+	if r.t != TypeObj && r.t != TypeArr {
+		if len(keys) > 1 {
+			// Attempt to get child of scalar value.
+			return nil
 		}
+		return r
+	}
+
+	if r.t == TypeArr {
+		return vec.getA(r, keys...)
+	}
+	if r.t == TypeObj {
+		return vec.getO(r, keys...)
+	}
+	return r
+}
+
+func (vec *Vector) getA(root *Val, keys ...string) *Val {
+	if len(keys) == 0 {
+		return root
+	}
+	k, err := strconv.Atoi(keys[0])
+	if err != nil || k >= root.Len() {
+		return nil
+	}
+	i := vec.r[root.d+1][k]
+	v := &vec.v[i]
+	tail := keys[1:]
+	if v.t != TypeArr && v.t != TypeObj {
+		if len(tail) > 0 {
+			// Attempt to get child of scalar value.
+			return nil
+		}
+		return v
+	}
+	if v.t == TypeArr {
+		return vec.getA(v, tail...)
+	}
+	if v.t == TypeObj {
+		return vec.getO(v, tail...)
+	}
+	return nil
+}
+
+func (vec *Vector) getO(root *Val, keys ...string) *Val {
+	if len(keys) == 0 {
+		return root
+	}
+	var v *Val
+	for i := root.cs; i < root.ce; i++ {
+		k := vec.r[root.d+1][i]
+		v = &vec.v[k]
+		if bytes.Equal(v.k.Bytes(), fastconv.S2B(keys[0])) {
+			break
+		}
+	}
+	if v == nil {
+		return v
+	}
+	tail := keys[1:]
+	if v.t != TypeArr && v.t != TypeObj {
+		if len(tail) > 0 {
+			// Attempt to get child of scalar value.
+			return nil
+		}
+		return v
+	}
+	if v.t == TypeArr {
+		return vec.getA(v, tail...)
+	}
+	if v.t == TypeObj {
+		return vec.getO(v, tail...)
 	}
 	return nil
 }
