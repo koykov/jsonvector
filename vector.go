@@ -25,6 +25,7 @@ const (
 
 type Vector struct {
 	s []byte
+	p uintptr
 	a uint64
 	v []Val
 	l int
@@ -63,6 +64,7 @@ func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 	vec.s = s
 	h := (*reflect.SliceHeader)(unsafe.Pointer(&vec.s))
 	vec.a = uint64(h.Data)
+	vec.p = vec.ptr()
 
 	offset := 0
 	for offset < len(vec.s) {
@@ -182,6 +184,7 @@ func (vec *Vector) newVal(depth int) (r *Val) {
 		vec.v = append(vec.v, *r)
 		vec.l++
 	}
+	r.p = vec.p
 	r.d = depth
 	return
 }
