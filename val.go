@@ -50,18 +50,30 @@ func (v *Val) Len() int {
 }
 
 func (v *Val) Bytes() []byte {
+	if v.t != TypeStr {
+		return nil
+	}
 	return v.v.Bytes()
 }
 
 func (v *Val) String() string {
+	if v.t != TypeStr {
+		return ""
+	}
 	return v.v.String()
 }
 
 func (v *Val) Bool() bool {
+	if v.t != TypeBool {
+		return false
+	}
 	return bytes.Equal(v.v.Bytes(), bTrue)
 }
 
 func (v *Val) Float() float64 {
+	if v.t != TypeNum {
+		return 0
+	}
 	f, err := strconv.ParseFloat(v.v.String(), 64)
 	if err == nil {
 		return f
@@ -71,6 +83,9 @@ func (v *Val) Float() float64 {
 }
 
 func (v *Val) Int() int64 {
+	if v.t != TypeNum {
+		return 0
+	}
 	i, err := strconv.ParseInt(v.v.String(), 10, 64)
 	if err == nil {
 		return i
@@ -80,6 +95,9 @@ func (v *Val) Int() int64 {
 }
 
 func (v *Val) Uint() uint64 {
+	if v.t != TypeNum {
+		return 0
+	}
 	u, err := strconv.ParseUint(v.v.String(), 10, 64)
 	if err == nil {
 		return u
