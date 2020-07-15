@@ -8,6 +8,9 @@ import (
 )
 
 var (
+	unesc       = []byte(`Lorem \"ipsum\" dolor \"sit\" amet.`)
+	unescExpect = []byte(`Lorem "ipsum" dolor "sit" amet.`)
+
 	scalarNull  = []byte("null")
 	scalarStr   = []byte(`"foo bar string"`)
 	scalarStrQ  = []byte(`"foo \"bar\" string"`)
@@ -26,9 +29,8 @@ var (
 	obj1 = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
 	obj2 = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
 	obj3 = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
-)
 
-var (
+	buf []byte
 	vec = NewVector()
 )
 
@@ -46,8 +48,9 @@ func testScalar(t testing.TB) {
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarStrQ, false)
-	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStrQ, bQuote), vec.Get().Bytes()) {
+	buf = append(buf[:0], scalarStrQ...)
+	_ = vec.Parse(buf, false)
+	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(buf[:17], bQuote), vec.Get().Bytes()) {
 		t.Error("quoted str mismatch")
 	}
 
@@ -128,7 +131,8 @@ func testObj(t testing.TB) {
 	}
 
 	vec.Reset()
-	_ = vec.Parse(obj2, false)
+	buf = append(buf[:0], obj2...)
+	_ = vec.Parse(buf, false)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 2 || vec.Get("key0").String() != "\"quoted\"" {
 		t.Error("obj 2 mismatch")
@@ -142,6 +146,13 @@ func testObj(t testing.TB) {
 	}
 }
 
+func TestUnescape(t *testing.T) {
+	buf = unescape(unesc)
+	if !bytes.Equal(buf, unescExpect) {
+		t.Error("unescape assertion failed")
+	}
+}
+
 func TestVector_ParseScalar(t *testing.T) {
 	testScalar(t)
 }
@@ -152,6 +163,17 @@ func TestVector_ParseArr(t *testing.T) {
 
 func TestVector_ParseObj(t *testing.T) {
 	testObj(t)
+}
+
+func BenchmarkUnescape(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		buf = append(buf[:0], unesc...)
+		buf = unescape(buf)
+		if !bytes.Equal(buf, unescExpect) {
+			b.Error("unescape assertion failed")
+		}
+	}
 }
 
 func BenchmarkVector_ParseScalar(b *testing.B) {

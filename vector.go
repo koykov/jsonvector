@@ -35,10 +35,11 @@ type Vector struct {
 }
 
 var (
-	bNull  = []byte("null")
-	bTrue  = []byte("true")
-	bFalse = []byte("false")
-	bQuote = []byte(`"`)
+	bNull   = []byte("null")
+	bTrue   = []byte("true")
+	bFalse  = []byte("false")
+	bQuote  = []byte(`"`)
+	bEQuote = []byte(`\"`)
 
 	ErrEmptySrc = errors.New("can't parse empty source")
 	ErrUnexpId  = errors.New("unexpected identifier")
@@ -224,6 +225,7 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 				}
 			}
 			v.v.l = e - offset - 1
+			v.v.e = true
 			offset += e + 1
 		}
 	case isDigit(vec.s[offset]):
@@ -296,6 +298,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 				}
 			}
 			c.k.l = e - offset
+			c.k.e = true
 			offset += e + 1
 		}
 		// Parse value.
