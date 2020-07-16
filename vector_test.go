@@ -30,7 +30,10 @@ var (
 	obj2 = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
 	obj3 = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
 
-	badScalarStr = []byte(`"unclosed string example`)
+	badTrash        = []byte(`foo bar`)
+	badScalarStr    = []byte(`"unclosed string example`)
+	badNumDiv       = []byte("3,14151")
+	badUnparsedTail = []byte(`{"a": 1, "b": 2}foo`)
 
 	buf []byte
 	vec = NewVector()
@@ -171,8 +174,26 @@ func TestErr(t *testing.T) {
 	var err error
 
 	vec.Reset()
+	err = vec.Parse(badTrash, false)
+	if err != ErrUnexpId && vec.ErrorOffset() != 0 {
+		t.Error("error assertion failed")
+	}
+
+	vec.Reset()
 	err = vec.Parse(badScalarStr, false)
 	if err != ErrUnexpEOS || vec.ErrorOffset() != 24 {
+		t.Error("error assertion failed")
+	}
+
+	vec.Reset()
+	err = vec.Parse(badNumDiv, false)
+	if err != ErrUnparsedTail && vec.ErrorOffset() != 1 {
+		t.Error("error assertion failed")
+	}
+
+	vec.Reset()
+	err = vec.Parse(badUnparsedTail, false)
+	if err != ErrUnparsedTail && vec.ErrorOffset() != 16 {
 		t.Error("error assertion failed")
 	}
 }

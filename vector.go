@@ -42,12 +42,13 @@ var (
 	bQuote  = []byte(`"`)
 	bEQuote = []byte(`\"`)
 
-	ErrEmptySrc = errors.New("can't parse empty source")
-	ErrUnexpId  = errors.New("unexpected identifier")
-	ErrUnexpEOF = errors.New("unexpected end of file")
-	ErrUnexpEOS = errors.New("unexpected end of string")
-	ErrEOA      = errors.New("end of array")
-	ErrEOO      = errors.New("end of object")
+	ErrEmptySrc     = errors.New("can't parse empty source")
+	ErrUnparsedTail = errors.New("unparsed tail")
+	ErrUnexpId      = errors.New("unexpected identifier")
+	ErrUnexpEOF     = errors.New("unexpected end of file")
+	ErrUnexpEOS     = errors.New("unexpected end of string")
+	ErrEOA          = errors.New("end of array")
+	ErrEOO          = errors.New("end of object")
 )
 
 func NewVector() *Vector {
@@ -70,16 +71,18 @@ func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 	vec.p = vec.ptr()
 
 	offset := 0
-	for offset < len(vec.s) {
-		val := vec.newVal(0)
-		i := vec.l - 1
-		vec.reg(0, i)
-		offset, err = vec.parse(0, offset, val)
-		if err != nil {
-			vec.e = offset
-			return err
-		}
-		vec.v[i] = *val
+	val := vec.newVal(0)
+	i := vec.l - 1
+	vec.reg(0, i)
+	offset, err = vec.parse(0, offset, val)
+	if err != nil {
+		vec.e = offset
+		return err
+	}
+	vec.v[i] = *val
+	if offset < len(vec.s) {
+		vec.e = offset
+		return ErrUnparsedTail
 	}
 
 	return
@@ -274,6 +277,8 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 		} else {
 			return offset, ErrUnexpId
 		}
+	default:
+		err = ErrUnexpId
 	}
 	return offset, err
 }
