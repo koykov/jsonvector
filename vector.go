@@ -29,6 +29,7 @@ type Vector struct {
 	a uint64
 	v []Val
 	l int
+	e int
 	// Registry.
 	r  [][]int
 	rl int
@@ -44,6 +45,7 @@ var (
 	ErrEmptySrc = errors.New("can't parse empty source")
 	ErrUnexpId  = errors.New("unexpected identifier")
 	ErrUnexpEOF = errors.New("unexpected end of file")
+	ErrUnexpEOS = errors.New("unexpected end of string")
 	ErrEOA      = errors.New("end of array")
 	ErrEOO      = errors.New("end of object")
 )
@@ -74,6 +76,7 @@ func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 		vec.reg(0, i)
 		offset, err = vec.parse(0, offset, val)
 		if err != nil {
+			vec.e = offset
 			return err
 		}
 		vec.v[i] = *val
@@ -88,6 +91,10 @@ func (vec *Vector) ParseStr(s string, copy bool) error {
 
 func (vec *Vector) Len() int {
 	return vec.l
+}
+
+func (vec *Vector) ErrorOffset() int {
+	return vec.e
 }
 
 func (vec *Vector) Get(keys ...string) *Val {
@@ -212,6 +219,9 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 		v.t = TypeStr
 		v.v.o = vec.a + uint64(offset+1)
 		e := bytealg.IndexAt(vec.s, bQuote, offset+1)
+		if e < 0 {
+			return len(vec.s), ErrUnexpEOS
+		}
 		if vec.s[e-1] != '\\' {
 			v.v.l = e - offset - 1
 			offset = e + 1
@@ -219,6 +229,10 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 			_ = vec.s[len(vec.s)-1]
 			for i := e; i < len(vec.s); {
 				i = bytealg.IndexAt(vec.s, bQuote, i+1)
+				if i < 0 {
+					e = len(vec.s)
+					break
+				}
 				e = i
 				if vec.s[e-1] != '\\' {
 					break
@@ -241,6 +255,7 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 			v.v.set(vec.a+uint64(offset), i-offset)
 			offset = i
 		} else {
+			vec.e = offset
 			return offset, ErrUnexpEOF
 		}
 	case vec.s[offset] == 't':
@@ -285,6 +300,9 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 		v.ce = vec.reg(depth, i)
 		c.k.o = vec.a + uint64(offset)
 		e := bytealg.IndexAt(vec.s, bQuote, offset)
+		if e < 0 {
+			return len(vec.s), ErrUnexpEOS
+		}
 		if vec.s[e-1] != '\\' {
 			c.k.l = e - offset
 			offset = e + 1
@@ -292,6 +310,10 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			_ = vec.s[len(vec.s)-1]
 			for i := e; i < len(vec.s); {
 				i = bytealg.IndexAt(vec.s, bQuote, i+1)
+				if i < 0 {
+					e = len(vec.s)
+					break
+				}
 				e = i
 				if vec.s[e-1] != '\\' {
 					break
@@ -363,6 +385,7 @@ func (vec *Vector) Reset() {
 	vec.s = nil
 	vec.a = 0
 	vec.l = 0
+	vec.e = 0
 	for i := 0; i < vec.rl; i++ {
 		vec.r[i] = vec.r[i][:0]
 	}

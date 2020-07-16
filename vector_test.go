@@ -30,6 +30,8 @@ var (
 	obj2 = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
 	obj3 = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
 
+	badScalarStr = []byte(`"unclosed string example`)
+
 	buf []byte
 	vec = NewVector()
 )
@@ -163,6 +165,16 @@ func TestVector_ParseArr(t *testing.T) {
 
 func TestVector_ParseObj(t *testing.T) {
 	testObj(t)
+}
+
+func TestErr(t *testing.T) {
+	var err error
+
+	vec.Reset()
+	err = vec.Parse(badScalarStr, false)
+	if err != ErrUnexpEOS || vec.ErrorOffset() != 24 {
+		t.Error("error assertion failed")
+	}
 }
 
 func BenchmarkUnescape(b *testing.B) {
