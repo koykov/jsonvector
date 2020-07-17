@@ -25,10 +25,17 @@ var (
 	arr2 = []byte(`[3.14156, 6.23e-4]`)
 	arr3 = []byte(`["quoted \"str\" value", null, "foo"]`)
 
-	obj0 = []byte(`{"a": 1, "b": 2, "c": 3}`)
-	obj1 = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
-	obj2 = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
-	obj3 = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
+	obj0   = []byte(`{"a": 1, "b": 2, "c": 3}`)
+	obj1   = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
+	obj2   = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
+	obj3   = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
+	objFmt = []byte(`
+	{
+		"c" :	15,
+		"foo":null,
+		"bar":  "qwerty \"encoded\""
+	}
+  `)
 
 	badTrash        = []byte(`foo bar`)
 	badScalarStr    = []byte(`"unclosed string example`)
@@ -148,6 +155,13 @@ func testObj(t testing.TB) {
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 2 {
 		t.Error("obj 3 mismatch")
+	}
+
+	vec.Reset()
+	_ = vec.Parse(objFmt, false)
+	v = vec.Get()
+	if v.Type() != TypeObj {
+		t.Error("obj fmt mismatch")
 	}
 }
 

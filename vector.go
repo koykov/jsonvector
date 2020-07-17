@@ -41,6 +41,7 @@ var (
 	bFalse  = []byte("false")
 	bQuote  = []byte(`"`)
 	bEQuote = []byte(`\"`)
+	bFmt    = []byte(" \t\n\r")
 
 	ErrEmptySrc     = errors.New("can't parse empty source")
 	ErrUnparsedTail = errors.New("unparsed tail")
@@ -60,12 +61,12 @@ func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 		err = ErrEmptySrc
 		return
 	}
+	s = bytealg.Trim(s, bFmt)
 	if copy {
 		vec.s = append(vec.s[:0], s...)
 	} else {
 		vec.s = s
 	}
-	vec.s = s
 	h := (*reflect.SliceHeader)(unsafe.Pointer(&vec.s))
 	vec.a = uint64(h.Data)
 	vec.p = vec.ptr()
@@ -233,7 +234,7 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 			for i := e; i < len(vec.s); {
 				i = bytealg.IndexAt(vec.s, bQuote, i+1)
 				if i < 0 {
-					e = len(vec.s)
+					e = len(vec.s) - 1
 					break
 				}
 				e = i
@@ -243,7 +244,7 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 			}
 			v.v.l = e - offset - 1
 			v.v.e = true
-			offset += e + 1
+			offset = e + 1
 		}
 	case isDigit(vec.s[offset]):
 		if len(vec.s[offset:]) > 0 {
@@ -292,7 +293,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			offset++
 			break
 		}
-		for vec.s[offset] == ' ' {
+		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 			offset++
 		}
 		// Parse key.
@@ -316,7 +317,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			for i := e; i < len(vec.s); {
 				i = bytealg.IndexAt(vec.s, bQuote, i+1)
 				if i < 0 {
-					e = len(vec.s)
+					e = len(vec.s) - 1
 					break
 				}
 				e = i
@@ -326,10 +327,10 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			}
 			c.k.l = e - offset
 			c.k.e = true
-			offset += e + 1
+			offset = e + 1
 		}
 		// Parse value.
-		for vec.s[offset] == ' ' {
+		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 			offset++
 		}
 		if vec.s[offset] == ':' {
@@ -337,7 +338,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 		} else {
 			return offset, ErrUnexpId
 		}
-		for vec.s[offset] == ' ' {
+		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 			offset++
 		}
 		offset, err = vec.parse(depth+1, offset, c)
@@ -345,7 +346,15 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			err = nil
 			break
 		}
-		for vec.s[offset] == ',' || vec.s[offset] == ' ' {
+		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
+			offset++
+		}
+		if vec.s[offset] == ',' {
+			offset++
+		} else {
+			return offset, ErrUnexpId
+		}
+		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 			offset++
 		}
 		vec.v[i] = *c
@@ -371,7 +380,15 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 			err = nil
 			break
 		}
-		for vec.s[offset] == ',' || vec.s[offset] == ' ' {
+		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
+			offset++
+		}
+		if vec.s[offset] == ',' {
+			offset++
+		} else {
+			return offset, ErrUnexpId
+		}
+		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 			offset++
 		}
 		vec.v[i] = *c
