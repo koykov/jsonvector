@@ -349,6 +349,10 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 			offset++
 		}
+		if vec.s[offset] == '}' {
+			offset++
+			break
+		}
 		if vec.s[offset] == ',' {
 			offset++
 		} else {
@@ -363,7 +367,6 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 }
 
 func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
-	// v.cs = len(vec.c)
 	v.cs = vec.regLen(depth)
 	offset++
 	var err error
@@ -382,6 +385,10 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 		}
 		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 			offset++
+		}
+		if vec.s[offset] == ']' {
+			offset++
+			break
 		}
 		if vec.s[offset] == ',' {
 			offset++
