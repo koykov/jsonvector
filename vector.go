@@ -290,12 +290,11 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 	var err error
 	for offset < len(vec.s) {
 		if vec.s[offset] == '}' {
+			// Edge case: empty object.
 			offset++
 			break
 		}
-		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-			offset++
-		}
+		offset = vec.skipFmt(offset)
 		// Parse key.
 		if vec.s[offset] != '"' {
 			return offset, ErrUnexpId
@@ -330,25 +329,19 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			offset = e + 1
 		}
 		// Parse value.
-		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-			offset++
-		}
+		offset = vec.skipFmt(offset)
 		if vec.s[offset] == ':' {
 			offset++
 		} else {
 			return offset, ErrUnexpId
 		}
-		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-			offset++
-		}
+		offset = vec.skipFmt(offset)
 		offset, err = vec.parse(depth+1, offset, c)
 		if err == ErrEOO {
 			err = nil
 			break
 		}
-		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-			offset++
-		}
+		offset = vec.skipFmt(offset)
 		if vec.s[offset] == '}' {
 			offset++
 			break
@@ -358,9 +351,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 		} else {
 			return offset, ErrUnexpId
 		}
-		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-			offset++
-		}
+		offset = vec.skipFmt(offset)
 		vec.v[i] = *c
 	}
 	return offset, err
@@ -372,6 +363,7 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 	var err error
 	for offset < len(vec.s) {
 		if vec.s[offset] == ']' {
+			// Edge case: empty array.
 			offset++
 			break
 		}
@@ -383,9 +375,7 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 			err = nil
 			break
 		}
-		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-			offset++
-		}
+		offset = vec.skipFmt(offset)
 		if vec.s[offset] == ']' {
 			offset++
 			break
@@ -395,9 +385,7 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 		} else {
 			return offset, ErrUnexpId
 		}
-		for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-			offset++
-		}
+		offset = vec.skipFmt(offset)
 		vec.v[i] = *c
 	}
 	return offset, nil
@@ -442,6 +430,13 @@ func (vec *Vector) regLen(depth int) int {
 		return 0
 	}
 	return len(vec.r[depth])
+}
+
+func (vec *Vector) skipFmt(offset int) int {
+	for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
+		offset++
+	}
+	return offset
 }
 
 func isDigit(c byte) bool {
