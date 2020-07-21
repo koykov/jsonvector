@@ -415,8 +415,10 @@ func (vec *Vector) ptr() uintptr {
 
 func (vec *Vector) reg(depth, idx int) int {
 	if len(vec.r) <= depth {
-		vec.r = append(vec.r, nil)
-		vec.rl++
+		for len(vec.r) <= depth {
+			vec.r = append(vec.r, nil)
+			vec.rl++
+		}
 	}
 	if vec.rl <= depth {
 		vec.rl++
