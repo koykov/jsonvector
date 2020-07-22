@@ -113,7 +113,7 @@ func (v *Val) Uint() uint64 {
 	return 0
 }
 
-func (v *Val) Array() []Val {
+func (v *Val) Array() Array {
 	if v.t != TypeArr {
 		return nil
 	}
@@ -126,7 +126,7 @@ func (v *Val) Array() []Val {
 	return nil
 }
 
-func (v *Val) Object() []Val {
+func (v *Val) Object() Object {
 	if v.t != TypeObj {
 		return nil
 	}
