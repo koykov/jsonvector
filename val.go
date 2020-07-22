@@ -63,6 +63,13 @@ func (v *Val) String() string {
 	return v.v.String()
 }
 
+func (v *Val) unescBytes() []byte {
+	if v.t != TypeStr {
+		return nil
+	}
+	return v.v.unescBytes()
+}
+
 func (v *Val) Bool() bool {
 	if v.t != TypeBool {
 		return false
@@ -104,6 +111,32 @@ func (v *Val) Uint() uint64 {
 	}
 	v.Err = err
 	return 0
+}
+
+func (v *Val) Array() []Val {
+	if v.t != TypeArr {
+		return nil
+	}
+	if vec := v.vec(); vec != nil {
+		a := vec.regGet(v.d, v.cs, v.ce)
+		if len(a) > 0 {
+			return vec.v[a[0]:a[len(a)-1]]
+		}
+	}
+	return nil
+}
+
+func (v *Val) Object() []Val {
+	if v.t != TypeObj {
+		return nil
+	}
+	if vec := v.vec(); vec != nil {
+		a := vec.regGet(v.d, v.cs, v.ce)
+		if len(a) > 0 {
+			return vec.v[a[0]:a[len(a)-1]]
+		}
+	}
+	return nil
 }
 
 func (v *Val) Reset() {

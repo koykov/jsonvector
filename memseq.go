@@ -19,12 +19,7 @@ func (m *memseq) set(o uint64, l int) {
 }
 
 func (m *memseq) Bytes() []byte {
-	h := reflect.SliceHeader{
-		Data: uintptr(m.o),
-		Len:  m.l,
-		Cap:  m.l,
-	}
-	p := *(*[]byte)(unsafe.Pointer(&h))
+	p := m.unescBytes()
 	if m.e {
 		p = unescape(p)
 		m.l = len(p)
@@ -35,6 +30,15 @@ func (m *memseq) Bytes() []byte {
 
 func (m *memseq) String() string {
 	return fastconv.B2S(m.Bytes())
+}
+
+func (m *memseq) unescBytes() []byte {
+	h := reflect.SliceHeader{
+		Data: uintptr(m.o),
+		Len:  m.l,
+		Cap:  m.l,
+	}
+	return *(*[]byte)(unsafe.Pointer(&h))
 }
 
 func unescape(p []byte) []byte {

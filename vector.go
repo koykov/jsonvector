@@ -3,6 +3,7 @@ package jsonvector
 import (
 	"bytes"
 	"errors"
+	"io"
 	"reflect"
 	"strconv"
 	"unsafe"
@@ -125,6 +126,12 @@ func (vec *Vector) Get(keys ...string) *Val {
 		return vec.getO(r, keys...)
 	}
 	return r
+}
+
+// Format vector in human readable representation.
+func (vec *Vector) Beautify(w io.Writer) error {
+	r := &vec.v[0]
+	return vec.beautify(w, r, 0)
 }
 
 func (vec *Vector) getA(root *Val, keys ...string) *Val {
@@ -336,7 +343,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 		offset = vec.skipFmt(offset)
-		offset, err = vec.parse(depth+1, offset, c)
+		offset, err = vec.parse(depth, offset, c)
 		if err == ErrEOO {
 			err = nil
 			break
@@ -370,7 +377,7 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 		c := vec.newVal(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
-		offset, err = vec.parse(depth+1, offset, c)
+		offset, err = vec.parse(depth, offset, c)
 		if err == ErrEOA {
 			err = nil
 			break
@@ -417,12 +424,12 @@ func (vec *Vector) reg(depth, idx int) int {
 	if len(vec.r) <= depth {
 		for len(vec.r) <= depth {
 			vec.r = append(vec.r, nil)
-			vec.rl++
+			vec.rl = len(vec.r)
 		}
 	}
-	if vec.rl <= depth {
-		vec.rl++
-	}
+	// if vec.rl <= depth {
+	// 	vec.rl++
+	// }
 	vec.r[depth] = append(vec.r[depth], idx)
 	return len(vec.r[depth])
 }
@@ -432,6 +439,13 @@ func (vec *Vector) regLen(depth int) int {
 		return 0
 	}
 	return len(vec.r[depth])
+}
+
+func (vec *Vector) regGet(depth, s, e int) []int {
+	if vec.regLen(depth) != 0 {
+		return vec.r[depth][s:e]
+	}
+	return nil
 }
 
 func (vec *Vector) skipFmt(offset int) int {
