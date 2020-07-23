@@ -16,9 +16,6 @@ var (
 )
 
 func (vec *Vector) beautify(w io.Writer, v *Val, depth int) (err error) {
-	for i := 0; i < depth; i++ {
-		_, err = w.Write(btTab)
-	}
 	switch v.t {
 	case TypeNull, TypeNum, TypeBool:
 		_, err = w.Write(v.Bytes())
@@ -36,9 +33,11 @@ func (vec *Vector) beautify(w io.Writer, v *Val, depth int) (err error) {
 				_, err = w.Write(btComma)
 				_, err = w.Write(btNl)
 			}
+			writePad(w, c.d)
 			err = vec.beautify(w, &c, depth+1)
 		}
 		_, err = w.Write(btNl)
+		writePad(w, v.d)
 		_, err = w.Write(btArrC)
 	case TypeObj:
 		_, err = w.Write(btObjO)
@@ -50,6 +49,7 @@ func (vec *Vector) beautify(w io.Writer, v *Val, depth int) (err error) {
 				_, err = w.Write(btComma)
 				_, err = w.Write(btNl)
 			}
+			writePad(w, c.d)
 			_, err = w.Write(btQuote)
 			_, err = w.Write(c.k.unescBytes())
 			_, err = w.Write(btQuote)
@@ -58,7 +58,14 @@ func (vec *Vector) beautify(w io.Writer, v *Val, depth int) (err error) {
 			err = vec.beautify(w, &c, depth+1)
 		}
 		_, err = w.Write(btNl)
+		writePad(w, v.d)
 		_, err = w.Write(btObjC)
 	}
 	return
+}
+
+func writePad(w io.Writer, cnt int) {
+	for i := 0; i < cnt; i++ {
+		_, _ = w.Write(btTab)
+	}
 }
