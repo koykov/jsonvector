@@ -37,7 +37,32 @@ var (
 	}
   `)
 
-	cmpx0 = []byte(`{"glossary":{"title":"example glossary","GlossDiv":{"title":"S","GlossList":{"GlossEntry":{"ID":"SGML","SortAs":"SGML","GlossTerm":"Standard Generalized Markup Language","Acronym":"SGML","Abbrev":"ISO 8879:1986","GlossDef":{"para":"A meta-markup language, used to create markup languages such as DocBook.","GlossSeeAlso":["GML","XML"]},"GlossSee":"markup"}}}}}`)
+	cmpx0       = []byte(`{"glossary":{"title":"example glossary","GlossDiv":{"title":"S","GlossList":{"GlossEntry":{"ID":"SGML","SortAs":"SGML","GlossTerm":"Standard Generalized Markup Language","Acronym":"SGML","Abbrev":"ISO 8879:1986","GlossDef":{"para":"A meta-markup language, used to create markup languages such as DocBook.","GlossSeeAlso":["GML","XML"]},"GlossSee":"markup"}}}}}`)
+	cmpxBeauty0 = []byte(`{
+	"glossary": {
+		"title": "example glossary",
+		"GlossDiv": {
+			"title": "S",
+			"GlossList": {
+				"GlossEntry": {
+					"ID": "SGML",
+					"SortAs": "SGML",
+					"GlossTerm": "Standard Generalized Markup Language",
+					"Acronym": "SGML",
+					"Abbrev": "ISO 8879:1986",
+					"GlossDef": {
+						"para": "A meta-markup language, used to create markup languages such as DocBook.",
+						"GlossSeeAlso": [
+							"GML",
+							"XML"
+						]
+					},
+					"GlossSee": "markup"
+				}
+			}
+		}
+	}
+}`)
 	cmpx1 = []byte(`{"firstName":"John","lastName":"Smith","isAlive":true,"age":27,"address":{"streetAddress":"21 2nd Street","city":"New York","state":"NY","postalCode":"10021-3100"},"phoneNumbers":[{"type":"home","number":"212 555-1234"},{"type":"office","number":"646 555-4567"},{"type":"mobile","number":"123 456-7890"}],"children":[],"spouse":null}`)
 	cmpx2 = []byte(`{"$schema":"http://json-schema.org/schema#","title":"Product","type":"object","required":["id","name","price"],"properties":{"id":{"type":"number","description":"Product identifier"},"name":{"type":"string","description":"Name of the product"},"price":{"type":"number","minimum":0},"tags":{"type":"array","items":{"type":"string"}},"stock":{"type":"object","properties":{"warehouse":{"type":"number"},"retail":{"type":"number"}}}}}`)
 	cmpx3 = []byte(`{"id":1,"name":"Foo","price":123,"tags":["Bar","Eek"],"stock":{"warehouse":300,"retail":20}}`)
@@ -177,11 +202,19 @@ func testObj(t testing.TB) {
 func testComplex0(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(cmpx0, false)
-	bb.Reset()
-	_ = vec.Beautify(&bb)
 	v := vec.Get("glossary", "GlossDiv", "GlossList", "GlossEntry", "ID")
 	if v.Type() != TypeStr && v.String() != "SGML" {
 		t.Error("complex 0 mismatch ID")
+	}
+}
+
+func testComplexBeauty0(t testing.TB) {
+	vec.Reset()
+	bb.Reset()
+	_ = vec.Parse(cmpx0, false)
+	_ = vec.Beautify(&bb)
+	if !bytes.Equal(bb.Bytes(), cmpxBeauty0) {
+		t.Error("complex 0 beauty mismatch")
 	}
 }
 
@@ -206,6 +239,10 @@ func TestVector_ParseObj(t *testing.T) {
 
 func TestVector_ParseComplex0(t *testing.T) {
 	testComplex0(t)
+}
+
+func TestVector_BeautyComplex0(t *testing.T) {
+	testComplexBeauty0(t)
 }
 
 func TestErr(t *testing.T) {
@@ -265,5 +302,12 @@ func BenchmarkVector_ParseObj(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		testObj(b)
+	}
+}
+
+func BenchmarkVector_ParseComplex0(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testComplex0(b)
 	}
 }
