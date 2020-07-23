@@ -348,6 +348,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			err = nil
 			break
 		}
+		vec.v[i] = *c
 		offset = vec.skipFmt(offset)
 		if vec.s[offset] == '}' {
 			offset++
@@ -359,7 +360,6 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 		offset = vec.skipFmt(offset)
-		vec.v[i] = *c
 	}
 	return offset, err
 }
@@ -382,6 +382,7 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 			err = nil
 			break
 		}
+		vec.v[i] = *c
 		offset = vec.skipFmt(offset)
 		if vec.s[offset] == ']' {
 			offset++
@@ -393,7 +394,6 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 		offset = vec.skipFmt(offset)
-		vec.v[i] = *c
 	}
 	return offset, nil
 }

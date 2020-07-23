@@ -113,28 +113,12 @@ func (v *Val) Uint() uint64 {
 	return 0
 }
 
-func (v *Val) Array() Array {
-	if v.t != TypeArr {
+func (v *Val) ChildIdx() []int {
+	if v.t != TypeArr && v.t != TypeObj {
 		return nil
 	}
 	if vec := v.vec(); vec != nil {
-		a := vec.regGet(v.d, v.cs, v.ce)
-		if len(a) > 0 {
-			return vec.v[a[0]:a[len(a)-1]]
-		}
-	}
-	return nil
-}
-
-func (v *Val) Object() Object {
-	if v.t != TypeObj {
-		return nil
-	}
-	if vec := v.vec(); vec != nil {
-		a := vec.regGet(v.d, v.cs, v.ce)
-		if len(a) > 0 {
-			return vec.v[a[0]:a[len(a)-1]]
-		}
+		return vec.regGet(v.d+1, v.cs, v.ce)
 	}
 	return nil
 }

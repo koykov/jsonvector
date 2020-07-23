@@ -51,6 +51,7 @@ var (
 	badUnparsedTail = []byte(`{"a": 1, "b": 2}foo`)
 
 	buf []byte
+	bb  bytes.Buffer
 	vec = NewVector()
 )
 
@@ -176,8 +177,10 @@ func testObj(t testing.TB) {
 func testComplex0(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(cmpx0, false)
+	bb.Reset()
+	_ = vec.Beautify(&bb)
 	v := vec.Get("glossary", "GlossDiv", "GlossList", "GlossEntry", "ID")
-	if v.Type() != TypeStr {
+	if v.Type() != TypeStr && v.String() != "SGML" {
 		t.Error("complex 0 mismatch ID")
 	}
 }

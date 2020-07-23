@@ -29,31 +29,33 @@ func (vec *Vector) beautify(w io.Writer, v *Val, depth int) (err error) {
 	case TypeArr:
 		_, err = w.Write(btArrO)
 		_, err = w.Write(btNl)
-		a := v.Array()
-		for i := 0; i < len(a); i++ {
-			if i > 0 {
+		ci := v.ChildIdx()
+		for cnt, i := range ci {
+			c := vec.v[i]
+			if cnt > 0 {
 				_, err = w.Write(btComma)
 				_, err = w.Write(btNl)
 			}
-			err = vec.beautify(w, &a[i], depth+1)
+			err = vec.beautify(w, &c, depth+1)
 		}
 		_, err = w.Write(btNl)
 		_, err = w.Write(btArrC)
 	case TypeObj:
 		_, err = w.Write(btObjO)
 		_, err = w.Write(btNl)
-		o := v.Object()
-		for i := 0; i < len(o); i++ {
-			if i > 0 {
+		ci := v.ChildIdx()
+		for cnt, i := range ci {
+			c := vec.v[i]
+			if cnt > 0 {
 				_, err = w.Write(btComma)
 				_, err = w.Write(btNl)
 			}
 			_, err = w.Write(btQuote)
-			_, err = w.Write(o[i].k.unescBytes())
+			_, err = w.Write(c.k.unescBytes())
 			_, err = w.Write(btQuote)
 			_, err = w.Write(btDotDot)
 			_, err = w.Write(btSpace)
-			err = vec.beautify(w, &o[i], depth+1)
+			err = vec.beautify(w, &c, depth+1)
 		}
 		_, err = w.Write(btNl)
 		_, err = w.Write(btObjC)
