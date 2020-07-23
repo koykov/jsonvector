@@ -132,10 +132,84 @@ var (
 		}
 	}
 }`)
-	cmpx3 = []byte(`{"id":1,"name":"Foo","price":123,"tags":["Bar","Eek"],"stock":{"warehouse":300,"retail":20}}`)
-	cmpx4 = []byte(`{"first name":"John","last name":"Smith","age":25,"address":{"street address":"21 2nd Street","city":"New York","state":"NY","postal code":"10021"},"phone numbers":[{"type":"home","number":"212 555-1234"},{"type":"fax","number":"646 555-4567"}],"sex":{"type":"male"}}`)
-	cmpx5 = []byte(`{"fruit":"Apple","size":"Large","color":"Red"}`)
-	cmpx6 = []byte(`{"quiz":{"sport":{"q1":{"question":"Which one is correct team name in NBA?","options":["New York Bulls","Los Angeles Kings","Golden State Warriros","Huston Rocket"],"answer":"Huston Rocket"}},"maths":{"q1":{"question":"5 + 7 = ?","options":["10","11","12","13"],"answer":"12"},"q2":{"question":"12 - 8 = ?","options":["1","2","3","4"],"answer":"4"}}}}`)
+	cmpx3       = []byte(`{"id":1,"name":"Foo","price":123,"tags":["Bar","Eek"],"stock":{"warehouse":300,"retail":20}}`)
+	cmpxBeauty3 = []byte(`{
+	"id": 1,
+	"name": "Foo",
+	"price": 123,
+	"tags": [
+		"Bar",
+		"Eek"
+	],
+	"stock": {
+		"warehouse": 300,
+		"retail": 20
+	}
+}`)
+	cmpx4       = []byte(`{"first name":"John","last name":"Smith","age":25,"address":{"street address":"21 2nd Street","city":"New York","state":"NY","postal code":"10021"},"phone numbers":[{"type":"home","number":"212 555-1234"},{"type":"fax","number":"646 555-4567"}],"sex":{"type":"male"}}`)
+	cmpxBeauty4 = []byte(`{
+	"first name": "John",
+	"last name": "Smith",
+	"age": 25,
+	"address": {
+		"street address": "21 2nd Street",
+		"city": "New York",
+		"state": "NY",
+		"postal code": "10021"
+	},
+	"phone numbers": [
+		{
+			"type": "home",
+			"number": "212 555-1234"
+		},
+		{
+			"type": "fax",
+			"number": "646 555-4567"
+		}
+	],
+	"sex": {
+		"type": "male"
+	}
+}`)
+	cmpx5       = []byte(`{"quiz":{"sport":{"q1":{"question":"Which one is correct team name in NBA?","options":["New York Bulls","Los Angeles Kings","Golden State Warriros","Huston Rocket"],"answer":"Huston Rocket"}},"maths":{"q1":{"question":"5 + 7 = ?","options":["10","11","12","13"],"answer":"12"},"q2":{"question":"12 - 8 = ?","options":["1","2","3","4"],"answer":"4"}}}}`)
+	cmpxBeauty5 = []byte(`{
+	"quiz": {
+		"sport": {
+			"q1": {
+				"question": "Which one is correct team name in NBA?",
+				"options": [
+					"New York Bulls",
+					"Los Angeles Kings",
+					"Golden State Warriros",
+					"Huston Rocket"
+				],
+				"answer": "Huston Rocket"
+			}
+		},
+		"maths": {
+			"q1": {
+				"question": "5 + 7 = ?",
+				"options": [
+					"10",
+					"11",
+					"12",
+					"13"
+				],
+				"answer": "12"
+			},
+			"q2": {
+				"question": "12 - 8 = ?",
+				"options": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"answer": "4"
+			}
+		}
+	}
+}`)
 
 	badTrash        = []byte(`foo bar`)
 	badScalarStr    = []byte(`"unclosed string example`)
@@ -331,6 +405,75 @@ func testComplexBeauty2(t testing.TB) {
 	}
 }
 
+func testComplex3(t testing.TB) {
+	var err error
+	vec.Reset()
+	err = vec.Parse(cmpx3, false)
+	if err != nil {
+		t.Error(err)
+	}
+	v := vec.Get("stock", "retail")
+	if v.Type() != TypeNum && v.Int() != 20 {
+		t.Error("complex 3 mismatch stock")
+	}
+}
+
+func testComplexBeauty3(t testing.TB) {
+	vec.Reset()
+	bb.Reset()
+	_ = vec.Parse(cmpx3, false)
+	_ = vec.Beautify(&bb)
+	if !bytes.Equal(bb.Bytes(), cmpxBeauty3) {
+		t.Error("complex 3 beauty mismatch")
+	}
+}
+
+func testComplex4(t testing.TB) {
+	var err error
+	vec.Reset()
+	err = vec.Parse(cmpx4, false)
+	if err != nil {
+		t.Error(err)
+	}
+	v := vec.Get("address", "postal code")
+	if v.Type() != TypeStr && v.String() != "10021" {
+		t.Error("complex 4 mismatch postal code")
+	}
+}
+
+func testComplexBeauty4(t testing.TB) {
+	vec.Reset()
+	bb.Reset()
+	_ = vec.Parse(cmpx4, false)
+	_ = vec.Beautify(&bb)
+	if !bytes.Equal(bb.Bytes(), cmpxBeauty4) {
+		t.Error("complex 4 beauty mismatch")
+	}
+}
+
+func testComplex5(t testing.TB) {
+	var err error
+	vec.Reset()
+	err = vec.Parse(cmpx5, false)
+	if err != nil {
+		t.Error(err)
+	}
+	v := vec.Get("quiz", "maths", "q2", "options", "2")
+	if v.Type() != TypeStr && v.String() != "3" {
+		t.Error("complex 5 mismatch quiz option")
+	}
+}
+
+func testComplexBeauty5(t testing.TB) {
+	vec.Reset()
+	bb.Reset()
+	_ = vec.Parse(cmpx5, false)
+	_ = vec.Beautify(&bb)
+	if !bytes.Equal(bb.Bytes(), cmpxBeauty5) {
+		t.Error("complex 5 beauty mismatch")
+	}
+}
+
 func TestUnescape(t *testing.T) {
 	buf = unescape(unesc)
 	if !bytes.Equal(buf, unescExpect) {
@@ -372,6 +515,30 @@ func TestVector_ParseComplex2(t *testing.T) {
 
 func TestVector_BeautyComplex2(t *testing.T) {
 	testComplexBeauty2(t)
+}
+
+func TestVector_ParseComplex3(t *testing.T) {
+	testComplex3(t)
+}
+
+func TestVector_BeautyComplex3(t *testing.T) {
+	testComplexBeauty3(t)
+}
+
+func TestVector_ParseComplex4(t *testing.T) {
+	testComplex4(t)
+}
+
+func TestVector_BeautyComplex4(t *testing.T) {
+	testComplexBeauty4(t)
+}
+
+func TestVector_ParseComplex5(t *testing.T) {
+	testComplex5(t)
+}
+
+func TestVector_BeautyComplex5(t *testing.T) {
+	testComplexBeauty5(t)
 }
 
 func TestErr(t *testing.T) {
@@ -452,5 +619,26 @@ func BenchmarkVector_ParseComplex2(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		testComplex2(b)
+	}
+}
+
+func BenchmarkVector_ParseComplex3(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testComplex3(b)
+	}
+}
+
+func BenchmarkVector_ParseComplex4(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testComplex4(b)
+	}
+}
+
+func BenchmarkVector_ParseComplex5(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testComplex5(b)
 	}
 }
