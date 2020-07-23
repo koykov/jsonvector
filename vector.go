@@ -142,7 +142,7 @@ func (vec *Vector) getA(root *Val, keys ...string) *Val {
 	if err != nil || k >= root.Len() {
 		return nil
 	}
-	i := vec.r[root.d+1][k]
+	i := vec.r[root.d+1][root.cs+k]
 	v := &vec.v[i]
 	tail := keys[1:]
 	if v.t != TypeArr && v.t != TypeObj {
@@ -410,7 +410,7 @@ func (vec *Vector) Reset() {
 	vec.a = 0
 	vec.l = 0
 	vec.e = 0
-	for i := 0; i < vec.rl; i++ {
+	for i := 0; i < len(vec.r); i++ {
 		vec.r[i] = vec.r[i][:0]
 	}
 	vec.rl = 0
@@ -442,7 +442,8 @@ func (vec *Vector) regLen(depth int) int {
 }
 
 func (vec *Vector) regGet(depth, s, e int) []int {
-	if vec.regLen(depth) != 0 {
+	l := vec.regLen(depth)
+	if l > s {
 		return vec.r[depth][s:e]
 	}
 	return nil

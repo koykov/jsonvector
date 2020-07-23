@@ -56,6 +56,10 @@ func (v *Val) Bytes() []byte {
 	return v.v.Bytes()
 }
 
+func (v *Val) ForceBytes() []byte {
+	return v.v.Bytes()
+}
+
 func (v *Val) String() string {
 	if v.t != TypeStr {
 		return ""

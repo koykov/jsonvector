@@ -29,13 +29,11 @@ var (
 	obj1   = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
 	obj2   = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
 	obj3   = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
-	objFmt = []byte(`
-	{
-		"c" :	15,
-		"foo":null,
-		"bar":  "qwerty \"encoded\""
-	}
-  `)
+	objFmt = []byte(`{
+	"c" :	15,
+	"foo":null,
+	"bar":  "qwerty \"encoded\""
+}`)
 
 	cmpx0       = []byte(`{"glossary":{"title":"example glossary","GlossDiv":{"title":"S","GlossList":{"GlossEntry":{"ID":"SGML","SortAs":"SGML","GlossTerm":"Standard Generalized Markup Language","Acronym":"SGML","Abbrev":"ISO 8879:1986","GlossDef":{"para":"A meta-markup language, used to create markup languages such as DocBook.","GlossSeeAlso":["GML","XML"]},"GlossSee":"markup"}}}}}`)
 	cmpxBeauty0 = []byte(`{
@@ -63,7 +61,35 @@ var (
 		}
 	}
 }`)
-	cmpx1 = []byte(`{"firstName":"John","lastName":"Smith","isAlive":true,"age":27,"address":{"streetAddress":"21 2nd Street","city":"New York","state":"NY","postalCode":"10021-3100"},"phoneNumbers":[{"type":"home","number":"212 555-1234"},{"type":"office","number":"646 555-4567"},{"type":"mobile","number":"123 456-7890"}],"children":[],"spouse":null}`)
+	cmpx1       = []byte(`{"firstName":"John","lastName":"Smith","isAlive":true,"age":27,"address":{"streetAddress":"21 2nd Street","city":"New York","state":"NY","postalCode":"10021-3100"},"phoneNumbers":[{"type":"home","number":"212 555-1234"},{"type":"office","number":"646 555-4567"},{"type":"mobile","number":"123 456-7890"}],"children":[],"spouse":null}`)
+	cmpxBeauty1 = []byte(`{
+	"firstName": "John",
+	"lastName": "Smith",
+	"isAlive": true,
+	"age": 27,
+	"address": {
+		"streetAddress": "21 2nd Street",
+		"city": "New York",
+		"state": "NY",
+		"postalCode": "10021-3100"
+	},
+	"phoneNumbers": [
+		{
+			"type": "home",
+			"number": "212 555-1234"
+		},
+		{
+			"type": "office",
+			"number": "646 555-4567"
+		},
+		{
+			"type": "mobile",
+			"number": "123 456-7890"
+		}
+	],
+	"children": [],
+	"spouse": null
+}`)
 	cmpx2 = []byte(`{"$schema":"http://json-schema.org/schema#","title":"Product","type":"object","required":["id","name","price"],"properties":{"id":{"type":"number","description":"Product identifier"},"name":{"type":"string","description":"Name of the product"},"price":{"type":"number","minimum":0},"tags":{"type":"array","items":{"type":"string"}},"stock":{"type":"object","properties":{"warehouse":{"type":"number"},"retail":{"type":"number"}}}}}`)
 	cmpx3 = []byte(`{"id":1,"name":"Foo","price":123,"tags":["Bar","Eek"],"stock":{"warehouse":300,"retail":20}}`)
 	cmpx4 = []byte(`{"first name":"John","last name":"Smith","age":25,"address":{"street address":"21 2nd Street","city":"New York","state":"NY","postal code":"10021"},"phone numbers":[{"type":"home","number":"212 555-1234"},{"type":"fax","number":"646 555-4567"}],"sex":{"type":"male"}}`)
@@ -218,6 +244,29 @@ func testComplexBeauty0(t testing.TB) {
 	}
 }
 
+func testComplex1(t testing.TB) {
+	var err error
+	vec.Reset()
+	err = vec.Parse(cmpx1, false)
+	if err != nil {
+		t.Error(err)
+	}
+	v := vec.Get("phoneNumbers", "1", "number")
+	if v.Type() != TypeStr && v.String() != "646 555-4567" {
+		t.Error("complex 1 mismatch phone number")
+	}
+}
+
+func testComplexBeauty1(t testing.TB) {
+	vec.Reset()
+	bb.Reset()
+	_ = vec.Parse(cmpx1, false)
+	_ = vec.Beautify(&bb)
+	if !bytes.Equal(bb.Bytes(), cmpxBeauty1) {
+		t.Error("complex 1 beauty mismatch")
+	}
+}
+
 func TestUnescape(t *testing.T) {
 	buf = unescape(unesc)
 	if !bytes.Equal(buf, unescExpect) {
@@ -243,6 +292,14 @@ func TestVector_ParseComplex0(t *testing.T) {
 
 func TestVector_BeautyComplex0(t *testing.T) {
 	testComplexBeauty0(t)
+}
+
+func TestVector_ParseComplex1(t *testing.T) {
+	testComplex1(t)
+}
+
+func TestVector_BeautyComplex1(t *testing.T) {
+	testComplexBeauty1(t)
 }
 
 func TestErr(t *testing.T) {
@@ -309,5 +366,12 @@ func BenchmarkVector_ParseComplex0(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		testComplex0(b)
+	}
+}
+
+func BenchmarkVector_ParseComplex1(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testComplex1(b)
 	}
 }
