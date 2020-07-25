@@ -8,7 +8,7 @@ import (
 	"github.com/koykov/fastconv"
 )
 
-type Val struct {
+type Value struct {
 	t      Type
 	d      int
 	p      uintptr
@@ -17,13 +17,17 @@ type Val struct {
 	Err    error
 }
 
-func (v *Val) Type() Type {
+func (v *Value) Type() Type {
 	return v.t
 }
 
-func (v *Val) Get(keys ...string) *Val {
+func (v *Value) Get(keys ...string) *Value {
 	if len(keys) == 0 {
 		return v
+	}
+	if v.t != TypeObj && v.t != TypeArr {
+		// Attempt to get child of scalar value.
+		return nil
 	}
 	vec := v.vec()
 	if vec == nil {
@@ -42,46 +46,46 @@ func (v *Val) Get(keys ...string) *Val {
 	return nil
 }
 
-func (v *Val) Len() int {
+func (v *Value) Len() int {
 	if v.ce != v.cs && v.ce >= v.cs {
 		return v.ce - v.cs
 	}
 	return 1
 }
 
-func (v *Val) Bytes() []byte {
+func (v *Value) Bytes() []byte {
 	if v.t != TypeStr {
 		return nil
 	}
 	return v.v.Bytes()
 }
 
-func (v *Val) ForceBytes() []byte {
+func (v *Value) ForceBytes() []byte {
 	return v.v.Bytes()
 }
 
-func (v *Val) String() string {
+func (v *Value) String() string {
 	if v.t != TypeStr {
 		return ""
 	}
 	return v.v.String()
 }
 
-func (v *Val) unescBytes() []byte {
+func (v *Value) unescBytes() []byte {
 	if v.t != TypeStr {
 		return nil
 	}
 	return v.v.unescBytes()
 }
 
-func (v *Val) Bool() bool {
+func (v *Value) Bool() bool {
 	if v.t != TypeBool {
 		return false
 	}
 	return bytes.Equal(v.v.Bytes(), bTrue)
 }
 
-func (v *Val) Float() float64 {
+func (v *Value) Float() float64 {
 	if v.t != TypeNum {
 		return 0
 	}
@@ -93,7 +97,7 @@ func (v *Val) Float() float64 {
 	return 0
 }
 
-func (v *Val) Int() int64 {
+func (v *Value) Int() int64 {
 	if v.t != TypeNum {
 		return 0
 	}
@@ -105,7 +109,7 @@ func (v *Val) Int() int64 {
 	return 0
 }
 
-func (v *Val) Uint() uint64 {
+func (v *Value) Uint() uint64 {
 	if v.t != TypeNum {
 		return 0
 	}
@@ -117,7 +121,7 @@ func (v *Val) Uint() uint64 {
 	return 0
 }
 
-func (v *Val) ChildIdx() []int {
+func (v *Value) ChildIdx() []int {
 	if v.t != TypeArr && v.t != TypeObj {
 		return nil
 	}
@@ -127,14 +131,14 @@ func (v *Val) ChildIdx() []int {
 	return nil
 }
 
-func (v *Val) Reset() {
+func (v *Value) Reset() {
 	v.t = TypeUnk
 	v.k.set(0, 0)
 	v.v.set(0, 0)
 	v.cs, v.ce = 0, 0
 }
 
-func (v *Val) vec() *Vector {
+func (v *Value) vec() *Vector {
 	if v.p == 0 {
 		return nil
 	}

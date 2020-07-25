@@ -28,7 +28,7 @@ type Vector struct {
 	s []byte
 	p uintptr
 	a uint64
-	v []Val
+	v []Value
 	l int
 	e int
 	// Registry.
@@ -37,13 +37,12 @@ type Vector struct {
 }
 
 var (
-	bNull   = []byte("null")
-	bTrue   = []byte("true")
-	bFalse  = []byte("false")
-	bQuote  = []byte(`"`)
-	bEQuote = []byte(`\"`)
-	bSlash  = []byte(`\`)
-	bFmt    = []byte(" \t\n\r")
+	bNull  = []byte("null")
+	bTrue  = []byte("true")
+	bFalse = []byte("false")
+	bQuote = []byte(`"`)
+	bSlash = []byte(`\`)
+	bFmt   = []byte(" \t\n\r")
 
 	ErrEmptySrc     = errors.New("can't parse empty source")
 	ErrUnparsedTail = errors.New("unparsed tail")
@@ -74,7 +73,7 @@ func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 	vec.p = vec.ptr()
 
 	offset := 0
-	val := vec.newVal(0)
+	val := vec.newValue(0)
 	i := vec.l - 1
 	vec.reg(0, i)
 	offset, err = vec.parse(0, offset, val)
@@ -103,7 +102,7 @@ func (vec *Vector) ErrorOffset() int {
 	return vec.e
 }
 
-func (vec *Vector) Get(keys ...string) *Val {
+func (vec *Vector) Get(keys ...string) *Value {
 	if len(keys) == 0 {
 		if vec.Len() > 0 {
 			return &vec.v[0]
@@ -135,7 +134,7 @@ func (vec *Vector) Beautify(w io.Writer) error {
 	return vec.beautify(w, r, 0)
 }
 
-func (vec *Vector) getA(root *Val, keys ...string) *Val {
+func (vec *Vector) getA(root *Value, keys ...string) *Value {
 	if len(keys) == 0 {
 		return root
 	}
@@ -162,11 +161,11 @@ func (vec *Vector) getA(root *Val, keys ...string) *Val {
 	return nil
 }
 
-func (vec *Vector) getO(root *Val, keys ...string) *Val {
+func (vec *Vector) getO(root *Value, keys ...string) *Value {
 	if len(keys) == 0 {
 		return root
 	}
-	var v *Val
+	var v *Value
 	for i := root.cs; i < root.ce; i++ {
 		k := vec.r[root.d+1][i]
 		v = &vec.v[k]
@@ -194,13 +193,13 @@ func (vec *Vector) getO(root *Val, keys ...string) *Val {
 	return nil
 }
 
-func (vec *Vector) newVal(depth int) (r *Val) {
+func (vec *Vector) newValue(depth int) (r *Value) {
 	if vec.l < len(vec.v) {
 		r = &vec.v[vec.l]
 		r.Reset()
 		vec.l++
 	} else {
-		r = &Val{t: TypeUnk}
+		r = &Value{t: TypeUnk}
 		vec.v = append(vec.v, *r)
 		vec.l++
 	}
@@ -209,7 +208,7 @@ func (vec *Vector) newVal(depth int) (r *Val) {
 	return
 }
 
-func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
+func (vec *Vector) parse(depth, offset int, v *Value) (int, error) {
 	var err error
 	switch {
 	case vec.s[offset] == 'n':
@@ -296,7 +295,7 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 	return offset, err
 }
 
-func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
+func (vec *Vector) parseO(depth, offset int, v *Value) (int, error) {
 	v.cs = vec.regLen(depth)
 	offset++
 	var err error
@@ -312,7 +311,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			return offset, ErrUnexpId
 		}
 		offset++
-		c := vec.newVal(depth)
+		c := vec.newValue(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
 		c.k.o = vec.a + uint64(offset)
@@ -373,7 +372,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 	return offset, err
 }
 
-func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
+func (vec *Vector) parseA(depth, offset int, v *Value) (int, error) {
 	v.cs = vec.regLen(depth)
 	offset++
 	var err error
@@ -383,7 +382,7 @@ func (vec *Vector) parseA(depth, offset int, v *Val) (int, error) {
 			offset++
 			break
 		}
-		c := vec.newVal(depth)
+		c := vec.newValue(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
 		offset, err = vec.parse(depth, offset, c)

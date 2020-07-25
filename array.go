@@ -1,8 +1,8 @@
 package jsonvector
 
-type Array []Val
+type Array []Value
 
-func (a *Array) Get(idx int) *Val {
+func (a *Array) Get(idx int) *Value {
 	if idx < len(*a) {
 		return &((*a)[idx])
 	}
