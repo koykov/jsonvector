@@ -8,9 +8,6 @@ import (
 )
 
 var (
-	unesc       = []byte(`Lorem \"ipsum\" dolor \"sit\" amet.`)
-	unescExpect = []byte(`Lorem "ipsum" dolor "sit" amet.`)
-
 	scalarNull  = []byte("null")
 	scalarStr   = []byte(`"foo bar string"`)
 	scalarStrQ  = []byte(`"foo \"bar\" string"`)
@@ -163,13 +160,6 @@ func testObj(t testing.TB) {
 	}
 }
 
-func TestUnescape(t *testing.T) {
-	buf = unescape(unesc)
-	if !bytes.Equal(buf, unescExpect) {
-		t.Error("unescape assertion failed")
-	}
-}
-
 func TestVector_ParseScalar(t *testing.T) {
 	testScalar(t)
 }
@@ -207,17 +197,6 @@ func TestErr(t *testing.T) {
 	err = vec.Parse(badUnparsedTail, false)
 	if err != ErrUnparsedTail && vec.ErrorOffset() != 16 {
 		t.Error("error assertion failed")
-	}
-}
-
-func BenchmarkUnescape(b *testing.B) {
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		buf = append(buf[:0], unesc...)
-		buf = unescape(buf)
-		if !bytes.Equal(buf, unescExpect) {
-			b.Error("unescape assertion failed")
-		}
 	}
 }
 

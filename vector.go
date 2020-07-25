@@ -42,6 +42,7 @@ var (
 	bFalse  = []byte("false")
 	bQuote  = []byte(`"`)
 	bEQuote = []byte(`\"`)
+	bSlash  = []byte(`\`)
 	bFmt    = []byte(" \t\n\r")
 
 	ErrEmptySrc     = errors.New("can't parse empty source")
@@ -233,6 +234,7 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 		if e < 0 {
 			return len(vec.s), ErrUnexpEOS
 		}
+		v.v.e = false
 		if vec.s[e-1] != '\\' {
 			v.v.l = e - offset - 1
 			offset = e + 1
@@ -252,6 +254,9 @@ func (vec *Vector) parse(depth, offset int, v *Val) (int, error) {
 			v.v.l = e - offset - 1
 			v.v.e = true
 			offset = e + 1
+		}
+		if !v.v.e {
+			v.v.e = bytes.IndexByte(v.v.unescBytes(), '\\') >= 0
 		}
 	case isDigit(vec.s[offset]):
 		if len(vec.s[offset:]) > 0 {
@@ -315,6 +320,7 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 		if e < 0 {
 			return len(vec.s), ErrUnexpEOS
 		}
+		c.k.e = false
 		if vec.s[e-1] != '\\' {
 			c.k.l = e - offset
 			offset = e + 1
@@ -334,6 +340,9 @@ func (vec *Vector) parseO(depth, offset int, v *Val) (int, error) {
 			c.k.l = e - offset
 			c.k.e = true
 			offset = e + 1
+		}
+		if !c.k.e {
+			c.k.e = bytes.IndexByte(c.k.unescBytes(), '\\') >= 0
 		}
 		// Parse value.
 		offset = vec.skipFmt(offset)
