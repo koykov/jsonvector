@@ -21,6 +21,20 @@ var (
 	unescGrk  = []byte(`Λορεμ ιπσθμ δολορ σιτ αμετ, ιδ cονγθε αccθσαμ vιξ.`)
 	escCyr    = []byte(`\u041B\u043E\u0440\u0435\u043C \u0438\u043F\u0441\u0443\u043C \u0434\u043E\u043B\u043E\u0440 \u0441\u0438\u0442 \u0430\u043C\u0435\u0442, \u0442\u0435 \u0432\u043E\u0446\u0438\u0431\u0443\u0441 \u043D\u0443\u0441\u044F\u0443\u0430\u043C \u0442\u0438\u0431\u0438\u044F\u0443\u0435 \u0441\u0435\u0430, \u0446\u0443\u043C \u0446\u0443 \u0435\u0438\u0443\u0441 \u0435\u0438\u0440\u043C\u043E\u0434.`)
 	unescCyr  = []byte(`Лорем ипсум долор сит амет, те воцибус нусяуам тибияуе сеа, цум цу еиус еирмод.`)
+
+	escSurr   = []byte(`What is better: \uD834\uDD1E or \uD834\uDD22?`)
+	unescSurr = []byte("What is better: 𝄞 or 𝄢?")
+
+	escCmpx   = []byte(`You can see escaped surrogate characters below\n\u041D\u0438\u0436\u0435 \u0432\u044B \u0443\u0432\u0438\u0434\u0438\u0442\u0435 \u043F\u0440\u0438\u043C\u0435\u0440\u044B \u0437\u0430\u043A\u043E\u0434\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0445 \u0441\u0443\u0440\u0440\u043E\u0433\u0430\u0442\u043D\u044B\u0445 \u043F\u0430\u0440:\n\t\uD835\uDC9E - Mathematical script capital C\n\t\uD835\uDCAF - Mathematical script capital T\n\t\uD835\uDCAE - Mathematical script capital S\n\t\uD835\uDC9F - Mathematical script capital D\n\t\uD835\uDCB3 - Mathematical script capital X\n\t\uD834\uDD1E - Musical symbol G clef\n\t\uD834\uDD22 - Musical symbol F clef`)
+	unescCmpx = []byte(`You can see escaped surrogate characters below
+Ниже вы увидите примеры закодированных суррогатных пар:
+	𝒞 - Mathematical script capital C
+	𝒯 - Mathematical script capital T
+	𝒮 - Mathematical script capital S
+	𝒟 - Mathematical script capital D
+	𝒳 - Mathematical script capital X
+	𝄞 - Musical symbol G clef
+	𝄢 - Musical symbol F clef`)
 )
 
 func testUnescape(t testing.TB, key string, src, dst []byte) {
@@ -57,6 +71,14 @@ func TestUnescapeGreek(t *testing.T) {
 
 func TestUnescapeCyrillic(t *testing.T) {
 	testUnescape(t, "unescape cyrillic", escCyr, unescCyr)
+}
+
+func TestUnescapeSurrogate(t *testing.T) {
+	testUnescape(t, "unescape surrogate", escSurr, unescSurr)
+}
+
+func TestUnescapeComplex(t *testing.T) {
+	testUnescape(t, "unescape complex", escCmpx, unescCmpx)
 }
 
 func BenchmarkUnescape0(b *testing.B) {
@@ -105,5 +127,19 @@ func BenchmarkUnescapeCyrillic(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		testUnescape(b, "unescape cyrillic", escCyr, unescCyr)
+	}
+}
+
+func BenchmarkUnescapeSurrogate(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testUnescape(b, "unescape surrogate", escSurr, unescSurr)
+	}
+}
+
+func BenchmarkUnescapeComplex(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testUnescape(b, "unescape complex", escCmpx, unescCmpx)
 	}
 }

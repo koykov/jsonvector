@@ -72,9 +72,11 @@ func unescape(p []byte) []byte {
 					}
 					r = utf16.DecodeRune(r, rune(u1))
 					s := string(r)
+					z := len(s)
 					copy(p[i:], s)
-					l -= 11 - len(s)
-					i += len(s)
+					copy(p[i+z:], p[i+12:])
+					l -= 11 - z
+					i += z
 				}
 			}
 		}
