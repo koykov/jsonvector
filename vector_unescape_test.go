@@ -43,6 +43,22 @@ func TestUnescape2(t *testing.T) {
 	testUnescape(t, "unescape 2", esc2, unesc2)
 }
 
+func TestUnescapeChinese(t *testing.T) {
+	testUnescape(t, "unescape chinese", escChin, unescChin)
+}
+
+func TestUnescapeArabic(t *testing.T) {
+	testUnescape(t, "unescape arabic", escArab, unescArab)
+}
+
+func TestUnescapeGreek(t *testing.T) {
+	testUnescape(t, "unescape greek", escGrk, unescGrk)
+}
+
+func TestUnescapeCyrillic(t *testing.T) {
+	testUnescape(t, "unescape cyrillic", escCyr, unescCyr)
+}
+
 func BenchmarkUnescape0(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -61,5 +77,33 @@ func BenchmarkUnescape2(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		testUnescape(b, "unescape 2", esc0, unesc0)
+	}
+}
+
+func BenchmarkUnescapeChinese(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testUnescape(b, "unescape chinese", escChin, unescChin)
+	}
+}
+
+func BenchmarkUnescapeArabic(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testUnescape(b, "unescape arabic", escArab, unescArab)
+	}
+}
+
+func BenchmarkUnescapeGreek(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testUnescape(b, "unescape greek", escGrk, unescGrk)
+	}
+}
+
+func BenchmarkUnescapeCyrillic(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testUnescape(b, "unescape cyrillic", escCyr, unescCyr)
 	}
 }
