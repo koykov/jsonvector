@@ -43,50 +43,50 @@ var (
 
 func testScalar(t testing.TB) {
 	vec.Reset()
-	_ = vec.Parse(scalarNull, false)
+	_ = vec.Parse(scalarNull)
 	if vec.v[0].t != TypeNull {
 		t.Error("null mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarStr, false)
+	_ = vec.Parse(scalarStr)
 	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStr, bQuote), vec.Get().Bytes()) {
 		t.Error("str mismatch")
 	}
 
 	vec.Reset()
 	buf = append(buf[:0], scalarStrQ...)
-	_ = vec.Parse(buf, false)
+	_ = vec.Parse(buf)
 	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(buf[:17], bQuote), vec.Get().Bytes()) {
 		t.Error("quoted str mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarNum0, false)
+	_ = vec.Parse(scalarNum0)
 	if vec.v[0].t != TypeNum || vec.Get().Int() != 123456 {
 		t.Error("num 0 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarNum1, false)
+	_ = vec.Parse(scalarNum1)
 	if vec.v[0].t != TypeNum || vec.Get().Float() != 123.456 {
 		t.Error("num 1 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarNum2, false)
+	_ = vec.Parse(scalarNum2)
 	if vec.v[0].t != TypeNum || vec.Get().Float() != 3.7e-5 {
 		t.Error("num 2 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarTrue, false)
+	_ = vec.Parse(scalarTrue)
 	if vec.v[0].t != TypeBool || vec.Get().Bool() != true {
 		t.Error("bool true mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(scalarFalse, false)
+	_ = vec.Parse(scalarFalse)
 	if vec.v[0].t != TypeBool || vec.Get().Bool() != false {
 		t.Error("bool false mismatch")
 	}
@@ -94,28 +94,28 @@ func testScalar(t testing.TB) {
 
 func testArr(t testing.TB) {
 	vec.Reset()
-	_ = vec.Parse(arr0, false)
+	_ = vec.Parse(arr0)
 	v := vec.Get()
 	if v.Type() != TypeArr || v.Len() != 5 || vec.Get("1").Int() != 2 {
 		t.Error("arr 0 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(arr1, false)
+	_ = vec.Parse(arr1)
 	v = vec.Get()
 	if v.Type() != TypeArr || v.Len() != 3 || !bytes.Equal(vec.Get("1").Bytes(), []byte("bar")) {
 		t.Error("arr 1 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(arr2, false)
+	_ = vec.Parse(arr2)
 	v = vec.Get()
 	if v.Type() != TypeArr || v.Len() != 2 || vec.Get("0").Float() != 3.14156 {
 		t.Error("arr 2 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(arr3, false)
+	_ = vec.Parse(arr3)
 	v = vec.Get()
 	if v.Type() != TypeArr || v.Len() != 3 || vec.Get("1").Type() != TypeNull {
 		t.Error("arr 3 mismatch")
@@ -124,14 +124,14 @@ func testArr(t testing.TB) {
 
 func testObj(t testing.TB) {
 	vec.Reset()
-	_ = vec.Parse(obj0, false)
+	_ = vec.Parse(obj0)
 	v := vec.Get()
 	if v.Type() != TypeObj && v.Len() != 3 || vec.Get("b").Int() != 2 {
 		t.Error("obj 0 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(obj1, false)
+	_ = vec.Parse(obj1)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 3 || vec.Get("c").String() != "string" {
 		t.Error("obj 1 mismatch")
@@ -139,21 +139,21 @@ func testObj(t testing.TB) {
 
 	vec.Reset()
 	buf = append(buf[:0], obj2...)
-	_ = vec.Parse(buf, false)
+	_ = vec.Parse(buf)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 2 || vec.Get("key0").String() != "\"quoted\"" {
 		t.Error("obj 2 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(obj3, false)
+	_ = vec.Parse(obj3)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 2 {
 		t.Error("obj 3 mismatch")
 	}
 
 	vec.Reset()
-	_ = vec.Parse(objFmt, false)
+	_ = vec.Parse(objFmt)
 	v = vec.Get()
 	if v.Type() != TypeObj {
 		t.Error("obj fmt mismatch")
@@ -176,25 +176,25 @@ func TestErr(t *testing.T) {
 	var err error
 
 	vec.Reset()
-	err = vec.Parse(badTrash, false)
+	err = vec.Parse(badTrash)
 	if err != ErrUnexpId && vec.ErrorOffset() != 0 {
 		t.Error("error assertion failed")
 	}
 
 	vec.Reset()
-	err = vec.Parse(badScalarStr, false)
+	err = vec.Parse(badScalarStr)
 	if err != ErrUnexpEOS || vec.ErrorOffset() != 24 {
 		t.Error("error assertion failed")
 	}
 
 	vec.Reset()
-	err = vec.Parse(badNumDiv, false)
+	err = vec.Parse(badNumDiv)
 	if err != ErrUnparsedTail && vec.ErrorOffset() != 1 {
 		t.Error("error assertion failed")
 	}
 
 	vec.Reset()
-	err = vec.Parse(badUnparsedTail, false)
+	err = vec.Parse(badUnparsedTail)
 	if err != ErrUnparsedTail && vec.ErrorOffset() != 16 {
 		t.Error("error assertion failed")
 	}

@@ -57,7 +57,23 @@ func NewVector() *Vector {
 	return &Vector{}
 }
 
-func (vec *Vector) Parse(s []byte, copy bool) (err error) {
+func (vec *Vector) Parse(s []byte) error {
+	return vec.parse(s, false)
+}
+
+func (vec *Vector) ParseStr(s string) error {
+	return vec.parse(fastconv.S2B(s), false)
+}
+
+func (vec *Vector) ParseCopy(s []byte) error {
+	return vec.parse(s, true)
+}
+
+func (vec *Vector) ParseCopyStr(s string) error {
+	return vec.parse(fastconv.S2B(s), true)
+}
+
+func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	if len(s) == 0 {
 		err = ErrEmptySrc
 		return
@@ -76,7 +92,7 @@ func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 	val := vec.newValue(0)
 	i := vec.l - 1
 	vec.reg(0, i)
-	offset, err = vec.parse(0, offset, val)
+	offset, err = vec.parseG(0, offset, val)
 	if err != nil {
 		vec.e = offset
 		return err
@@ -88,10 +104,6 @@ func (vec *Vector) Parse(s []byte, copy bool) (err error) {
 	}
 
 	return
-}
-
-func (vec *Vector) ParseStr(s string, copy bool) error {
-	return vec.Parse(fastconv.S2B(s), copy)
 }
 
 func (vec *Vector) Len() int {
@@ -208,7 +220,7 @@ func (vec *Vector) newValue(depth int) (r *Value) {
 	return
 }
 
-func (vec *Vector) parse(depth, offset int, v *Value) (int, error) {
+func (vec *Vector) parseG(depth, offset int, v *Value) (int, error) {
 	var err error
 	switch {
 	case vec.s[offset] == 'n':
@@ -351,7 +363,7 @@ func (vec *Vector) parseO(depth, offset int, v *Value) (int, error) {
 			return offset, ErrUnexpId
 		}
 		offset = vec.skipFmt(offset)
-		offset, err = vec.parse(depth, offset, c)
+		offset, err = vec.parseG(depth, offset, c)
 		if err == ErrEOO {
 			err = nil
 			break
@@ -385,7 +397,7 @@ func (vec *Vector) parseA(depth, offset int, v *Value) (int, error) {
 		c := vec.newValue(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
-		offset, err = vec.parse(depth, offset, c)
+		offset, err = vec.parseG(depth, offset, c)
 		if err == ErrEOA {
 			err = nil
 			break

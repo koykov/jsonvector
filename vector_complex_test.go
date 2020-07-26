@@ -193,7 +193,7 @@ var (
 
 func testComplex(t testing.TB, key string, src []byte, path []string, typ Type, val interface{}) {
 	vec.Reset()
-	err := vec.Parse(src, false)
+	err := vec.Parse(src)
 	if err != nil {
 		t.Error(key, err)
 	}
@@ -216,7 +216,7 @@ func testComplex(t testing.TB, key string, src []byte, path []string, typ Type, 
 func testComplexFmt(t testing.TB, key string, src, dst []byte) {
 	vec.Reset()
 	bbuf.Reset()
-	err := vec.Parse(src, false)
+	err := vec.Parse(src)
 	if err != nil {
 		t.Error(key, err)
 	}
