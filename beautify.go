@@ -26,10 +26,10 @@ func (vec *Vector) beautify(w io.Writer, v *Value, depth int) (err error) {
 		_, err = w.Write(v.ForceBytes())
 	case TypeStr:
 		_, err = w.Write(btQuote)
-		_, err = w.Write(v.unescBytes())
+		_, err = w.Write(v.RawBytes())
 		_, err = w.Write(btQuote)
 	case TypeArr:
-		ci := v.ChildIdx()
+		ci := v.childIdx()
 		if len(ci) == 0 {
 			_, err = w.Write(btArrE)
 		} else {
@@ -49,7 +49,7 @@ func (vec *Vector) beautify(w io.Writer, v *Value, depth int) (err error) {
 			_, err = w.Write(btArrC)
 		}
 	case TypeObj:
-		ci := v.ChildIdx()
+		ci := v.childIdx()
 		if len(ci) == 0 {
 			_, err = w.Write(btObjE)
 		} else {
@@ -63,7 +63,7 @@ func (vec *Vector) beautify(w io.Writer, v *Value, depth int) (err error) {
 				}
 				writePad(w, c.d)
 				_, err = w.Write(btQuote)
-				_, err = w.Write(c.k.unescBytes())
+				_, err = w.Write(c.k.rawBytes())
 				_, err = w.Write(btQuote)
 				_, err = w.Write(btDotDot)
 				_, err = w.Write(btSpace)

@@ -255,7 +255,7 @@ func (vec *Vector) parse(depth, offset int, v *Value) (int, error) {
 			offset = e + 1
 		}
 		if !v.v.e {
-			v.v.e = bytes.IndexByte(v.v.unescBytes(), '\\') >= 0
+			v.v.e = bytes.IndexByte(v.v.rawBytes(), '\\') >= 0
 		}
 	case isDigit(vec.s[offset]):
 		if len(vec.s[offset:]) > 0 {
@@ -341,7 +341,7 @@ func (vec *Vector) parseO(depth, offset int, v *Value) (int, error) {
 			offset = e + 1
 		}
 		if !c.k.e {
-			c.k.e = bytes.IndexByte(c.k.unescBytes(), '\\') >= 0
+			c.k.e = bytes.IndexByte(c.k.rawBytes(), '\\') >= 0
 		}
 		// Parse value.
 		offset = vec.skipFmt(offset)

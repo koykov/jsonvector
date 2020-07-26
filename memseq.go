@@ -18,7 +18,7 @@ func (m *memseq) set(o uint64, l int) {
 }
 
 func (m *memseq) Bytes() []byte {
-	p := m.unescBytes()
+	p := m.rawBytes()
 	if m.e {
 		p = unescape(p)
 		m.l = len(p)
@@ -31,7 +31,7 @@ func (m *memseq) String() string {
 	return fastconv.B2S(m.Bytes())
 }
 
-func (m *memseq) unescBytes() []byte {
+func (m *memseq) rawBytes() []byte {
 	h := reflect.SliceHeader{
 		Data: uintptr(m.o),
 		Len:  m.l,

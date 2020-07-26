@@ -53,6 +53,20 @@ func (v *Value) Len() int {
 	return 1
 }
 
+func (v *Value) Object() *Object {
+	if v.t != TypeObj {
+		return nil
+	}
+	return (*Object)(v)
+}
+
+func (v *Value) Array() *Array {
+	if v.t != TypeArr {
+		return nil
+	}
+	return (*Array)(v)
+}
+
 func (v *Value) Bytes() []byte {
 	if v.t != TypeStr {
 		return nil
@@ -64,18 +78,15 @@ func (v *Value) ForceBytes() []byte {
 	return v.v.Bytes()
 }
 
+func (v *Value) RawBytes() []byte {
+	return v.v.rawBytes()
+}
+
 func (v *Value) String() string {
 	if v.t != TypeStr {
 		return ""
 	}
 	return v.v.String()
-}
-
-func (v *Value) unescBytes() []byte {
-	if v.t != TypeStr {
-		return nil
-	}
-	return v.v.unescBytes()
 }
 
 func (v *Value) Bool() bool {
@@ -121,7 +132,7 @@ func (v *Value) Uint() uint64 {
 	return 0
 }
 
-func (v *Value) ChildIdx() []int {
+func (v *Value) childIdx() []int {
 	if v.t != TypeArr && v.t != TypeObj {
 		return nil
 	}
@@ -135,7 +146,9 @@ func (v *Value) Reset() {
 	v.t = TypeUnk
 	v.k.set(0, 0)
 	v.v.set(0, 0)
+	v.d, v.p = 0, 0
 	v.cs, v.ce = 0, 0
+	v.Err = nil
 }
 
 func (v *Value) vec() *Vector {
