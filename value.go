@@ -57,14 +57,14 @@ func (v *Value) Object() *Object {
 	if v.t != TypeObj {
 		return nil
 	}
-	return (*Object)(v)
+	return &Object{*v}
 }
 
 func (v *Value) Array() *Array {
 	if v.t != TypeArr {
 		return nil
 	}
-	return (*Array)(v)
+	return &Array{*v}
 }
 
 func (v *Value) Bytes() []byte {
