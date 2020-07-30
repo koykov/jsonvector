@@ -1,20 +1,17 @@
 package jsonvector
 
-type Array Value
+type Array struct {
+	Value
+}
 
-func (a *Array) Get(idx int) *Value {
-	v := (*Value)(a)
-	vec := v.vec()
+func (a *Array) At(idx int) *Value {
+	vec := a.vec()
 	if vec == nil {
 		return nil
 	}
-	ci := v.childIdx()
+	ci := a.childIdx()
 	if idx < len(ci) {
 		return &vec.v[ci[idx]]
 	}
 	return nil
-}
-
-func (a *Array) Len() int {
-	return (*Value)(a).Len()
 }

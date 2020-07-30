@@ -1,14 +1,15 @@
 package jsonvector
 
-type Object Value
+type Object struct {
+	Value
+}
 
-func (o *Object) Get(key string) *Value {
-	v := (*Value)(o)
-	vec := v.vec()
+func (o *Object) Look(key string) *Value {
+	vec := o.vec()
 	if vec == nil {
 		return nil
 	}
-	ci := v.childIdx()
+	ci := o.childIdx()
 	for _, i := range ci {
 		c := vec.v[i]
 		if key == c.k.String() {
@@ -16,8 +17,4 @@ func (o *Object) Get(key string) *Value {
 		}
 	}
 	return nil
-}
-
-func (o *Object) Len() int {
-	return (*Value)(o).Len()
 }
