@@ -1,10 +1,10 @@
 package jsonvector
 
 type Array struct {
-	Value
+	Node
 }
 
-func (a *Array) At(idx int) *Value {
+func (a *Array) At(idx int) *Node {
 	vec := a.vec()
 	if vec == nil {
 		return nil

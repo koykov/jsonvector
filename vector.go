@@ -28,7 +28,7 @@ type Vector struct {
 	s []byte
 	p uintptr
 	a uint64
-	v []Value
+	v []Node
 	l int
 	e int
 	// Registry.
@@ -89,7 +89,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	vec.p = vec.ptr()
 
 	offset := 0
-	val := vec.newValue(0)
+	val := vec.newNode(0)
 	i := vec.l - 1
 	vec.reg(0, i)
 	offset, err = vec.parseG(0, offset, val)
@@ -114,7 +114,7 @@ func (vec *Vector) ErrorOffset() int {
 	return vec.e
 }
 
-func (vec *Vector) Get(keys ...string) *Value {
+func (vec *Vector) Get(keys ...string) *Node {
 	if len(keys) == 0 {
 		if vec.Len() > 0 {
 			return &vec.v[0]
@@ -146,7 +146,7 @@ func (vec *Vector) Beautify(w io.Writer) error {
 	return vec.beautify(w, r, 0)
 }
 
-func (vec *Vector) getA(root *Value, keys ...string) *Value {
+func (vec *Vector) getA(root *Node, keys ...string) *Node {
 	if len(keys) == 0 {
 		return root
 	}
@@ -173,11 +173,11 @@ func (vec *Vector) getA(root *Value, keys ...string) *Value {
 	return nil
 }
 
-func (vec *Vector) getO(root *Value, keys ...string) *Value {
+func (vec *Vector) getO(root *Node, keys ...string) *Node {
 	if len(keys) == 0 {
 		return root
 	}
-	var v *Value
+	var v *Node
 	for i := root.cs; i < root.ce; i++ {
 		k := vec.r[root.d+1][i]
 		v = &vec.v[k]
@@ -205,13 +205,13 @@ func (vec *Vector) getO(root *Value, keys ...string) *Value {
 	return nil
 }
 
-func (vec *Vector) newValue(depth int) (r *Value) {
+func (vec *Vector) newNode(depth int) (r *Node) {
 	if vec.l < len(vec.v) {
 		r = &vec.v[vec.l]
 		r.Reset()
 		vec.l++
 	} else {
-		r = &Value{t: TypeUnk}
+		r = &Node{t: TypeUnk}
 		vec.v = append(vec.v, *r)
 		vec.l++
 	}
@@ -220,7 +220,7 @@ func (vec *Vector) newValue(depth int) (r *Value) {
 	return
 }
 
-func (vec *Vector) parseG(depth, offset int, v *Value) (int, error) {
+func (vec *Vector) parseG(depth, offset int, v *Node) (int, error) {
 	var err error
 	switch {
 	case vec.s[offset] == 'n':
@@ -307,7 +307,7 @@ func (vec *Vector) parseG(depth, offset int, v *Value) (int, error) {
 	return offset, err
 }
 
-func (vec *Vector) parseO(depth, offset int, v *Value) (int, error) {
+func (vec *Vector) parseO(depth, offset int, v *Node) (int, error) {
 	v.cs = vec.regLen(depth)
 	offset++
 	var err error
@@ -323,7 +323,7 @@ func (vec *Vector) parseO(depth, offset int, v *Value) (int, error) {
 			return offset, ErrUnexpId
 		}
 		offset++
-		c := vec.newValue(depth)
+		c := vec.newNode(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
 		c.k.o = vec.a + uint64(offset)
@@ -384,7 +384,7 @@ func (vec *Vector) parseO(depth, offset int, v *Value) (int, error) {
 	return offset, err
 }
 
-func (vec *Vector) parseA(depth, offset int, v *Value) (int, error) {
+func (vec *Vector) parseA(depth, offset int, v *Node) (int, error) {
 	v.cs = vec.regLen(depth)
 	offset++
 	var err error
@@ -394,7 +394,7 @@ func (vec *Vector) parseA(depth, offset int, v *Value) (int, error) {
 			offset++
 			break
 		}
-		c := vec.newValue(depth)
+		c := vec.newNode(depth)
 		i := vec.l - 1
 		v.ce = vec.reg(depth, i)
 		offset, err = vec.parseG(depth, offset, c)

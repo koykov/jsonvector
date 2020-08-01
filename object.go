@@ -1,10 +1,10 @@
 package jsonvector
 
 type Object struct {
-	Value
+	Node
 }
 
-func (o *Object) Look(key string) *Value {
+func (o *Object) Look(key string) *Node {
 	vec := o.vec()
 	if vec == nil {
 		return nil

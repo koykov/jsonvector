@@ -18,7 +18,7 @@ var (
 	btNull   = []byte(`null`)
 )
 
-func (vec *Vector) beautify(w io.Writer, v *Value, depth int) (err error) {
+func (vec *Vector) beautify(w io.Writer, v *Node, depth int) (err error) {
 	switch v.t {
 	case TypeNull:
 		_, err = w.Write(btNull)

@@ -8,7 +8,7 @@ import (
 	"github.com/koykov/fastconv"
 )
 
-type Value struct {
+type Node struct {
 	t      Type
 	d      int
 	p      uintptr
@@ -17,11 +17,11 @@ type Value struct {
 	Err    error
 }
 
-func (v *Value) Type() Type {
+func (v *Node) Type() Type {
 	return v.t
 }
 
-func (v *Value) Get(keys ...string) *Value {
+func (v *Node) Get(keys ...string) *Node {
 	if len(keys) == 0 {
 		return v
 	}
@@ -46,57 +46,57 @@ func (v *Value) Get(keys ...string) *Value {
 	return nil
 }
 
-func (v *Value) Len() int {
+func (v *Node) Len() int {
 	if v.ce != v.cs && v.ce >= v.cs {
 		return v.ce - v.cs
 	}
 	return 1
 }
 
-func (v *Value) Object() *Object {
+func (v *Node) Object() *Object {
 	if v.t != TypeObj {
 		return nil
 	}
 	return &Object{*v}
 }
 
-func (v *Value) Array() *Array {
+func (v *Node) Array() *Array {
 	if v.t != TypeArr {
 		return nil
 	}
 	return &Array{*v}
 }
 
-func (v *Value) Bytes() []byte {
+func (v *Node) Bytes() []byte {
 	if v.t != TypeStr {
 		return nil
 	}
 	return v.v.Bytes()
 }
 
-func (v *Value) ForceBytes() []byte {
+func (v *Node) ForceBytes() []byte {
 	return v.v.Bytes()
 }
 
-func (v *Value) RawBytes() []byte {
+func (v *Node) RawBytes() []byte {
 	return v.v.rawBytes()
 }
 
-func (v *Value) String() string {
+func (v *Node) String() string {
 	if v.t != TypeStr {
 		return ""
 	}
 	return v.v.String()
 }
 
-func (v *Value) Bool() bool {
+func (v *Node) Bool() bool {
 	if v.t != TypeBool {
 		return false
 	}
 	return bytes.Equal(v.v.Bytes(), bTrue)
 }
 
-func (v *Value) Float() float64 {
+func (v *Node) Float() float64 {
 	if v.t != TypeNum {
 		return 0
 	}
@@ -108,7 +108,7 @@ func (v *Value) Float() float64 {
 	return 0
 }
 
-func (v *Value) Int() int64 {
+func (v *Node) Int() int64 {
 	if v.t != TypeNum {
 		return 0
 	}
@@ -120,7 +120,7 @@ func (v *Value) Int() int64 {
 	return 0
 }
 
-func (v *Value) Uint() uint64 {
+func (v *Node) Uint() uint64 {
 	if v.t != TypeNum {
 		return 0
 	}
@@ -132,7 +132,7 @@ func (v *Value) Uint() uint64 {
 	return 0
 }
 
-func (v *Value) childIdx() []int {
+func (v *Node) childIdx() []int {
 	if v.t != TypeArr && v.t != TypeObj {
 		return nil
 	}
@@ -142,7 +142,7 @@ func (v *Value) childIdx() []int {
 	return nil
 }
 
-func (v *Value) Reset() {
+func (v *Node) Reset() {
 	v.t = TypeUnk
 	v.k.set(0, 0)
 	v.v.set(0, 0)
@@ -151,7 +151,7 @@ func (v *Value) Reset() {
 	v.Err = nil
 }
 
-func (v *Value) vec() *Vector {
+func (v *Node) vec() *Vector {
 	if v.p == 0 {
 		return nil
 	}
