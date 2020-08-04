@@ -33,15 +33,30 @@ func (v *Node) Get(keys ...string) *Node {
 	if vec == nil {
 		return v
 	}
-	for i := v.cs; i < v.ce; i++ {
-		k := vec.r[v.d+1][i]
-		c := vec.v[k]
-		if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
-			if len(keys[1:]) == 0 {
-				return &c
-			} else {
-				return c.Get(keys[1:]...)
+	if v.t == TypeObj {
+		for i := v.cs; i < v.ce; i++ {
+			k := vec.r[v.d+1][i]
+			c := vec.v[k]
+			if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
+				if len(keys[1:]) == 0 {
+					return &c
+				} else {
+					return c.Get(keys[1:]...)
+				}
 			}
+		}
+	}
+	if v.t == TypeArr {
+		k, err := strconv.Atoi(keys[0])
+		if err != nil || k >= v.Len() {
+			return nil
+		}
+		i := vec.r[v.d+1][v.cs+k]
+		v := &vec.v[i]
+		if len(keys[1:]) == 0 {
+			return v
+		} else {
+			return v.Get(keys[1:]...)
 		}
 	}
 	return nil
