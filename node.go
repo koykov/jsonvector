@@ -36,10 +36,10 @@ func (v *Node) Get(keys ...string) *Node {
 	if v.t == TypeObj {
 		for i := v.cs; i < v.ce; i++ {
 			k := vec.r[v.d+1][i]
-			c := vec.v[k]
+			c := &vec.v[k]
 			if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
 				if len(keys[1:]) == 0 {
-					return &c
+					return c
 				} else {
 					return c.Get(keys[1:]...)
 				}
