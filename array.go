@@ -9,7 +9,7 @@ func (a *Array) At(idx int) *Node {
 	if vec == nil {
 		return nil
 	}
-	ci := a.childIdx()
+	ci := a.ChildIdx()
 	if idx < len(ci) {
 		return &vec.v[ci[idx]]
 	}

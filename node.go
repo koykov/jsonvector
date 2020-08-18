@@ -148,7 +148,7 @@ func (v *Node) Uint() uint64 {
 	return 0
 }
 
-func (v *Node) childIdx() []int {
+func (v *Node) ChildIdx() []int {
 	if v.t != TypeArr && v.t != TypeObj {
 		return nil
 	}
