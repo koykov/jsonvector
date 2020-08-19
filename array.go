@@ -10,8 +10,15 @@ func (a *Array) At(idx int) *Node {
 		return nil
 	}
 	ci := a.ChildIdx()
-	if idx < len(ci) {
-		return &vec.v[ci[idx]]
+	h := -1
+	for _, i := range ci {
+		if i == idx {
+			h = i
+			break
+		}
+	}
+	if h >= 0 {
+		return &vec.v[h]
 	}
 	return nil
 }
