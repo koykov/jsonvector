@@ -114,6 +114,10 @@ func (vec *Vector) ErrorOffset() int {
 	return vec.e
 }
 
+func (vec *Vector) Root() *Node {
+	return vec.Get()
+}
+
 func (vec *Vector) Get(keys ...string) *Node {
 	if len(keys) == 0 {
 		if vec.Len() > 0 {
