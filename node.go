@@ -17,25 +17,25 @@ type Node struct {
 	Err    error
 }
 
-func (v *Node) Type() Type {
-	return v.t
+func (n *Node) Type() Type {
+	return n.t
 }
 
-func (v *Node) Get(keys ...string) *Node {
+func (n *Node) Get(keys ...string) *Node {
 	if len(keys) == 0 {
-		return v
+		return n
 	}
-	if v.t != TypeObj && v.t != TypeArr {
+	if n.t != TypeObj && n.t != TypeArr {
 		// Attempt to get child of scalar value.
 		return nil
 	}
-	vec := v.vec()
+	vec := n.vec()
 	if vec == nil {
-		return v
+		return n
 	}
-	if v.t == TypeObj {
-		for i := v.cs; i < v.ce; i++ {
-			k := vec.r[v.d+1][i]
+	if n.t == TypeObj {
+		for i := n.cs; i < n.ce; i++ {
+			k := vec.r[n.d+1][i]
 			c := &vec.v[k]
 			if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
 				if len(keys[1:]) == 0 {
@@ -46,130 +46,130 @@ func (v *Node) Get(keys ...string) *Node {
 			}
 		}
 	}
-	if v.t == TypeArr {
+	if n.t == TypeArr {
 		k, err := strconv.Atoi(keys[0])
-		if err != nil || k >= v.Len() {
+		if err != nil || k >= n.Len() {
 			return nil
 		}
-		i := vec.r[v.d+1][v.cs+k]
+		i := vec.r[n.d+1][n.cs+k]
 		v := &vec.v[i]
 		if len(keys[1:]) == 0 {
 			return v
 		} else {
-			return v.Get(keys[1:]...)
+			return n.Get(keys[1:]...)
 		}
 	}
 	return nil
 }
 
-func (v *Node) Len() int {
-	if v.ce != v.cs && v.ce >= v.cs {
-		return v.ce - v.cs
+func (n *Node) Len() int {
+	if n.ce != n.cs && n.ce >= n.cs {
+		return n.ce - n.cs
 	}
 	return 1
 }
 
-func (v *Node) Object() *Object {
-	if v.t != TypeObj {
+func (n *Node) Object() *Object {
+	if n.t != TypeObj {
 		return nil
 	}
-	return &Object{*v}
+	return &Object{*n}
 }
 
-func (v *Node) Array() *Array {
-	if v.t != TypeArr {
+func (n *Node) Array() *Array {
+	if n.t != TypeArr {
 		return nil
 	}
-	return &Array{*v}
+	return &Array{*n}
 }
 
-func (v *Node) Bytes() []byte {
-	if v.t != TypeStr {
+func (n *Node) Bytes() []byte {
+	if n.t != TypeStr {
 		return nil
 	}
-	return v.v.Bytes()
+	return n.v.Bytes()
 }
 
-func (v *Node) ForceBytes() []byte {
-	return v.v.Bytes()
+func (n *Node) ForceBytes() []byte {
+	return n.v.Bytes()
 }
 
-func (v *Node) RawBytes() []byte {
-	return v.v.rawBytes()
+func (n *Node) RawBytes() []byte {
+	return n.v.rawBytes()
 }
 
-func (v *Node) String() string {
-	if v.t != TypeStr {
+func (n *Node) String() string {
+	if n.t != TypeStr {
 		return ""
 	}
-	return v.v.String()
+	return n.v.String()
 }
 
-func (v *Node) Bool() bool {
-	if v.t != TypeBool {
+func (n *Node) Bool() bool {
+	if n.t != TypeBool {
 		return false
 	}
-	return bytes.Equal(v.v.Bytes(), bTrue)
+	return bytes.Equal(n.v.Bytes(), bTrue)
 }
 
-func (v *Node) Float() float64 {
-	if v.t != TypeNum {
+func (n *Node) Float() float64 {
+	if n.t != TypeNum {
 		return 0
 	}
-	f, err := strconv.ParseFloat(v.v.String(), 64)
+	f, err := strconv.ParseFloat(n.v.String(), 64)
 	if err == nil {
 		return f
 	}
-	v.Err = err
+	n.Err = err
 	return 0
 }
 
-func (v *Node) Int() int64 {
-	if v.t != TypeNum {
+func (n *Node) Int() int64 {
+	if n.t != TypeNum {
 		return 0
 	}
-	i, err := strconv.ParseInt(v.v.String(), 10, 64)
+	i, err := strconv.ParseInt(n.v.String(), 10, 64)
 	if err == nil {
 		return i
 	}
-	v.Err = err
+	n.Err = err
 	return 0
 }
 
-func (v *Node) Uint() uint64 {
-	if v.t != TypeNum {
+func (n *Node) Uint() uint64 {
+	if n.t != TypeNum {
 		return 0
 	}
-	u, err := strconv.ParseUint(v.v.String(), 10, 64)
+	u, err := strconv.ParseUint(n.v.String(), 10, 64)
 	if err == nil {
 		return u
 	}
-	v.Err = err
+	n.Err = err
 	return 0
 }
 
-func (v *Node) ChildIdx() []int {
-	if v.t != TypeArr && v.t != TypeObj {
+func (n *Node) ChildIdx() []int {
+	if n.t != TypeArr && n.t != TypeObj {
 		return nil
 	}
-	if vec := v.vec(); vec != nil {
-		return vec.regGet(v.d+1, v.cs, v.ce)
+	if vec := n.vec(); vec != nil {
+		return vec.regGet(n.d+1, n.cs, n.ce)
 	}
 	return nil
 }
 
-func (v *Node) Reset() {
-	v.t = TypeUnk
-	v.k.set(0, 0)
-	v.v.set(0, 0)
-	v.d, v.p = 0, 0
-	v.cs, v.ce = 0, 0
-	v.Err = nil
+func (n *Node) Reset() {
+	n.t = TypeUnk
+	n.k.set(0, 0)
+	n.v.set(0, 0)
+	n.d, n.p = 0, 0
+	n.cs, n.ce = 0, 0
+	n.Err = nil
 }
 
-func (v *Node) vec() *Vector {
-	if v.p == 0 {
+func (n *Node) vec() *Vector {
+	if n.p == 0 {
 		return nil
 	}
-	return (*Vector)(unsafe.Pointer(v.p))
+	return (*Vector)(unsafe.Pointer(n.p))
 }
