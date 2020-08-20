@@ -1,15 +1,13 @@
 package jsonvector
 
-type Array struct {
-	Node
-}
+type Array Node
 
 func (a *Array) At(idx int) *Node {
-	vec := a.vec()
+	vec := (*Node)(a).vec()
 	if vec == nil {
 		return nil
 	}
-	ci := a.ChildIdx()
+	ci := (*Node)(a).ChildIdx()
 	h := -1
 	for _, i := range ci {
 		if i == idx {

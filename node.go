@@ -73,14 +73,14 @@ func (n *Node) Object() *Object {
 	if n.t != TypeObj {
 		return nil
 	}
-	return &Object{*n}
+	return (*Object)(n)
 }
 
 func (n *Node) Array() *Array {
 	if n.t != TypeArr {
 		return nil
 	}
-	return &Array{*n}
+	return (*Array)(n)
 }
 
 func (n *Node) Bytes() []byte {
