@@ -1,7 +1,7 @@
 package jsonvector
 
 func (n *Node) GetObject(keys ...string) *Node {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeObj {
 		return nil
 	}
@@ -9,7 +9,7 @@ func (n *Node) GetObject(keys ...string) *Node {
 }
 
 func (n *Node) GetArray(keys ...string) *Node {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeArr {
 		return nil
 	}
@@ -17,7 +17,7 @@ func (n *Node) GetArray(keys ...string) *Node {
 }
 
 func (n *Node) GetBytes(keys ...string) []byte {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeStr {
 		return nil
 	}
@@ -25,7 +25,7 @@ func (n *Node) GetBytes(keys ...string) []byte {
 }
 
 func (n *Node) GetString(keys ...string) string {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeStr {
 		return ""
 	}
@@ -33,7 +33,7 @@ func (n *Node) GetString(keys ...string) string {
 }
 
 func (n *Node) GetBool(keys ...string) bool {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeBool {
 		return false
 	}
@@ -41,7 +41,7 @@ func (n *Node) GetBool(keys ...string) bool {
 }
 
 func (n *Node) GetFloat(keys ...string) float64 {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeNum {
 		return 0
 	}
@@ -49,7 +49,7 @@ func (n *Node) GetFloat(keys ...string) float64 {
 }
 
 func (n *Node) GetInt(keys ...string) int64 {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeNum {
 		return 0
 	}
@@ -57,7 +57,7 @@ func (n *Node) GetInt(keys ...string) int64 {
 }
 
 func (n *Node) GetUint(keys ...string) uint64 {
-	c := n.vec().Get(keys...)
+	c := n.Get(keys...)
 	if c == nil || c.Type() != TypeNum {
 		return 0
 	}
