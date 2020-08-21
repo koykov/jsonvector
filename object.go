@@ -1,13 +1,13 @@
 package jsonvector
 
-type Object Node
+// type Object Node
 
-func (o *Object) Look(key string) *Node {
-	vec := (*Node)(o).vec()
+func (n *Node) Look(key string) *Node {
+	vec := n.vec()
 	if vec == nil {
 		return nil
 	}
-	ci := (*Node)(o).ChildIdx()
+	ci := n.ChildIdx()
 	for _, i := range ci {
 		c := vec.v[i]
 		if key == c.k.String() {

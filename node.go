@@ -69,18 +69,18 @@ func (n *Node) Len() int {
 	return 1
 }
 
-func (n *Node) Object() *Object {
+func (n *Node) Object() *Node {
 	if n.t != TypeObj {
 		return nil
 	}
-	return (*Object)(n)
+	return n
 }
 
-func (n *Node) Array() *Array {
+func (n *Node) Array() *Node {
 	if n.t != TypeArr {
 		return nil
 	}
-	return (*Array)(n)
+	return n
 }
 
 func (n *Node) Bytes() []byte {

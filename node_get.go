@@ -1,6 +1,6 @@
 package jsonvector
 
-func (n *Node) GetObject(keys ...string) *Object {
+func (n *Node) GetObject(keys ...string) *Node {
 	c := n.vec().Get(keys...)
 	if c == nil || c.Type() != TypeObj {
 		return nil
@@ -8,7 +8,7 @@ func (n *Node) GetObject(keys ...string) *Object {
 	return c.Object()
 }
 
-func (n *Node) GetArray(keys ...string) *Array {
+func (n *Node) GetArray(keys ...string) *Node {
 	c := n.vec().Get(keys...)
 	if c == nil || c.Type() != TypeArr {
 		return nil

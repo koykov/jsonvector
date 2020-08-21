@@ -1,13 +1,13 @@
 package jsonvector
 
-type Array Node
+// type Array Node
 
-func (a *Array) At(idx int) *Node {
-	vec := (*Node)(a).vec()
+func (n *Node) At(idx int) *Node {
+	vec := n.vec()
 	if vec == nil {
 		return nil
 	}
-	ci := (*Node)(a).ChildIdx()
+	ci := n.ChildIdx()
 	h := -1
 	for _, i := range ci {
 		if i == idx {
