@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"unsafe"
 
+	"github.com/koykov/bytealg"
 	"github.com/koykov/fastconv"
 )
 
@@ -60,6 +61,15 @@ func (n *Node) Get(keys ...string) *Node {
 		}
 	}
 	return nil
+}
+
+func (n *Node) GetByPath(path, sep string) *Node {
+	vec := n.vec()
+	if vec == nil {
+		return n
+	}
+	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	return n.Get(vec.ss...)
 }
 
 func (n *Node) Len() int {

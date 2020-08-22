@@ -31,6 +31,9 @@ type Vector struct {
 	v []Node
 	l int
 	e int
+
+	ss []string
+
 	// Registry.
 	r  [][]int
 	rl int
@@ -142,6 +145,11 @@ func (vec *Vector) Get(keys ...string) *Node {
 		return vec.getO(r, keys...)
 	}
 	return r
+}
+
+func (vec *Vector) GetByPath(path, sep string) *Node {
+	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	return vec.Get(vec.ss...)
 }
 
 // Format vector in human readable representation.
@@ -451,9 +459,6 @@ func (vec *Vector) reg(depth, idx int) int {
 			vec.rl = len(vec.r)
 		}
 	}
-	// if vec.rl <= depth {
-	// 	vec.rl++
-	// }
 	vec.r[depth] = append(vec.r[depth], idx)
 	return len(vec.r[depth])
 }
