@@ -112,7 +112,7 @@ func (n *Node) Array() *Node {
 }
 
 func (n *Node) Bytes() []byte {
-	if n.t != TypeStr {
+	if n.t != TypeStr && n.t != TypeNum {
 		return nil
 	}
 	return n.v.Bytes()
@@ -127,7 +127,7 @@ func (n *Node) RawBytes() []byte {
 }
 
 func (n *Node) String() string {
-	if n.t != TypeStr {
+	if n.t != TypeStr && n.t != TypeNum {
 		return ""
 	}
 	return n.v.String()
