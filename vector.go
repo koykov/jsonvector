@@ -158,6 +158,11 @@ func (vec *Vector) Beautify(w io.Writer) error {
 	return vec.beautify(w, r, 0)
 }
 
+func (vec *Vector) Exists(key string) bool {
+	n := vec.Get()
+	return n.Exists(key)
+}
+
 func (vec *Vector) getA(root *Node, keys ...string) *Node {
 	if len(keys) == 0 {
 		return root

@@ -72,6 +72,24 @@ func (n *Node) GetByPath(path, sep string) *Node {
 	return n.Get(vec.ss...)
 }
 
+func (n *Node) Exists(key string) bool {
+	if n.t != TypeObj {
+		return false
+	}
+	vec := n.vec()
+	if vec == nil {
+		return false
+	}
+	for i := n.cs; i < n.ce; i++ {
+		k := vec.r[n.d+1][i]
+		c := &vec.v[k]
+		if c.k.String() == key {
+			return true
+		}
+	}
+	return false
+}
+
 func (n *Node) Len() int {
 	if n.ce != n.cs && n.ce >= n.cs {
 		return n.ce - n.cs
