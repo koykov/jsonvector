@@ -68,7 +68,7 @@ func (n *Node) GetByPath(path, sep string) *Node {
 	if vec == nil {
 		return n
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	return n.Get(vec.ss...)
 }
 

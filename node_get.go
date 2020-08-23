@@ -71,7 +71,7 @@ func (n *Node) GetObjectByPath(path, sep string) *Node {
 	if vec == nil {
 		return nil
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeObj {
 		return nil
@@ -84,7 +84,7 @@ func (n *Node) GetArrayByPath(path, sep string) *Node {
 	if vec == nil {
 		return nil
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeArr {
 		return nil
@@ -97,7 +97,7 @@ func (n *Node) GetBytesByPath(path, sep string) []byte {
 	if vec == nil {
 		return nil
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeStr {
 		return nil
@@ -110,7 +110,7 @@ func (n *Node) GetStringByPath(path, sep string) string {
 	if vec == nil {
 		return ""
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeStr {
 		return ""
@@ -123,7 +123,7 @@ func (n *Node) GetBoolByPath(path, sep string) bool {
 	if vec == nil {
 		return false
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeBool {
 		return false
@@ -136,7 +136,7 @@ func (n *Node) GetFloatByPath(path, sep string) float64 {
 	if vec == nil {
 		return 0
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeNum {
 		return 0
@@ -149,7 +149,7 @@ func (n *Node) GetIntByPath(path, sep string) int64 {
 	if vec == nil {
 		return 0
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeNum {
 		return 0
@@ -162,7 +162,7 @@ func (n *Node) GetUintByPath(path, sep string) uint64 {
 	if vec == nil {
 		return 0
 	}
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
 	if c == nil || c.Type() != TypeNum {
 		return 0

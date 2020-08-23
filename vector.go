@@ -148,7 +148,7 @@ func (vec *Vector) Get(keys ...string) *Node {
 }
 
 func (vec *Vector) GetByPath(path, sep string) *Node {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	return vec.Get(vec.ss...)
 }
 

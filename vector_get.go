@@ -67,7 +67,7 @@ func (vec *Vector) GetUint(keys ...string) uint64 {
 }
 
 func (vec *Vector) GetObjectByPath(path, sep string) *Node {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeObj {
 		return nil
@@ -76,7 +76,7 @@ func (vec *Vector) GetObjectByPath(path, sep string) *Node {
 }
 
 func (vec *Vector) GetArrayByPath(path, sep string) *Node {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeArr {
 		return nil
@@ -85,7 +85,7 @@ func (vec *Vector) GetArrayByPath(path, sep string) *Node {
 }
 
 func (vec *Vector) GetBytesByPath(path, sep string) []byte {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeStr {
 		return nil
@@ -94,7 +94,7 @@ func (vec *Vector) GetBytesByPath(path, sep string) []byte {
 }
 
 func (vec *Vector) GetStringByPath(path, sep string) string {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeStr {
 		return ""
@@ -103,7 +103,7 @@ func (vec *Vector) GetStringByPath(path, sep string) string {
 }
 
 func (vec *Vector) GetBoolByPath(path, sep string) bool {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeBool {
 		return false
@@ -112,7 +112,7 @@ func (vec *Vector) GetBoolByPath(path, sep string) bool {
 }
 
 func (vec *Vector) GetFloatByPath(path, sep string) float64 {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeNum {
 		return 0
@@ -121,7 +121,7 @@ func (vec *Vector) GetFloatByPath(path, sep string) float64 {
 }
 
 func (vec *Vector) GetIntByPath(path, sep string) int64 {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeNum {
 		return 0
@@ -130,7 +130,7 @@ func (vec *Vector) GetIntByPath(path, sep string) int64 {
 }
 
 func (vec *Vector) GetUintByPath(path, sep string) uint64 {
-	vec.ss = bytealg.AppendSplitStr(vec.ss, path, sep, -1)
+	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeNum {
 		return 0
