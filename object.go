@@ -1,8 +1,9 @@
 package jsonvector
 
-// type Object Node
-
 func (n *Node) Look(key string) *Node {
+	if n.t != TypeObj {
+		return nil
+	}
 	vec := n.vec()
 	if vec == nil {
 		return nil
