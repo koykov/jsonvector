@@ -8,10 +8,11 @@ import (
 	"github.com/koykov/fastconv"
 )
 
+// Node type.
 type Type int
 
 const (
-	TypeUnk = iota
+	TypeUnk Type = iota
 	TypeNull
 	TypeObj
 	TypeArr
@@ -20,19 +21,28 @@ const (
 	TypeBool
 )
 
+// Parser object.
 type Vector struct {
+	// Source data to parse.
 	s []byte
-	p uintptr
+	// Source data pointer.
 	a uint64
+	// Self pointer.
+	p uintptr
+	// List of nodes.
 	v []Node
+	// Length of nodes array.
 	l int
+	// Error offset.
 	e int
+	// Registry of nodes parenthood.
 	r registry
-
+	// Buffer of strings.
 	ss []string
 }
 
 var (
+	// Byte constants.
 	bNull  = []byte("null")
 	bTrue  = []byte("true")
 	bFalse = []byte("false")
@@ -41,38 +51,47 @@ var (
 	bFmt   = []byte(" \t\n\r")
 )
 
+// Make new parser.
 func NewVector() *Vector {
 	return &Vector{}
 }
 
+// Parse source bytes.
 func (vec *Vector) Parse(s []byte) error {
 	return vec.parse(s, false)
 }
 
+// Parse source string.
 func (vec *Vector) ParseStr(s string) error {
 	return vec.parse(fastconv.S2B(s), false)
 }
 
+// Copy source bytes and parse it.
 func (vec *Vector) ParseCopy(s []byte) error {
 	return vec.parse(s, true)
 }
 
+// Copy source string and parse it.
 func (vec *Vector) ParseCopyStr(s string) error {
 	return vec.parse(fastconv.S2B(s), true)
 }
 
+// Get length of nodes array.
 func (vec *Vector) Len() int {
 	return vec.l
 }
 
+// Get error offset.
 func (vec *Vector) ErrorOffset() int {
 	return vec.e
 }
 
+// Get root node.
 func (vec *Vector) Root() *Node {
 	return vec.Get()
 }
 
+// Get node by given keys.
 func (vec *Vector) Get(keys ...string) *Node {
 	if len(keys) == 0 {
 		if vec.Len() > 0 {
@@ -99,6 +118,7 @@ func (vec *Vector) Get(keys ...string) *Node {
 	return r
 }
 
+// Get node by path.
 func (vec *Vector) GetByPath(path, sep string) *Node {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	return vec.Get(vec.ss...)
@@ -110,11 +130,13 @@ func (vec *Vector) Beautify(w io.Writer) error {
 	return vec.beautify(w, r, 0)
 }
 
+// Check if node exists.
 func (vec *Vector) Exists(key string) bool {
 	n := vec.Get()
 	return n.Exists(key)
 }
 
+// Get or create new node.
 func (vec *Vector) newNode(depth int) (r *Node) {
 	if vec.l < len(vec.v) {
 		r = &vec.v[vec.l]
@@ -129,6 +151,7 @@ func (vec *Vector) newNode(depth int) (r *Node) {
 	return
 }
 
+// Reset node before put to the pool.
 func (vec *Vector) Reset() {
 	if vec.l == 0 {
 		return
@@ -141,6 +164,7 @@ func (vec *Vector) Reset() {
 	vec.r.reset()
 }
 
+// Get raw pointer of self parser.
 func (vec *Vector) ptr() uintptr {
 	return uintptr(unsafe.Pointer(vec))
 }
