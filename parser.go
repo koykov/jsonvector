@@ -129,7 +129,7 @@ func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 }
 
 func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
-	v.cs = vec.r.len(depth)
+	v.s = vec.r.len(depth)
 	offset++
 	var err error
 	for offset < len(vec.s) {
@@ -146,7 +146,7 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 		offset++
 		c := vec.newNode(depth)
 		i := vec.l - 1
-		v.ce = vec.r.reg(depth, i)
+		v.e = vec.r.reg(depth, i)
 		c.k.o = vec.a + uint64(offset)
 		e := bytealg.IndexAt(vec.s, bQuote, offset)
 		if e < 0 {
@@ -206,7 +206,7 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 }
 
 func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
-	v.cs = vec.r.len(depth)
+	v.s = vec.r.len(depth)
 	offset++
 	var err error
 	for offset < len(vec.s) {
@@ -217,7 +217,7 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 		}
 		c := vec.newNode(depth)
 		i := vec.l - 1
-		v.ce = vec.r.reg(depth, i)
+		v.e = vec.r.reg(depth, i)
 		offset, err = vec.parseGeneric(depth, offset, c)
 		if err == ErrEOA {
 			err = nil

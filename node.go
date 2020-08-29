@@ -9,19 +9,28 @@ import (
 	"github.com/koykov/fastconv"
 )
 
+// Json node object.
 type Node struct {
-	t      Type
-	d      int
-	p      uintptr
-	k, v   byteptr
-	cs, ce int
-	Err    error
+	// Node type.
+	t Type
+	// Node depth in json object.
+	d int
+	// Parser pointer.
+	p uintptr
+	// Key/value bytes
+	k, v byteptr
+	// First and last indexes of children in registry.
+	s, e int
+	// Nested error.
+	Err error
 }
 
+// Get node type.
 func (n *Node) Type() Type {
 	return n.t
 }
 
+// Get child node by given keys.
 func (n *Node) Get(keys ...string) *Node {
 	if len(keys) == 0 {
 		return n
@@ -35,7 +44,7 @@ func (n *Node) Get(keys ...string) *Node {
 		return n
 	}
 	if n.t == TypeObj {
-		for i := n.cs; i < n.ce; i++ {
+		for i := n.s; i < n.e; i++ {
 			k := vec.r.r[n.d+1][i]
 			c := &vec.v[k]
 			if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
@@ -52,7 +61,7 @@ func (n *Node) Get(keys ...string) *Node {
 		if err != nil || k >= n.Len() {
 			return nil
 		}
-		i := vec.r.r[n.d+1][n.cs+k]
+		i := vec.r.r[n.d+1][n.s+k]
 		v := &vec.v[i]
 		if len(keys[1:]) == 0 {
 			return v
@@ -63,6 +72,7 @@ func (n *Node) Get(keys ...string) *Node {
 	return nil
 }
 
+// Get child node by path.
 func (n *Node) GetByPath(path, sep string) *Node {
 	vec := n.vec()
 	if vec == nil {
@@ -72,6 +82,7 @@ func (n *Node) GetByPath(path, sep string) *Node {
 	return n.Get(vec.ss...)
 }
 
+// Check if key exists in child nodes.
 func (n *Node) Exists(key string) bool {
 	if n.t != TypeObj {
 		return false
@@ -80,7 +91,7 @@ func (n *Node) Exists(key string) bool {
 	if vec == nil {
 		return false
 	}
-	for i := n.cs; i < n.ce; i++ {
+	for i := n.s; i < n.e; i++ {
 		k := vec.r.r[n.d+1][i]
 		c := &vec.v[k]
 		if c.k.String() == key {
@@ -90,13 +101,15 @@ func (n *Node) Exists(key string) bool {
 	return false
 }
 
+// Get length of child nodes.
 func (n *Node) Len() int {
-	if n.ce != n.cs && n.ce >= n.cs {
-		return n.ce - n.cs
+	if n.e != n.s && n.e >= n.s {
+		return n.e - n.s
 	}
 	return 1
 }
 
+// Convert current node to object.
 func (n *Node) Object() *Node {
 	if n.t != TypeObj {
 		return nil
@@ -104,6 +117,7 @@ func (n *Node) Object() *Node {
 	return n
 }
 
+// Convert current node to array.
 func (n *Node) Array() *Node {
 	if n.t != TypeArr {
 		return nil
@@ -111,6 +125,7 @@ func (n *Node) Array() *Node {
 	return n
 }
 
+// Get node value as bytes.
 func (n *Node) Bytes() []byte {
 	if n.t != TypeStr && n.t != TypeNum {
 		return nil
@@ -118,14 +133,17 @@ func (n *Node) Bytes() []byte {
 	return n.v.Bytes()
 }
 
+// Get node value as bytes even if type isn't a string.
 func (n *Node) ForceBytes() []byte {
 	return n.v.Bytes()
 }
 
+// Get node value as bytes without unescape.
 func (n *Node) RawBytes() []byte {
 	return n.v.rawBytes()
 }
 
+// Get node value string.
 func (n *Node) String() string {
 	if n.t != TypeStr && n.t != TypeNum {
 		return ""
@@ -133,6 +151,7 @@ func (n *Node) String() string {
 	return n.v.String()
 }
 
+// Get node value as boolean.
 func (n *Node) Bool() bool {
 	if n.t != TypeBool {
 		return false
@@ -140,6 +159,7 @@ func (n *Node) Bool() bool {
 	return bytes.Equal(n.v.Bytes(), bTrue)
 }
 
+// Get node value as float.
 func (n *Node) Float() float64 {
 	if n.t != TypeNum {
 		return 0
@@ -152,6 +172,7 @@ func (n *Node) Float() float64 {
 	return 0
 }
 
+// Get node value as integer.
 func (n *Node) Int() int64 {
 	if n.t != TypeNum {
 		return 0
@@ -164,6 +185,7 @@ func (n *Node) Int() int64 {
 	return 0
 }
 
+// Get node value as unsigned integer.
 func (n *Node) Uint() uint64 {
 	if n.t != TypeNum {
 		return 0
@@ -176,25 +198,28 @@ func (n *Node) Uint() uint64 {
 	return 0
 }
 
+// Get indexes of child nodes.
 func (n *Node) ChildIdx() []int {
 	if n.t != TypeArr && n.t != TypeObj {
 		return nil
 	}
 	if vec := n.vec(); vec != nil {
-		return vec.r.get(n.d+1, n.cs, n.ce)
+		return vec.r.get(n.d+1, n.s, n.e)
 	}
 	return nil
 }
 
+// Reset the node.
 func (n *Node) Reset() {
 	n.t = TypeUnk
 	n.k.set(0, 0)
 	n.v.set(0, 0)
 	n.d, n.p = 0, 0
-	n.cs, n.ce = 0, 0
+	n.s, n.e = 0, 0
 	n.Err = nil
 }
 
+// Restore entire parser object from raw pointer.
 func (n *Node) vec() *Vector {
 	if n.p == 0 {
 		return nil
