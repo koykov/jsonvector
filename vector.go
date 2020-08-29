@@ -27,12 +27,9 @@ type Vector struct {
 	v []Node
 	l int
 	e int
+	r registry
 
 	ss []string
-
-	// Registry.
-	r  [][]int
-	rl int
 }
 
 var (
@@ -128,8 +125,7 @@ func (vec *Vector) newNode(depth int) (r *Node) {
 		vec.v = append(vec.v, *r)
 		vec.l++
 	}
-	r.p = vec.p
-	r.d = depth
+	r.p, r.d = vec.p, depth
 	return
 }
 
@@ -141,42 +137,10 @@ func (vec *Vector) Reset() {
 	for i := 0; i < vec.l; i++ {
 		vec.v[i].p = 0
 	}
-	vec.s = nil
-	vec.a = 0
-	vec.l = 0
-	vec.e = 0
-	for i := 0; i < len(vec.r); i++ {
-		vec.r[i] = vec.r[i][:0]
-	}
-	vec.rl = 0
+	vec.s, vec.a, vec.l, vec.e = nil, 0, 0, 0
+	vec.r.reset()
 }
 
 func (vec *Vector) ptr() uintptr {
 	return uintptr(unsafe.Pointer(vec))
-}
-
-func (vec *Vector) reg(depth, idx int) int {
-	if len(vec.r) <= depth {
-		for len(vec.r) <= depth {
-			vec.r = append(vec.r, nil)
-			vec.rl = len(vec.r)
-		}
-	}
-	vec.r[depth] = append(vec.r[depth], idx)
-	return len(vec.r[depth])
-}
-
-func (vec *Vector) regLen(depth int) int {
-	if len(vec.r) <= depth {
-		return 0
-	}
-	return len(vec.r[depth])
-}
-
-func (vec *Vector) regGet(depth, s, e int) []int {
-	l := vec.regLen(depth)
-	if l > s {
-		return vec.r[depth][s:e]
-	}
-	return nil
 }

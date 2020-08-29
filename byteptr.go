@@ -7,17 +7,17 @@ import (
 	"github.com/koykov/fastconv"
 )
 
-type memseq struct {
+type byteptr struct {
 	o uint64
 	l int
 	e bool
 }
 
-func (m *memseq) set(o uint64, l int) {
+func (m *byteptr) set(o uint64, l int) {
 	m.o, m.l = o, l
 }
 
-func (m *memseq) Bytes() []byte {
+func (m *byteptr) Bytes() []byte {
 	p := m.rawBytes()
 	if m.e {
 		p = unescape(p)
@@ -27,11 +27,11 @@ func (m *memseq) Bytes() []byte {
 	return p
 }
 
-func (m *memseq) String() string {
+func (m *byteptr) String() string {
 	return fastconv.B2S(m.Bytes())
 }
 
-func (m *memseq) rawBytes() []byte {
+func (m *byteptr) rawBytes() []byte {
 	h := reflect.SliceHeader{
 		Data: uintptr(m.o),
 		Len:  m.l,

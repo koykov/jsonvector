@@ -152,7 +152,7 @@ func (vec *Vector) getArr(root *Node, keys ...string) *Node {
 	if err != nil || k >= root.Len() {
 		return nil
 	}
-	i := vec.r[root.d+1][root.cs+k]
+	i := vec.r.r[root.d+1][root.cs+k]
 	v := &vec.v[i]
 	tail := keys[1:]
 	if v.t != TypeArr && v.t != TypeObj {
@@ -177,7 +177,7 @@ func (vec *Vector) getObj(root *Node, keys ...string) *Node {
 	}
 	var v *Node
 	for i := root.cs; i < root.ce; i++ {
-		k := vec.r[root.d+1][i]
+		k := vec.r.r[root.d+1][i]
 		v = &vec.v[k]
 		if bytes.Equal(v.k.Bytes(), fastconv.S2B(keys[0])) {
 			break

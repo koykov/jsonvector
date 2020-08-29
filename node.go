@@ -13,7 +13,7 @@ type Node struct {
 	t      Type
 	d      int
 	p      uintptr
-	k, v   memseq
+	k, v   byteptr
 	cs, ce int
 	Err    error
 }
@@ -36,7 +36,7 @@ func (n *Node) Get(keys ...string) *Node {
 	}
 	if n.t == TypeObj {
 		for i := n.cs; i < n.ce; i++ {
-			k := vec.r[n.d+1][i]
+			k := vec.r.r[n.d+1][i]
 			c := &vec.v[k]
 			if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
 				if len(keys[1:]) == 0 {
@@ -52,7 +52,7 @@ func (n *Node) Get(keys ...string) *Node {
 		if err != nil || k >= n.Len() {
 			return nil
 		}
-		i := vec.r[n.d+1][n.cs+k]
+		i := vec.r.r[n.d+1][n.cs+k]
 		v := &vec.v[i]
 		if len(keys[1:]) == 0 {
 			return v
@@ -81,7 +81,7 @@ func (n *Node) Exists(key string) bool {
 		return false
 	}
 	for i := n.cs; i < n.ce; i++ {
-		k := vec.r[n.d+1][i]
+		k := vec.r.r[n.d+1][i]
 		c := &vec.v[k]
 		if c.k.String() == key {
 			return true
@@ -181,7 +181,7 @@ func (n *Node) ChildIdx() []int {
 		return nil
 	}
 	if vec := n.vec(); vec != nil {
-		return vec.regGet(n.d+1, n.cs, n.ce)
+		return vec.r.get(n.d+1, n.cs, n.ce)
 	}
 	return nil
 }
