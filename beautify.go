@@ -3,6 +3,7 @@ package jsonvector
 import "io"
 
 var (
+	// Byte constants.
 	btSpace  = []byte(` `)
 	btQuote  = []byte(`"`)
 	btComma  = []byte(`,`)
@@ -18,6 +19,9 @@ var (
 	btNull   = []byte(`null`)
 )
 
+// Internal beautifier helper.
+//
+// Writes beautified JSON to w.
 func (vec *Vector) beautify(w io.Writer, v *Node, depth int) (err error) {
 	switch v.t {
 	case TypeNull:
@@ -77,6 +81,7 @@ func (vec *Vector) beautify(w io.Writer, v *Node, depth int) (err error) {
 	return
 }
 
+// Write number of tabs to w.
 func writePad(w io.Writer, cnt int) {
 	for i := 0; i < cnt; i++ {
 		_, _ = w.Write(btTab)
