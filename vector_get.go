@@ -1,3 +1,4 @@
+// Getter API of JSON vector.
 package jsonvector
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/koykov/fastconv"
 )
 
+// Look and get object by given keys.
 func (vec *Vector) GetObject(keys ...string) *Node {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeObj {
@@ -16,6 +18,7 @@ func (vec *Vector) GetObject(keys ...string) *Node {
 	return v.Object()
 }
 
+// Look and get array by given keys.
 func (vec *Vector) GetArray(keys ...string) *Node {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeArr {
@@ -24,6 +27,7 @@ func (vec *Vector) GetArray(keys ...string) *Node {
 	return v.Array()
 }
 
+// Look and get bytes by given keys.
 func (vec *Vector) GetBytes(keys ...string) []byte {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeStr {
@@ -32,6 +36,7 @@ func (vec *Vector) GetBytes(keys ...string) []byte {
 	return v.Bytes()
 }
 
+// Look and get string by given keys.
 func (vec *Vector) GetString(keys ...string) string {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeStr {
@@ -40,6 +45,7 @@ func (vec *Vector) GetString(keys ...string) string {
 	return v.String()
 }
 
+// Look and get bool by given keys.
 func (vec *Vector) GetBool(keys ...string) bool {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeBool {
@@ -48,6 +54,7 @@ func (vec *Vector) GetBool(keys ...string) bool {
 	return v.Bool()
 }
 
+// Look and get float by given keys.
 func (vec *Vector) GetFloat(keys ...string) float64 {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeNum {
@@ -56,6 +63,7 @@ func (vec *Vector) GetFloat(keys ...string) float64 {
 	return v.Float()
 }
 
+// Look and get integer by given keys.
 func (vec *Vector) GetInt(keys ...string) int64 {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeNum {
@@ -64,6 +72,7 @@ func (vec *Vector) GetInt(keys ...string) int64 {
 	return v.Int()
 }
 
+// Look and get unsigned integer by given keys.
 func (vec *Vector) GetUint(keys ...string) uint64 {
 	v := vec.Get(keys...)
 	if v == nil || v.Type() != TypeNum {
@@ -72,6 +81,7 @@ func (vec *Vector) GetUint(keys ...string) uint64 {
 	return v.Uint()
 }
 
+// Look and get object by given path.
 func (vec *Vector) GetObjectByPath(path, sep string) *Node {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
@@ -81,6 +91,7 @@ func (vec *Vector) GetObjectByPath(path, sep string) *Node {
 	return v.Object()
 }
 
+// Look and get array by given path.
 func (vec *Vector) GetArrayByPath(path, sep string) *Node {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
@@ -90,6 +101,7 @@ func (vec *Vector) GetArrayByPath(path, sep string) *Node {
 	return v.Array()
 }
 
+// Look and get bytes by given path.
 func (vec *Vector) GetBytesByPath(path, sep string) []byte {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
@@ -99,6 +111,7 @@ func (vec *Vector) GetBytesByPath(path, sep string) []byte {
 	return v.Bytes()
 }
 
+// Look and get string by given path.
 func (vec *Vector) GetStringByPath(path, sep string) string {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
@@ -108,6 +121,7 @@ func (vec *Vector) GetStringByPath(path, sep string) string {
 	return v.String()
 }
 
+// Look and get bool by given path.
 func (vec *Vector) GetBoolByPath(path, sep string) bool {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
@@ -117,6 +131,7 @@ func (vec *Vector) GetBoolByPath(path, sep string) bool {
 	return v.Bool()
 }
 
+// Look and get float by given path.
 func (vec *Vector) GetFloatByPath(path, sep string) float64 {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
@@ -126,6 +141,7 @@ func (vec *Vector) GetFloatByPath(path, sep string) float64 {
 	return v.Float()
 }
 
+// Look and get integer by given path.
 func (vec *Vector) GetIntByPath(path, sep string) int64 {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
@@ -135,6 +151,7 @@ func (vec *Vector) GetIntByPath(path, sep string) int64 {
 	return v.Int()
 }
 
+// Look and get unsigned integer by given path.
 func (vec *Vector) GetUintByPath(path, sep string) uint64 {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
