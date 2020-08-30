@@ -19,7 +19,7 @@ type Node struct {
 	p uintptr
 	// Key/value bytes
 	k, v byteptr
-	// First and last indexes of children in registry.
+	// First and last indexes of childs in registry.
 	s, e int
 	// Nested error.
 	Err error

@@ -1,5 +1,6 @@
 package jsonvector
 
+// Get child node of array by given index.
 func (n *Node) At(idx int) *Node {
 	if n.t != TypeArr {
 		return nil
