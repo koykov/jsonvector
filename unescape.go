@@ -8,6 +8,7 @@ import (
 	"github.com/koykov/fastconv"
 )
 
+// Unescape byte array using itself as a destination.
 func unescape(p []byte) []byte {
 	l, i := len(p), 0
 	for {
@@ -17,26 +18,34 @@ func unescape(p []byte) []byte {
 		}
 		switch p[i+1] {
 		case '\\':
+			// Escaped slash caught, just copy it over slash.
 			copy(p[i:], p[i+1:])
 			i++
 		case '"', '/':
+			// Caught " and /, just copy them over slash.
 			copy(p[i:], p[i+1:])
 		case 'n':
+			// Caught new line symbol, unescape it and copy over slash.
 			p[i] = '\n'
 			copy(p[i+1:], p[i+2:])
 		case 'r':
+			// Caught caret return symbol, unescape it and copy over slash.
 			p[i] = '\r'
 			copy(p[i+1:], p[i+2:])
 		case 't':
+			// Caught tab symbol, unescape it and copy over slash.
 			p[i] = '\t'
 			copy(p[i+1:], p[i+2:])
 		case 'b':
+			// Caught backspace symbol, unescape it and copy over slash.
 			p[i] = '\b'
 			copy(p[i+1:], p[i+2:])
 		case 'f':
+			// Caught form feed symbol, unescape it and copy over slash.
 			p[i] = '\f'
 			copy(p[i+1:], p[i+2:])
 		case 'u':
+			// Caught unicode symbol.
 			if l-i < 6 {
 				i++
 				continue
@@ -49,6 +58,7 @@ func unescape(p []byte) []byte {
 			}
 			r := rune(u)
 			if !utf16.IsSurrogate(r) {
+				// Regular utf8 symbol.
 				s := string(r)
 				z := len(s)
 				copy(p[i:], s)
@@ -56,6 +66,7 @@ func unescape(p []byte) []byte {
 				l -= 5 - z
 				i += z
 			} else {
+				// Caught surrogate pair, see https://en.wikipedia.org/wiki/UTF-16#Code_points_from_U+010000_to_U+10FFFF
 				if l-i < 12 {
 					i++
 					continue
