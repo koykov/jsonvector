@@ -8,25 +8,27 @@ import (
 )
 
 var (
-	scalarNull  = []byte("null")
-	scalarStr   = []byte(`"foo bar string"`)
-	scalarStrQ  = []byte(`"foo \"bar\" string"`)
-	scalarNum0  = []byte("123456")
-	scalarNum1  = []byte("123.456")
-	scalarNum2  = []byte("3.7e-5")
-	scalarTrue  = []byte("true")
-	scalarFalse = []byte("false")
+	scalarNull    = []byte("null")
+	scalarStr     = []byte(`"foo bar string"`)
+	scalarStrQ    = []byte(`"foo \"bar\" string"`)
+	scalarStrQexp = []byte(`foo "bar" string`)
+	scalarNum0    = []byte("123456")
+	scalarNum1    = []byte("123.456")
+	scalarNum2    = []byte("3.7e-5")
+	scalarTrue    = []byte("true")
+	scalarFalse   = []byte("false")
 
 	arr0 = []byte(`[1, 2, 3, 4, 5]`)
 	arr1 = []byte(`["foo", "bar", "string"]`)
 	arr2 = []byte(`[3.14156, 6.23e-4]`)
 	arr3 = []byte(`["quoted \"str\" value", null, "foo"]`)
 
-	obj0   = []byte(`{"a": 1, "b": 2, "c": 3}`)
-	obj1   = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
-	obj2   = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
-	obj3   = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
-	objFmt = []byte(`{
+	obj0    = []byte(`{"a": 1, "b": 2, "c": 3}`)
+	obj1    = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
+	obj2    = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
+	obj2exp = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
+	obj3    = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
+	objFmt  = []byte(`{
 	"c" :	15,
 	"foo":null,
 	"bar":  "qwerty \"encoded\""
@@ -37,7 +39,6 @@ var (
 	badNumDiv       = []byte("3,14151")
 	badUnparsedTail = []byte(`{"a": 1, "b": 2}foo`)
 
-	buf []byte
 	vec = NewVector()
 )
 
@@ -55,9 +56,8 @@ func testScalar(t testing.TB) {
 	}
 
 	vec.Reset()
-	buf = append(buf[:0], scalarStrQ...)
-	_ = vec.Parse(buf)
-	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(buf[:17], bQuote), vec.Get().Bytes()) {
+	_ = vec.ParseCopy(scalarStrQ)
+	if vec.v[0].t != TypeStr || !bytes.Equal(scalarStrQexp, vec.Get().Bytes()) {
 		t.Error("quoted str mismatch")
 	}
 
@@ -138,8 +138,7 @@ func testObj(t testing.TB) {
 	}
 
 	vec.Reset()
-	buf = append(buf[:0], obj2...)
-	_ = vec.Parse(buf)
+	_ = vec.ParseCopy(obj2)
 	v = vec.Get()
 	if v.Type() != TypeObj && v.Len() != 2 || vec.Get("key0").String() != "\"quoted\"" {
 		t.Error("obj 2 mismatch")

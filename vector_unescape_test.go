@@ -35,6 +35,8 @@ var (
 	𝒳 - Mathematical script capital X
 	𝄞 - Musical symbol G clef
 	𝄢 - Musical symbol F clef`)
+
+	buf []byte
 )
 
 func testUnescape(t testing.TB, key string, src, dst []byte) {
