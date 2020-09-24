@@ -15,7 +15,9 @@ type Node struct {
 	t Type
 	// Node depth in json object.
 	d int
-	// Parser pointer.
+	// Raw pointer to vector.
+	// It's safe to using uintptr here because vector guaranteed to exist while the node is alive and isn't a garbage
+	// collected.
 	p uintptr
 	// Key/value bytes
 	k, v byteptr
