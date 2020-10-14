@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/fastconv"
 )
 
 func Validate(s []byte) (offset int, err error) {
@@ -18,6 +19,10 @@ func Validate(s []byte) (offset int, err error) {
 		err = ErrUnparsedTail
 	}
 	return
+}
+
+func ValidateStr(s string) (int, error) {
+	return Validate(fastconv.S2B(s))
 }
 
 func validateGeneric(depth int, s []byte, offset int) (int, error) {
