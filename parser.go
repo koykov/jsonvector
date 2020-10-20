@@ -157,14 +157,19 @@ func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 	v.s = vec.r.len(depth)
 	offset++
-	var err error
+	var (
+		err error
+		eof bool
+	)
 	for offset < len(vec.s) {
 		if vec.s[offset] == '}' {
 			// Edge case: empty object.
 			offset++
 			break
 		}
-		offset = vec.skipFmt(offset)
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 		// Parse key.
 		if vec.s[offset] != '"' {
 			// Key should be a string wrapped with double quotas.
@@ -209,14 +214,18 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 			c.k.e = bytes.IndexByte(c.k.rawBytes(), '\\') >= 0
 		}
 		// Parse value.
-		offset = vec.skipFmt(offset)
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 		// Check division symbol.
 		if vec.s[offset] == ':' {
 			offset++
 		} else {
 			return offset, ErrUnexpId
 		}
-		offset = vec.skipFmt(offset)
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 		// Value mey be an arbitrary type.
 		offset, err = vec.parseGeneric(depth, offset, c)
 		if err == ErrEOO {
@@ -225,7 +234,9 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 		}
 		// Save node to the vector.
 		vec.v[i] = *c
-		offset = vec.skipFmt(offset)
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 		if vec.s[offset] == '}' {
 			// End of the object caught.
 			offset++
@@ -237,7 +248,9 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 		} else {
 			return offset, ErrUnexpId
 		}
-		offset = vec.skipFmt(offset)
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 	}
 	return offset, err
 }
@@ -246,7 +259,10 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 	v.s = vec.r.len(depth)
 	offset++
-	var err error
+	var (
+		err error
+		eof bool
+	)
 	for offset < len(vec.s) {
 		if vec.s[offset] == ']' {
 			// Edge case: empty array.
@@ -266,7 +282,9 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 		}
 		// Save node to the vector.
 		vec.v[i] = *c
-		offset = vec.skipFmt(offset)
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 		if vec.s[offset] == ']' {
 			// End of the array caught.
 			offset++
@@ -278,7 +296,9 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 		} else {
 			return offset, ErrUnexpId
 		}
-		offset = vec.skipFmt(offset)
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 	}
 	return offset, nil
 }
@@ -286,11 +306,14 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 // Skip formatting symbols like tabs, spaces, ...
 //
 // Returns the next non-format symbol index.
-func (vec *Vector) skipFmt(offset int) int {
+func (vec *Vector) skipFmt(offset int) (int, bool) {
+	if offset >= len(vec.s) {
+		return offset, true
+	}
 	for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
 		offset++
 	}
-	return offset
+	return offset, false
 }
 
 // Check if given byte is a part of the number.
