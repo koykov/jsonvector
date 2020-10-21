@@ -71,9 +71,6 @@ func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 		// Check open array node.
 		v.t = TypeArr
 		offset, err = vec.parseArr(depth+1, offset, v)
-	case vec.s[offset] == ']':
-		// Check end array node.
-		return offset, ErrEOA
 	case vec.s[offset] == '"':
 		// Check string node.
 		v.t = TypeStr
@@ -213,7 +210,6 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 			// Extra check of escaped sequences in the key.
 			c.k.e = bytes.IndexByte(c.k.rawBytes(), '\\') >= 0
 		}
-		// Parse value.
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
 		}
@@ -226,11 +222,10 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
 		}
-		// Value mey be an arbitrary type.
-		offset, err = vec.parseGeneric(depth, offset, c)
-		if err == ErrEOO {
-			err = nil
-			break
+		// Parse value.
+		// Value may be an arbitrary type.
+		if offset, err = vec.parseGeneric(depth, offset, c); err != nil {
+			return offset, err
 		}
 		// Save node to the vector.
 		vec.v[i] = *c
@@ -274,11 +269,8 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 		i := vec.l - 1
 		v.e = vec.r.reg(depth, i)
 		// Parse the value.
-		offset, err = vec.parseGeneric(depth, offset, c)
-		if err == ErrEOA {
-			// End of array isn't the error actually.
-			err = nil
-			break
+		if offset, err = vec.parseGeneric(depth, offset, c); err != nil {
+			return offset, err
 		}
 		// Save node to the vector.
 		vec.v[i] = *c
