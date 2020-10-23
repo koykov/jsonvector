@@ -54,6 +54,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 // Generic parser helper.
 func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 	var err error
+	v.s = vec.r.len(depth)
 	switch {
 	case vec.s[offset] == 'n':
 		// Check null node.

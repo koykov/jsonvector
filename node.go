@@ -127,6 +127,20 @@ func (n *Node) Array() *Node {
 	return n
 }
 
+func (n *Node) Key() []byte {
+	if n.k.o != 0 && n.k.l > 0 {
+		return n.k.Bytes()
+	}
+	return nil
+}
+
+func (n *Node) KeyString() string {
+	if n.k.o != 0 && n.k.l > 0 {
+		return n.k.String()
+	}
+	return ""
+}
+
 // Get node value as bytes.
 func (n *Node) Bytes() []byte {
 	if n.t != TypeStr && n.t != TypeNum {
@@ -200,13 +214,28 @@ func (n *Node) Uint() uint64 {
 	return 0
 }
 
-// Get indexes of child nodes.
-func (n *Node) ChildIdx() []int {
-	if n.t != TypeArr && n.t != TypeObj {
-		return nil
+func (n *Node) Each(fn func(idx int, node *Node)) {
+	idx := n.childIdx()
+	vec := n.vec()
+	if len(idx) == 0 || vec == nil {
+		return
 	}
+	c := 0
+	for _, i := range idx {
+		cn := &vec.v[i]
+		fn(c, cn)
+		c++
+	}
+}
+
+// Get indexes of child nodes.
+func (n *Node) childIdx() []int {
 	if vec := n.vec(); vec != nil {
-		return vec.r.get(n.d+1, n.s, n.e)
+		var e = n.e
+		if e == 0 {
+			e = n.s + 1
+		}
+		return vec.r.get(n.d+1, n.s, e)
 	}
 	return nil
 }

@@ -33,7 +33,7 @@ func (vec *Vector) beautify(w io.Writer, v *Node, depth int) (err error) {
 		_, err = w.Write(v.RawBytes())
 		_, err = w.Write(btQuote)
 	case TypeArr:
-		ci := v.ChildIdx()
+		ci := v.childIdx()
 		if len(ci) == 0 {
 			_, err = w.Write(btArrE)
 		} else {
@@ -53,7 +53,7 @@ func (vec *Vector) beautify(w io.Writer, v *Node, depth int) (err error) {
 			_, err = w.Write(btArrC)
 		}
 	case TypeObj:
-		ci := v.ChildIdx()
+		ci := v.childIdx()
 		if len(ci) == 0 {
 			_, err = w.Write(btObjE)
 		} else {

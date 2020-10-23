@@ -23,12 +23,11 @@ var (
 	arr2 = []byte(`[3.14156, 6.23e-4]`)
 	arr3 = []byte(`["quoted \"str\" value", null, "foo"]`)
 
-	obj0    = []byte(`{"a": 1, "b": 2, "c": 3}`)
-	obj1    = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
-	obj2    = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
-	obj2exp = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
-	obj3    = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
-	objFmt  = []byte(`{
+	obj0   = []byte(`{"a": 1, "b": 2, "c": 3}`)
+	obj1   = []byte(`{"a": "foo", "b": "bar", "c": "string"}`)
+	obj2   = []byte(`{"key0": "\"quoted\"", "key\"1\"": "str"}`)
+	obj3   = []byte(`{"pi": 3.1415, "e": 2,718281828459045}`)
+	objFmt = []byte(`{
 	"c" :	15,
 	"foo":null,
 	"bar":  "qwerty \"encoded\""
@@ -106,6 +105,22 @@ func testArr(t testing.TB) {
 	if v.Type() != TypeArr || v.Len() != 3 || !bytes.Equal(vec.Get("1").Bytes(), []byte("bar")) {
 		t.Error("arr 1 mismatch")
 	}
+	v.Each(func(idx int, node *Node) {
+		switch idx {
+		case 0:
+			if v := node.String(); v != "foo" {
+				t.Error(`arr 1 val 0 mismatch, need "foo", got`, v)
+			}
+		case 1:
+			if v := node.String(); v != "bar" {
+				t.Error(`arr 1 val 1 mismatch, need "bar", got`, v)
+			}
+		case 2:
+			if v := node.String(); v != "string" {
+				t.Error(`arr 1 val 2 mismatch, need "string", got`, v)
+			}
+		}
+	})
 
 	vec.Reset()
 	_ = vec.Parse(arr2)
@@ -150,6 +165,24 @@ func testObj(t testing.TB) {
 	if v.Type() != TypeObj && v.Len() != 2 {
 		t.Error("obj 3 mismatch")
 	}
+	v.Each(func(idx int, node *Node) {
+		switch idx {
+		case 0:
+			if k := node.KeyString(); k != "pi" {
+				t.Error(`obj 3 key 0 mismatch, need "pi", got`, k)
+			}
+			if v := node.Float(); v != 3.1415 {
+				t.Error(`obj 3 value 0 mismatch, need 3.1415, got`, v)
+			}
+		case 1:
+			if k := node.KeyString(); k != "e" {
+				t.Error(`obj 3 key 0 mismatch, need "e", got`, k)
+			}
+			if v := node.Float(); v != 2 {
+				t.Error(`obj 3 value 0 mismatch, need 2, got`, v)
+			}
+		}
+	})
 
 	vec.Reset()
 	_ = vec.Parse(objFmt)

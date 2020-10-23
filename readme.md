@@ -62,4 +62,4 @@ and
 }
 ```
 
-See the picture below to see difference between classic JSON parser and vector:
+Classic JSON parser will build the following tree:

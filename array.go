@@ -9,7 +9,7 @@ func (n *Node) At(idx int) *Node {
 	if vec == nil {
 		return nil
 	}
-	ci := n.ChildIdx()
+	ci := n.childIdx()
 	h := -1
 	for _, i := range ci {
 		if i == idx {

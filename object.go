@@ -9,7 +9,7 @@ func (n *Node) Look(key string) *Node {
 	if vec == nil {
 		return nil
 	}
-	ci := n.ChildIdx()
+	ci := n.childIdx()
 	for _, i := range ci {
 		c := vec.v[i]
 		if key == c.k.String() {

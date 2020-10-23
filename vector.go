@@ -160,7 +160,8 @@ func (vec *Vector) Reset() {
 	for i := 0; i < vec.l; i++ {
 		vec.v[i].p = 0
 	}
-	vec.s, vec.a, vec.l, vec.e = nil, 0, 0, 0
+	vec.s = vec.s[:0]
+	vec.a, vec.l, vec.e = 0, 0, 0
 	vec.r.reset()
 }
 
