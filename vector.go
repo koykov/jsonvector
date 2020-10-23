@@ -24,7 +24,7 @@ const (
 // Parser object.
 type Vector struct {
 	// Source data to parse.
-	s []byte
+	b, s []byte
 	// Source data pointer.
 	a uint64
 	// Self pointer.
@@ -160,7 +160,7 @@ func (vec *Vector) Reset() {
 	for i := 0; i < vec.l; i++ {
 		vec.v[i].p = 0
 	}
-	vec.s = vec.s[:0]
+	vec.b, vec.s = vec.b[:0], nil
 	vec.a, vec.l, vec.e = 0, 0, 0
 	vec.r.reset()
 }

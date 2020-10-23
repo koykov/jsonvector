@@ -17,7 +17,8 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	s = bytealg.Trim(s, bFmt)
 	if copy {
 		// Copy input data.
-		vec.s = append(vec.s[:0], s...)
+		vec.b = append(vec.b[:0], s...)
+		vec.s = vec.b
 	} else {
 		// Use input data as source.
 		vec.s = s
