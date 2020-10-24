@@ -55,28 +55,37 @@ func (vec *Vector) GetBool(keys ...string) bool {
 }
 
 // Look and get float by given keys.
-func (vec *Vector) GetFloat(keys ...string) float64 {
+func (vec *Vector) GetFloat(keys ...string) (float64, error) {
 	v := vec.Get(keys...)
-	if v == nil || v.Type() != TypeNum {
-		return 0
+	if v == nil {
+		return 0, ErrNotFound
+	}
+	if v.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return v.Float()
 }
 
 // Look and get integer by given keys.
-func (vec *Vector) GetInt(keys ...string) int64 {
+func (vec *Vector) GetInt(keys ...string) (int64, error) {
 	v := vec.Get(keys...)
-	if v == nil || v.Type() != TypeNum {
-		return 0
+	if v == nil {
+		return 0, ErrNotFound
+	}
+	if v.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return v.Int()
 }
 
 // Look and get unsigned integer by given keys.
-func (vec *Vector) GetUint(keys ...string) uint64 {
+func (vec *Vector) GetUint(keys ...string) (uint64, error) {
 	v := vec.Get(keys...)
-	if v == nil || v.Type() != TypeNum {
-		return 0
+	if v == nil {
+		return 0, ErrNotFound
+	}
+	if v.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return v.Uint()
 }
@@ -132,31 +141,40 @@ func (vec *Vector) GetBoolByPath(path, sep string) bool {
 }
 
 // Look and get float by given path.
-func (vec *Vector) GetFloatByPath(path, sep string) float64 {
+func (vec *Vector) GetFloatByPath(path, sep string) (float64, error) {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeNum {
-		return 0
+	if v == nil {
+		return 0, ErrNotFound
+	}
+	if v.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return v.Float()
 }
 
 // Look and get integer by given path.
-func (vec *Vector) GetIntByPath(path, sep string) int64 {
+func (vec *Vector) GetIntByPath(path, sep string) (int64, error) {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeNum {
-		return 0
+	if v == nil {
+		return 0, ErrNotFound
+	}
+	if v.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return v.Int()
 }
 
 // Look and get unsigned integer by given path.
-func (vec *Vector) GetUintByPath(path, sep string) uint64 {
+func (vec *Vector) GetUintByPath(path, sep string) (uint64, error) {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeNum {
-		return 0
+	if v == nil {
+		return 0, ErrNotFound
+	}
+	if v.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return v.Uint()
 }

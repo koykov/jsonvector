@@ -62,19 +62,22 @@ func testScalar(t testing.TB) {
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum0)
-	if vec.v[0].t != TypeNum || vec.Get().Int() != 123456 {
+	i, _ := vec.Get().Int()
+	if vec.v[0].t != TypeNum || i != 123456 {
 		t.Error("num 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum1)
-	if vec.v[0].t != TypeNum || vec.Get().Float() != 123.456 {
+	f, _ := vec.Get().Float()
+	if vec.v[0].t != TypeNum || f != 123.456 {
 		t.Error("num 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum2)
-	if vec.v[0].t != TypeNum || vec.Get().Float() != 3.7e-5 {
+	f, _ = vec.Get().Float()
+	if vec.v[0].t != TypeNum || f != 3.7e-5 {
 		t.Error("num 2 mismatch")
 	}
 
@@ -95,7 +98,8 @@ func testArr(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(arr0)
 	v := vec.Get()
-	if v.Type() != TypeArr || v.Len() != 5 || vec.Get("1").Int() != 2 {
+	i, _ := vec.Get("1").Int()
+	if v.Type() != TypeArr || v.Len() != 5 || i != 2 {
 		t.Error("arr 0 mismatch")
 	}
 
@@ -125,7 +129,8 @@ func testArr(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(arr2)
 	v = vec.Get()
-	if v.Type() != TypeArr || v.Len() != 2 || vec.Get("0").Float() != 3.14156 {
+	f, _ := vec.Get("0").Float()
+	if v.Type() != TypeArr || v.Len() != 2 || f != 3.14156 {
 		t.Error("arr 2 mismatch")
 	}
 
@@ -141,7 +146,8 @@ func testObj(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(obj0)
 	v := vec.Get()
-	if v.Type() != TypeObj && v.Len() != 3 || vec.Get("b").Int() != 2 {
+	i, _ := vec.Get("b").Int()
+	if v.Type() != TypeObj && v.Len() != 3 || i != 2 {
 		t.Error("obj 0 mismatch")
 	}
 
@@ -171,14 +177,14 @@ func testObj(t testing.TB) {
 			if k := node.KeyString(); k != "pi" {
 				t.Error(`obj 3 key 0 mismatch, need "pi", got`, k)
 			}
-			if v := node.Float(); v != 3.1415 {
+			if v, _ := node.Float(); v != 3.1415 {
 				t.Error(`obj 3 value 0 mismatch, need 3.1415, got`, v)
 			}
 		case 1:
 			if k := node.KeyString(); k != "e" {
 				t.Error(`obj 3 key 0 mismatch, need "e", got`, k)
 			}
-			if v := node.Float(); v != 2 {
+			if v, _ := node.Float(); v != 2 {
 				t.Error(`obj 3 value 0 mismatch, need 2, got`, v)
 			}
 		}

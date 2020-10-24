@@ -49,28 +49,37 @@ func (n *Node) GetBool(keys ...string) bool {
 }
 
 // Look and get child float by given keys.
-func (n *Node) GetFloat(keys ...string) float64 {
+func (n *Node) GetFloat(keys ...string) (float64, error) {
 	c := n.Get(keys...)
-	if c == nil || c.Type() != TypeNum {
-		return 0
+	if c == nil {
+		return 0, ErrNotFound
+	}
+	if c.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return c.Float()
 }
 
 // Look and get child integer by given keys.
-func (n *Node) GetInt(keys ...string) int64 {
+func (n *Node) GetInt(keys ...string) (int64, error) {
 	c := n.Get(keys...)
-	if c == nil || c.Type() != TypeNum {
-		return 0
+	if c == nil {
+		return 0, ErrNotFound
+	}
+	if c.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return c.Int()
 }
 
 // Look and get child unsigned integer by given keys.
-func (n *Node) GetUint(keys ...string) uint64 {
+func (n *Node) GetUint(keys ...string) (uint64, error) {
 	c := n.Get(keys...)
-	if c == nil || c.Type() != TypeNum {
-		return 0
+	if c == nil {
+		return 0, ErrNotFound
+	}
+	if c.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return c.Uint()
 }
@@ -146,43 +155,52 @@ func (n *Node) GetBoolByPath(path, sep string) bool {
 }
 
 // Look and get child float by given path.
-func (n *Node) GetFloatByPath(path, sep string) float64 {
+func (n *Node) GetFloatByPath(path, sep string) (float64, error) {
 	vec := n.vec()
 	if vec == nil {
-		return 0
+		return 0, ErrInternal
 	}
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
-	if c == nil || c.Type() != TypeNum {
-		return 0
+	if c == nil {
+		return 0, ErrNotFound
+	}
+	if c.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return c.Float()
 }
 
 // Look and get child integer by given path.
-func (n *Node) GetIntByPath(path, sep string) int64 {
+func (n *Node) GetIntByPath(path, sep string) (int64, error) {
 	vec := n.vec()
 	if vec == nil {
-		return 0
+		return 0, ErrInternal
 	}
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
-	if c == nil || c.Type() != TypeNum {
-		return 0
+	if c == nil {
+		return 0, ErrNotFound
+	}
+	if c.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return c.Int()
 }
 
 // Look and get child unsigned int by given path.
-func (n *Node) GetUintByPath(path, sep string) uint64 {
+func (n *Node) GetUintByPath(path, sep string) (uint64, error) {
 	vec := n.vec()
 	if vec == nil {
-		return 0
+		return 0, ErrInternal
 	}
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	c := n.Get(vec.ss...)
-	if c == nil || c.Type() != TypeNum {
-		return 0
+	if c == nil {
+		return 0, ErrNotFound
+	}
+	if c.Type() != TypeNum {
+		return 0, ErrIncompatType
 	}
 	return c.Uint()
 }

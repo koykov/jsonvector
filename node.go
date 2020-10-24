@@ -24,7 +24,7 @@ type Node struct {
 	// First and last indexes of childs in registry.
 	s, e int
 	// Nested error.
-	Err error
+	// Err error
 }
 
 // Get node type.
@@ -172,46 +172,43 @@ func (n *Node) Bool() bool {
 	if n.t != TypeBool {
 		return false
 	}
-	return bytes.Equal(n.v.Bytes(), bTrue)
+	return bytes.Equal(bytealg.ToLower(n.v.Bytes()), bTrue)
 }
 
 // Get node value as float.
-func (n *Node) Float() float64 {
+func (n *Node) Float() (float64, error) {
 	if n.t != TypeNum {
-		return 0
+		return 0, ErrIncompatType
 	}
 	f, err := strconv.ParseFloat(n.v.String(), 64)
-	if err == nil {
-		return f
+	if err != nil {
+		return 0, err
 	}
-	n.Err = err
-	return 0
+	return f, nil
 }
 
 // Get node value as integer.
-func (n *Node) Int() int64 {
+func (n *Node) Int() (int64, error) {
 	if n.t != TypeNum {
-		return 0
+		return 0, ErrIncompatType
 	}
 	i, err := strconv.ParseInt(n.v.String(), 10, 64)
-	if err == nil {
-		return i
+	if err != nil {
+		return 0, err
 	}
-	n.Err = err
-	return 0
+	return i, nil
 }
 
 // Get node value as unsigned integer.
-func (n *Node) Uint() uint64 {
+func (n *Node) Uint() (uint64, error) {
 	if n.t != TypeNum {
-		return 0
+		return 0, ErrIncompatType
 	}
 	u, err := strconv.ParseUint(n.v.String(), 10, 64)
-	if err == nil {
-		return u
+	if err != nil {
+		return 0, err
 	}
-	n.Err = err
-	return 0
+	return u, nil
 }
 
 func (n *Node) Each(fn func(idx int, node *Node)) {
@@ -247,7 +244,6 @@ func (n *Node) Reset() {
 	n.v.set(0, 0)
 	n.d, n.p = 0, 0
 	n.s, n.e = 0, 0
-	n.Err = nil
 }
 
 // Restore entire parser object from raw pointer.

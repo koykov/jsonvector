@@ -207,8 +207,9 @@ func testComplex(t testing.TB, key string, src []byte, path []string, typ Type, 
 		}
 	}
 	if valN, ok := val.(int64); ok {
-		if v.Int() != valN {
-			t.Error(key, "value assertion failed", v.Int(), "vs", valN)
+		i, _ := v.Int()
+		if i != valN {
+			t.Error(key, "value assertion failed", i, "vs", valN)
 		}
 	}
 }
