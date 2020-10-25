@@ -45,21 +45,46 @@ Lets we have two JSON:
   }
 }
 ```
-and
-```json
-{
-  "a": {
-    "b": {
-      "c": [
-        "lorem ipsum",
-        "dolor sit",
-        "amet"
-      ],
-      "d": null
-    }
-  },
-  "h": "bar"
-}
-```
 
-Classic JSON parser will build the following tree:
+Majority of JSON parsers will build array of nodes like:
+
+| 0               | 1          | 2               | 3           | 4                   | 5           | 6           | 7              |
+|-----------------|------------|-----------------|-------------|---------------------|-------------|-------------|----------------|
+| type: obj       | type: bool | type: obj       | type: str   | type: arr           | type: num   | type: num   | type: num      |
+| key: ""         | key: "a"   | key: ""         | key: "c"    | key: ""             | key: ""     | key: ""     | key: ""        |
+| str: ""         | str: ""    | str: ""         | str: "foo"  | str: ""             | str: ""     | str: ""     | str: ""        |
+| num: 0          | num: 0     | num: 0          | num: 0      | num: 0              | num: 5      | num: 3.1415 | num: 812.48927 |
+| bool: false     | bool: true | bool: false     | bool: false | bool: false         | bool: false | bool: false | bool: false    |
+| child: [*1, *2] | child: []  | child: [*3, *4] | child: []   | child: [*5, *6, *7] | child: []   | child: []   | child: []      |
+
+As you can see, independent of JSON node type, each parsed node contains at least 3 poiters:
+* key (string)
+* str (string)
+* child (slice of node pointers)
+
+JSON vector has different approach and build the following array of nodes and index:
+
+Vector:
+
+| 0          | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|------------|---|---|---|---|---|---|---|
+| type: obj  | type: bool | | | | | | |
+| key pos: 0 | key pos:   | | | | | | |
+| key len: 0 | key len:   | | | | | | |
+| val pos: 0 | val pos:   | | | | | | |
+| val len: 0 | val len:   | | | | | | |
+| depth: 0   | depth: 1   | | | | | | |
+| idx pos: 0 | idx pos: 0 | | | | | | |
+| idx len: 2 | idx len: 0 | | | | | | |
+
+Index (X-axis means depth):
+
+| 0 | 1 | 2 | 3 |
+|---|---|---|---|
+| 0 ||||
+| - ||||
+| - ||||
+| - ||||
+| - ||||
+| - ||||
+| - ||||
