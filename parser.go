@@ -266,6 +266,9 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 			offset++
 			break
 		}
+		if offset, eof = vec.skipFmt(offset); eof {
+			return offset, ErrUnexpEOF
+		}
 		// Register new node.
 		c := vec.newNode(depth)
 		i := vec.l - 1

@@ -32,6 +32,17 @@ var (
 	"foo":null,
 	"bar":  "qwerty \"encoded\""
 }`)
+	objFmt1 = []byte(`{
+  "a": true,
+  "b": {
+    "c": "foo",
+    "d": [
+      5,
+      3.1415,
+      812.48927
+    ]
+  }
+}`)
 
 	badTrash        = []byte(`foo bar`)
 	badScalarStr    = []byte(`"unclosed string example`)
@@ -198,6 +209,15 @@ func testObj(t testing.TB) {
 	}
 }
 
+func testFmt(t testing.TB) {
+	vec.Reset()
+	_ = vec.Parse(objFmt1)
+	v := vec.Get()
+	if v.Type() != TypeObj {
+		t.Error("obj fmt mismatch")
+	}
+}
+
 func TestVector_ParseScalar(t *testing.T) {
 	testScalar(t)
 }
@@ -208,6 +228,10 @@ func TestVector_ParseArr(t *testing.T) {
 
 func TestVector_ParseObj(t *testing.T) {
 	testObj(t)
+}
+
+func TestVector_ParseFmt(t *testing.T) {
+	testFmt(t)
 }
 
 func TestErr(t *testing.T) {
@@ -256,5 +280,12 @@ func BenchmarkVector_ParseObj(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		testObj(b)
+	}
+}
+
+func BenchmarkVector_ParseFmt(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		testFmt(b)
 	}
 }
