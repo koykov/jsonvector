@@ -23,8 +23,6 @@ type Node struct {
 	k, v byteptr
 	// First and last indexes of childs in registry.
 	s, e int
-	// Nested error.
-	// Err error
 }
 
 // Get node type.
