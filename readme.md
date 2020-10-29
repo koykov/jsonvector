@@ -66,25 +66,25 @@ JSON vector has different approach and build the following array of nodes and in
 
 Vector:
 
-| 0          | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
-|------------|---|---|---|---|---|---|---|
-| type: obj  | type: bool | | | | | | |
-| key pos: 0 | key pos:   | | | | | | |
-| key len: 0 | key len:   | | | | | | |
-| val pos: 0 | val pos:   | | | | | | |
-| val len: 0 | val len:   | | | | | | |
-| depth: 0   | depth: 1   | | | | | | |
-| idx pos: 0 | idx pos: 0 | | | | | | |
-| idx len: 2 | idx len: 0 | | | | | | |
+| 0          | 1          | 2           | 3           | 4           | 5           | 6           | 7           |
+|------------|------------|-------------|-------------|-------------|-------------|-------------|-------------|
+| type: obj  | type: bool | type: obj   | type: str   | type: arr   | type: num   | type: num   | type: num   |
+| key pos: 0 | key pos: 5 | key pos: 18 | key pos: 29 | key pos: 45 | key pos: 0  | key pos: 0  | key pos: 0  |
+| key len: 0 | key len: 1 | key len: 1  | key len: 1  | key len: 1  | key len: 0  | key len: 0  | key len: 0  |
+| val pos: 0 | val pos: 9 | val pos: 0  | val pos: 34 | val pos: 0  | val pos: 57 | val pos: 64 | val pos: 80 |
+| val len: 0 | val len: 4 | val len: 0  | val len: 3  | val len: 0  | val len: 1  | val len: 6  | val len: 9  |
+| depth: 0   | depth: 1   | depth: 1    | depth: 2    | depth: 2    | depth: 3    | depth: 3    | depth: 3    |
+| idx pos: 0 | idx pos: 0 | idx pos: 0  | idx pos: 0  | idx pos: 0  | idx pos: 0  | idx pos: 0  | idx pos: 0  |
+| idx len: 2 | idx len: 0 | idx len: 2  | idx len: 0  | idx len: 3  | idx len: 0  | idx len: 0  | idx len: 0  |
 
 Index (X-axis means depth):
 
 | 0 | 1 | 2 | 3 |
 |---|---|---|---|
-| 0 ||||
-| - ||||
-| - ||||
-| - ||||
-| - ||||
-| - ||||
-| - ||||
+| 0 | 1 | 3 | 5 |
+| - | 2 | 4 | 6 |
+| - | - | - | 7 |
+
+Each node contains only int variables and therefore avoid escapes to heap at all.
+The whole vector contains only two pointers - nodes array and index matrix. GC checks it instantly.
+That way also allows parsing JSON with unlimited depths.
