@@ -57,7 +57,7 @@ Majority of JSON parsers will build array of nodes like:
 | bool: false     | bool: true | bool: false     | bool: false | bool: false         | bool: false | bool: false | bool: false    |
 | child: [*1, *2] | child: []  | child: [*3, *4] | child: []   | child: [*5, *6, *7] | child: []   | child: []   | child: []      |
 
-As you can see, independent of JSON node type, each parsed node contains at least 3 poiters:
+As you can see, independent of JSON node type, each parsed node contains at least 3 pointers:
 * key (string)
 * str (string)
 * child (slice of node pointers)
