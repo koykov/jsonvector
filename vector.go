@@ -35,8 +35,8 @@ type Vector struct {
 	l int
 	// Error offset.
 	e int
-	// Registry of nodes parenthood.
-	r registry
+	// Nodes index.
+	i index
 	// Buffer of strings.
 	ss []string
 }
@@ -162,7 +162,7 @@ func (vec *Vector) Reset() {
 	}
 	vec.b, vec.s = vec.b[:0], nil
 	vec.a, vec.l, vec.e = 0, 0, 0
-	vec.r.reset()
+	vec.i.reset()
 }
 
 // Get raw pointer of self parser.

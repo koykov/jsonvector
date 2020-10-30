@@ -21,7 +21,7 @@ type Node struct {
 	p uintptr
 	// Key/value bytes
 	k, v byteptr
-	// First and last indexes of childs in registry.
+	// Position of first and last child nodes in index.
 	s, e int
 }
 
@@ -45,7 +45,7 @@ func (n *Node) Get(keys ...string) *Node {
 	}
 	if n.t == TypeObj {
 		for i := n.s; i < n.e; i++ {
-			k := vec.r.r[n.d+1][i]
+			k := vec.i.t[n.d+1][i]
 			c := &vec.v[k]
 			if bytes.Equal(c.k.Bytes(), fastconv.S2B(keys[0])) {
 				if len(keys[1:]) == 0 {
@@ -61,7 +61,7 @@ func (n *Node) Get(keys ...string) *Node {
 		if err != nil || k >= n.Len() {
 			return nil
 		}
-		i := vec.r.r[n.d+1][n.s+k]
+		i := vec.i.t[n.d+1][n.s+k]
 		v := &vec.v[i]
 		if len(keys[1:]) == 0 {
 			return v
@@ -92,7 +92,7 @@ func (n *Node) Exists(key string) bool {
 		return false
 	}
 	for i := n.s; i < n.e; i++ {
-		k := vec.r.r[n.d+1][i]
+		k := vec.i.t[n.d+1][i]
 		c := &vec.v[k]
 		if c.k.String() == key {
 			return true
@@ -230,7 +230,7 @@ func (n *Node) childIdx() []int {
 		if e == 0 {
 			e = n.s + 1
 		}
-		return vec.r.get(n.d+1, n.s, e)
+		return vec.i.get(n.d+1, n.s, e)
 	}
 	return nil
 }

@@ -33,7 +33,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	// Create root node and register it.
 	val := vec.newNode(0)
 	i := vec.l - 1
-	vec.r.reg(0, i)
+	vec.i.reg(0, i)
 
 	// Parse source data.
 	offset, err = vec.parseGeneric(0, offset, val)
@@ -55,7 +55,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 // Generic parser helper.
 func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 	var err error
-	v.s = vec.r.len(depth)
+	v.s = vec.i.len(depth)
 	switch {
 	case vec.s[offset] == 'n':
 		// Check null node.
@@ -154,7 +154,7 @@ func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 
 // Object parsing helper.
 func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
-	v.s = vec.r.len(depth)
+	v.s = vec.i.len(depth)
 	offset++
 	var (
 		err error
@@ -178,7 +178,7 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 		// Register new node.
 		c := vec.newNode(depth)
 		i := vec.l - 1
-		v.e = vec.r.reg(depth, i)
+		v.e = vec.i.reg(depth, i)
 		// Fill up key's offset and length.
 		c.k.o = vec.a + uint64(offset)
 		e := bytealg.IndexAt(vec.s, bQuote, offset)
@@ -254,7 +254,7 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 
 // Array parsing helper.
 func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
-	v.s = vec.r.len(depth)
+	v.s = vec.i.len(depth)
 	offset++
 	var (
 		err error
@@ -272,7 +272,7 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 		// Register new node.
 		c := vec.newNode(depth)
 		i := vec.l - 1
-		v.e = vec.r.reg(depth, i)
+		v.e = vec.i.reg(depth, i)
 		// Parse the value.
 		if offset, err = vec.parseGeneric(depth, offset, c); err != nil {
 			return offset, err
