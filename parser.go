@@ -269,6 +269,11 @@ func (vec *Vector) parseArr(depth, offset int, v *Node) (int, error) {
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
 		}
+		if vec.s[offset] == ']' {
+			// Edge case: empty array.
+			offset++
+			break
+		}
 		// Register new node.
 		c := vec.newNode(depth)
 		i := vec.l - 1
