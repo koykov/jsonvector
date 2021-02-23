@@ -79,7 +79,8 @@ func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 		// Save offset of string value.
 		v.v.o = vec.a + uint64(offset+1)
 		// Get index of end of string value.
-		e := bytealg.IndexAt(vec.s, bQuote, offset+1)
+		// e := bytealg.IndexAt(vec.s, bQuote, offset+1)
+		e := bytealg.IndexByteAtRL(vec.s, '"', offset+1)
 		if e < 0 {
 			return len(vec.s), ErrUnexpEOS
 		}
@@ -92,7 +93,8 @@ func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 			// Walk over double quotas and look for unescaped.
 			_ = vec.s[len(vec.s)-1]
 			for i := e; i < len(vec.s); {
-				i = bytealg.IndexAt(vec.s, bQuote, i+1)
+				// i = bytealg.IndexAt(vec.s, bQuote, i+1)
+				i = bytealg.IndexByteAtRL(vec.s, '"', i+1)
 				if i < 0 {
 					e = len(vec.s) - 1
 					break
@@ -108,7 +110,8 @@ func (vec *Vector) parseGeneric(depth, offset int, v *Node) (int, error) {
 		}
 		if !v.v.e {
 			// Extra check of escaping sequences.
-			v.v.e = bytes.IndexByte(v.v.rawBytes(), '\\') >= 0
+			// v.v.e = bytes.IndexByte(v.v.rawBytes(), '\\') >= 0
+			v.v.e = bytealg.HasByte(v.v.rawBytes(), '\\')
 		}
 	case isDigit(vec.s[offset]):
 		// Check number node.
@@ -181,7 +184,8 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 		v.e = vec.i.reg(depth, i)
 		// Fill up key's offset and length.
 		c.k.o = vec.a + uint64(offset)
-		e := bytealg.IndexAt(vec.s, bQuote, offset)
+		// e := bytealg.IndexAt(vec.s, bQuote, offset)
+		e := bytealg.IndexByteAtRL(vec.s, '"', offset+1)
 		if e < 0 {
 			return len(vec.s), ErrUnexpEOS
 		}
@@ -194,7 +198,8 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 			// Key contains escaped bytes.
 			_ = vec.s[len(vec.s)-1]
 			for i := e; i < len(vec.s); {
-				i = bytealg.IndexAt(vec.s, bQuote, i+1)
+				// i = bytealg.IndexAt(vec.s, bQuote, i+1)
+				i = bytealg.IndexByteAtRL(vec.s, '"', i+1)
 				if i < 0 {
 					e = len(vec.s) - 1
 					break
@@ -210,7 +215,8 @@ func (vec *Vector) parseObj(depth, offset int, v *Node) (int, error) {
 		}
 		if !c.k.e {
 			// Extra check of escaped sequences in the key.
-			c.k.e = bytes.IndexByte(c.k.rawBytes(), '\\') >= 0
+			// c.k.e = bytes.IndexByte(c.k.rawBytes(), '\\') >= 0
+			c.k.e = bytealg.HasByte(c.k.rawBytes(), '\\')
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
@@ -312,9 +318,27 @@ func (vec *Vector) skipFmt(offset int) (int, bool) {
 	if offset >= len(vec.s) {
 		return offset, true
 	}
-	for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
-		offset++
+
+loop:
+	c := vec.s[offset]
+	if c != bFmt[0] && c != bFmt[1] && c != bFmt[2] && c != bFmt[3] {
+		return offset, false
 	}
+	offset++
+	goto loop
+
+	// for {
+	// 	c := vec.s[offset]
+	// 	if c != bFmt[0] && c != bFmt[1] && c != bFmt[2] && c != bFmt[3] {
+	// 		break
+	// 	}
+	// 	offset++
+	// }
+
+	// for bytes.IndexByte(bFmt, vec.s[offset]) != -1 {
+	// 	offset++
+	// }
+
 	return offset, false
 }
 
