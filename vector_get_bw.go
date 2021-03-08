@@ -3,95 +3,42 @@ package jsonvector
 // Old vector.Get*ByPath() methods.
 // Kept for backward compatibility.
 
-import (
-	"github.com/koykov/bytealg"
-)
-
-// Look and get object by given path.
+// Look and get object by given path and separator.
 func (vec *Vector) GetObjectByPath(path, sep string) *Node {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeObj {
-		return nil
-	}
-	return v.Object()
+	return vec.GetObjectPS(path, sep)
 }
 
-// Look and get array by given path.
+// Look and get array by given path and separator.
 func (vec *Vector) GetArrayByPath(path, sep string) *Node {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeArr {
-		return nil
-	}
-	return v.Array()
+	return vec.GetArrayPS(path, sep)
 }
 
-// Look and get bytes by given path.
+// Look and get bytes by given path and separator.
 func (vec *Vector) GetBytesByPath(path, sep string) []byte {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeStr {
-		return nil
-	}
-	return v.Bytes()
+	return vec.GetBytesPS(path, sep)
 }
 
-// Look and get string by given path.
+// Look and get string by given path and separator.
 func (vec *Vector) GetStringByPath(path, sep string) string {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeStr {
-		return ""
-	}
-	return v.String()
+	return vec.GetStringPS(path, sep)
 }
 
-// Look and get bool by given path.
+// Look and get bool by given path and separator.
 func (vec *Vector) GetBoolByPath(path, sep string) bool {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil || v.Type() != TypeBool {
-		return false
-	}
-	return v.Bool()
+	return vec.GetBoolPS(path, sep)
 }
 
-// Look and get float by given path.
+// Look and get float by given path and separator.
 func (vec *Vector) GetFloatByPath(path, sep string) (float64, error) {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil {
-		return 0, ErrNotFound
-	}
-	if v.Type() != TypeNum {
-		return 0, ErrIncompatType
-	}
-	return v.Float()
+	return vec.GetFloatPS(path, sep)
 }
 
-// Look and get integer by given path.
+// Look and get integer by given path and separator.
 func (vec *Vector) GetIntByPath(path, sep string) (int64, error) {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil {
-		return 0, ErrNotFound
-	}
-	if v.Type() != TypeNum {
-		return 0, ErrIncompatType
-	}
-	return v.Int()
+	return vec.GetIntPS(path, sep)
 }
 
-// Look and get unsigned integer by given path.
+// Look and get unsigned integer by given path and separator.
 func (vec *Vector) GetUintByPath(path, sep string) (uint64, error) {
-	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
-	v := vec.Get(vec.ss...)
-	if v == nil {
-		return 0, ErrNotFound
-	}
-	if v.Type() != TypeNum {
-		return 0, ErrIncompatType
-	}
-	return v.Uint()
+	return vec.GetUintPS(path, sep)
 }
