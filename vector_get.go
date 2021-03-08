@@ -91,7 +91,7 @@ func (vec *Vector) GetUint(keys ...string) (uint64, error) {
 }
 
 // Look and get object by given path.
-func (vec *Vector) GetObjectByPath(path, sep string) *Node {
+func (vec *Vector) DotObject(path, sep string) *Node {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeObj {
@@ -101,7 +101,7 @@ func (vec *Vector) GetObjectByPath(path, sep string) *Node {
 }
 
 // Look and get array by given path.
-func (vec *Vector) GetArrayByPath(path, sep string) *Node {
+func (vec *Vector) DotArray(path, sep string) *Node {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeArr {
@@ -111,7 +111,7 @@ func (vec *Vector) GetArrayByPath(path, sep string) *Node {
 }
 
 // Look and get bytes by given path.
-func (vec *Vector) GetBytesByPath(path, sep string) []byte {
+func (vec *Vector) DotBytes(path, sep string) []byte {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeStr {
@@ -121,7 +121,7 @@ func (vec *Vector) GetBytesByPath(path, sep string) []byte {
 }
 
 // Look and get string by given path.
-func (vec *Vector) GetStringByPath(path, sep string) string {
+func (vec *Vector) DotString(path, sep string) string {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeStr {
@@ -131,7 +131,7 @@ func (vec *Vector) GetStringByPath(path, sep string) string {
 }
 
 // Look and get bool by given path.
-func (vec *Vector) GetBoolByPath(path, sep string) bool {
+func (vec *Vector) DotBool(path, sep string) bool {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil || v.Type() != TypeBool {
@@ -141,7 +141,7 @@ func (vec *Vector) GetBoolByPath(path, sep string) bool {
 }
 
 // Look and get float by given path.
-func (vec *Vector) GetFloatByPath(path, sep string) (float64, error) {
+func (vec *Vector) DotFloat(path, sep string) (float64, error) {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil {
@@ -154,7 +154,7 @@ func (vec *Vector) GetFloatByPath(path, sep string) (float64, error) {
 }
 
 // Look and get integer by given path.
-func (vec *Vector) GetIntByPath(path, sep string) (int64, error) {
+func (vec *Vector) DotInt(path, sep string) (int64, error) {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil {
@@ -167,7 +167,7 @@ func (vec *Vector) GetIntByPath(path, sep string) (int64, error) {
 }
 
 // Look and get unsigned integer by given path.
-func (vec *Vector) GetUintByPath(path, sep string) (uint64, error) {
+func (vec *Vector) DotUint(path, sep string) (uint64, error) {
 	vec.ss = bytealg.AppendSplitStr(vec.ss[:0], path, sep, -1)
 	v := vec.Get(vec.ss...)
 	if v == nil {
