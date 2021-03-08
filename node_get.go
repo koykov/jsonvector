@@ -84,8 +84,8 @@ func (n *Node) GetUint(keys ...string) (uint64, error) {
 	return c.Uint()
 }
 
-// Look and get child object by given path.
-func (n *Node) DotObject(path, sep string) *Node {
+// Look and get child object by given path and separator.
+func (n *Node) GetObjectPS(path, sep string) *Node {
 	vec := n.vec()
 	if vec == nil {
 		return nil
@@ -98,8 +98,8 @@ func (n *Node) DotObject(path, sep string) *Node {
 	return c.Object()
 }
 
-// Look and get child array by given path.
-func (n *Node) DotArray(path, sep string) *Node {
+// Look and get child array by given path and separator.
+func (n *Node) GetArrayPS(path, sep string) *Node {
 	vec := n.vec()
 	if vec == nil {
 		return nil
@@ -112,8 +112,8 @@ func (n *Node) DotArray(path, sep string) *Node {
 	return c.Array()
 }
 
-// Look and get child bytes by given path.
-func (n *Node) DotBytes(path, sep string) []byte {
+// Look and get child bytes by given path and separator.
+func (n *Node) GetBytesPS(path, sep string) []byte {
 	vec := n.vec()
 	if vec == nil {
 		return nil
@@ -126,8 +126,8 @@ func (n *Node) DotBytes(path, sep string) []byte {
 	return c.Bytes()
 }
 
-// Look and get child string by given path.
-func (n *Node) DotString(path, sep string) string {
+// Look and get child string by given path and separator.
+func (n *Node) GetStringPS(path, sep string) string {
 	vec := n.vec()
 	if vec == nil {
 		return ""
@@ -140,8 +140,8 @@ func (n *Node) DotString(path, sep string) string {
 	return c.String()
 }
 
-// Look and get child bool by given path.
-func (n *Node) DotBool(path, sep string) bool {
+// Look and get child bool by given path and separator.
+func (n *Node) GetBoolPS(path, sep string) bool {
 	vec := n.vec()
 	if vec == nil {
 		return false
@@ -154,8 +154,8 @@ func (n *Node) DotBool(path, sep string) bool {
 	return c.Bool()
 }
 
-// Look and get child float by given path.
-func (n *Node) DotFloat(path, sep string) (float64, error) {
+// Look and get child float by given path and separator.
+func (n *Node) GetFloatPS(path, sep string) (float64, error) {
 	vec := n.vec()
 	if vec == nil {
 		return 0, ErrInternal
@@ -171,8 +171,8 @@ func (n *Node) DotFloat(path, sep string) (float64, error) {
 	return c.Float()
 }
 
-// Look and get child integer by given path.
-func (n *Node) DotInt(path, sep string) (int64, error) {
+// Look and get child integer by given path and separator.
+func (n *Node) GetIntPS(path, sep string) (int64, error) {
 	vec := n.vec()
 	if vec == nil {
 		return 0, ErrInternal
@@ -188,8 +188,8 @@ func (n *Node) DotInt(path, sep string) (int64, error) {
 	return c.Int()
 }
 
-// Look and get child unsigned int by given path.
-func (n *Node) DotUint(path, sep string) (uint64, error) {
+// Look and get child unsigned int by given path and separator.
+func (n *Node) GetUintPS(path, sep string) (uint64, error) {
 	vec := n.vec()
 	if vec == nil {
 		return 0, ErrInternal
