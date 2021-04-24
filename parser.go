@@ -81,7 +81,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Save offset of string value.
 		node.Value().SetOffset(vec.SrcAddr() + uint64(offset+1))
 		// Get index of end of string value.
-		e := bytealg.IndexAt(vec.Src(), bQuote, offset+1)
+		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
 		if e < 0 {
 			return vec.SrcLen(), ErrUnexpEOS
 		}
@@ -94,7 +94,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			// Walk over double quotas and look for unescaped.
 			_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < vec.SrcLen(); {
-				i = bytealg.IndexAt(vec.Src(), bQuote, i+1)
+				i = bytealg.IndexByteAtRL(vec.Src(), '"', i+1)
 				if i < 0 {
 					e = vec.SrcLen() - 1
 					break
@@ -110,7 +110,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		}
 		if !node.Value().GetFlag(vector.FlagEscape) {
 			// Extra check of escaping sequences.
-			node.Value().SetFlag(vector.FlagEscape, bytes.IndexByte(node.Bytes(), '\\') >= 0)
+			node.Value().SetFlag(vector.FlagEscape, bytealg.HasByte(node.Value().RawBytes(), '\\'))
 		}
 	case isDigit(vec.SrcAt(offset)):
 		// Check number node.
@@ -183,7 +183,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		node.SetLimit(vec.Index.Register(depth, i))
 		// Fill up key's offset and length.
 		child.Key().SetOffset(vec.SrcAddr() + uint64(offset))
-		e := bytealg.IndexAt(vec.Src(), bQuote, offset)
+		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
 		if e < 0 {
 			return vec.SrcLen(), ErrUnexpEOS
 		}
@@ -196,7 +196,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			// Key contains escaped bytes.
 			_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < len(vec.Src()); {
-				i = bytealg.IndexAt(vec.Src(), bQuote, i+1)
+				i = bytealg.IndexByteAtRL(vec.Src(), '"', i+1)
 				if i < 0 {
 					e = vec.SrcLen() - 1
 					break
@@ -212,7 +212,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		if !child.Key().GetFlag(vector.FlagEscape) {
 			// Extra check of escaped sequences in the key.
-			child.Key().SetFlag(vector.FlagEscape, bytes.IndexByte(child.Key().RawBytes(), '\\') >= 0)
+			child.Key().SetFlag(vector.FlagEscape, bytealg.HasByte(child.KeyBytes(), '\\'))
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
@@ -311,13 +311,16 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 //
 // Returns the next non-format symbol index.
 func (vec *Vector) skipFmt(offset int) (int, bool) {
+loop:
 	if offset >= vec.SrcLen() {
 		return offset, true
 	}
-	for bytes.IndexByte(bFmt, vec.SrcAt(offset)) != -1 {
-		offset++
+	c := vec.SrcAt(offset)
+	if c != bFmt[0] && c != bFmt[1] && c != bFmt[2] && c != bFmt[3] {
+		return offset, false
 	}
-	return offset, false
+	offset++
+	goto loop
 }
 
 // Check if given byte is a part of the number.
