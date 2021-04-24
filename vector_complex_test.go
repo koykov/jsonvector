@@ -3,6 +3,8 @@ package jsonvector
 import (
 	"bytes"
 	"testing"
+
+	"github.com/koykov/vector"
 )
 
 var (
@@ -191,7 +193,7 @@ var (
 	bbuf bytes.Buffer
 )
 
-func testComplex(t testing.TB, key string, src []byte, path []string, typ Type, val interface{}) {
+func testComplex(t testing.TB, key string, src []byte, path []string, typ vector.Type, val interface{}) {
 	vec.Reset()
 	err := vec.Parse(src)
 	if err != nil {
@@ -231,7 +233,7 @@ func testComplexFmt(t testing.TB, key string, src, dst []byte) {
 }
 
 func TestVector_ParseComplex0(t *testing.T) {
-	testComplex(t, "complex 0", complex0, complexPath0, TypeStr, "SGML")
+	testComplex(t, "complex 0", complex0, complexPath0, vector.TypeStr, "SGML")
 }
 
 func TestVector_FmtComplex0(t *testing.T) {
@@ -239,7 +241,7 @@ func TestVector_FmtComplex0(t *testing.T) {
 }
 
 func TestVector_ParseComplex1(t *testing.T) {
-	testComplex(t, "complex 1", complex1, complexPath1, TypeStr, "646 555-4567")
+	testComplex(t, "complex 1", complex1, complexPath1, vector.TypeStr, "646 555-4567")
 }
 
 func TestVector_FmtComplex1(t *testing.T) {
@@ -247,7 +249,7 @@ func TestVector_FmtComplex1(t *testing.T) {
 }
 
 func TestVector_ParseComplex2(t *testing.T) {
-	testComplex(t, "complex 2", complex2, complexPath2, TypeStr, "number")
+	testComplex(t, "complex 2", complex2, complexPath2, vector.TypeStr, "number")
 }
 
 func TestVector_FmtComplex2(t *testing.T) {
@@ -255,7 +257,7 @@ func TestVector_FmtComplex2(t *testing.T) {
 }
 
 func TestVector_ParseComplex3(t *testing.T) {
-	testComplex(t, "complex 3", complex3, complexPath3, TypeNum, int64(20))
+	testComplex(t, "complex 3", complex3, complexPath3, vector.TypeNum, int64(20))
 }
 
 func TestVector_FmtComplex3(t *testing.T) {
@@ -263,7 +265,7 @@ func TestVector_FmtComplex3(t *testing.T) {
 }
 
 func TestVector_ParseComplex4(t *testing.T) {
-	testComplex(t, "complex 4", complex4, complexPath4, TypeStr, "10021")
+	testComplex(t, "complex 4", complex4, complexPath4, vector.TypeStr, "10021")
 }
 
 func TestVector_FmtComplex4(t *testing.T) {
@@ -271,7 +273,7 @@ func TestVector_FmtComplex4(t *testing.T) {
 }
 
 func TestVector_ParseComplex5(t *testing.T) {
-	testComplex(t, "complex 5", complex5, complexPath5, TypeStr, "3")
+	testComplex(t, "complex 5", complex5, complexPath5, vector.TypeStr, "3")
 }
 
 func TestVector_FmtComplex5(t *testing.T) {
@@ -281,41 +283,41 @@ func TestVector_FmtComplex5(t *testing.T) {
 func BenchmarkVector_ParseComplex0(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		testComplex(b, "complex 0", complex0, complexPath0, TypeStr, "SGML")
+		testComplex(b, "complex 0", complex0, complexPath0, vector.TypeStr, "SGML")
 	}
 }
 
 func BenchmarkVector_ParseComplex1(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		testComplex(b, "complex 1", complex1, complexPath1, TypeStr, "646 555-4567")
+		testComplex(b, "complex 1", complex1, complexPath1, vector.TypeStr, "646 555-4567")
 	}
 }
 
 func BenchmarkVector_ParseComplex2(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		testComplex(b, "complex 2", complex2, complexPath2, TypeStr, "number")
+		testComplex(b, "complex 2", complex2, complexPath2, vector.TypeStr, "number")
 	}
 }
 
 func BenchmarkVector_ParseComplex3(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		testComplex(b, "complex 3", complex3, complexPath3, TypeNum, int64(20))
+		testComplex(b, "complex 3", complex3, complexPath3, vector.TypeNum, int64(20))
 	}
 }
 
 func BenchmarkVector_ParseComplex4(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		testComplex(b, "complex 4", complex4, complexPath4, TypeStr, "10021")
+		testComplex(b, "complex 4", complex4, complexPath4, vector.TypeStr, "10021")
 	}
 }
 
 func BenchmarkVector_ParseComplex5(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		testComplex(b, "complex 5", complex5, complexPath5, TypeStr, "3")
+		testComplex(b, "complex 5", complex5, complexPath5, vector.TypeStr, "3")
 	}
 }

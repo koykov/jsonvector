@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/vector"
 )
 
 var (
@@ -55,52 +56,52 @@ var (
 func testScalar(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(scalarNull)
-	if vec.v[0].t != TypeNull {
+	if vec.Root().Type() != vector.TypeNull {
 		t.Error("null mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarStr)
-	if vec.v[0].t != TypeStr || !bytes.Equal(bytealg.Trim(scalarStr, bQuote), vec.Get().Bytes()) {
+	if vec.Root().Type() != vector.TypeStr || !bytes.Equal(bytealg.Trim(scalarStr, bQuote), vec.Get().Bytes()) {
 		t.Error("str mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.ParseCopy(scalarStrQ)
-	if vec.v[0].t != TypeStr || !bytes.Equal(scalarStrQexp, vec.Get().Bytes()) {
+	if vec.Root().Type() != vector.TypeStr || !bytes.Equal(scalarStrQexp, vec.Get().Bytes()) {
 		t.Error("quoted str mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum0)
 	i, _ := vec.Get().Int()
-	if vec.v[0].t != TypeNum || i != 123456 {
+	if vec.Root().Type() != vector.TypeNum || i != 123456 {
 		t.Error("num 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum1)
 	f, _ := vec.Get().Float()
-	if vec.v[0].t != TypeNum || f != 123.456 {
+	if vec.Root().Type() != vector.TypeNum || f != 123.456 {
 		t.Error("num 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarNum2)
 	f, _ = vec.Get().Float()
-	if vec.v[0].t != TypeNum || f != 3.7e-5 {
+	if vec.Root().Type() != vector.TypeNum || f != 3.7e-5 {
 		t.Error("num 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarTrue)
-	if vec.v[0].t != TypeBool || vec.Get().Bool() != true {
+	if vec.Root().Type() != vector.TypeBool || vec.Get().Bool() != true {
 		t.Error("bool true mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(scalarFalse)
-	if vec.v[0].t != TypeBool || vec.Get().Bool() != false {
+	if vec.Root().Type() != vector.TypeBool || vec.Get().Bool() != false {
 		t.Error("bool false mismatch")
 	}
 }
@@ -110,17 +111,17 @@ func testArr(t testing.TB) {
 	_ = vec.Parse(arr0)
 	v := vec.Get()
 	i, _ := vec.Get("1").Int()
-	if v.Type() != TypeArr || v.Len() != 5 || i != 2 {
+	if v.Type() != vector.TypeArr || v.Limit() != 5 || i != 2 {
 		t.Error("arr 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr1)
 	v = vec.Get()
-	if v.Type() != TypeArr || v.Len() != 3 || !bytes.Equal(vec.Get("1").Bytes(), []byte("bar")) {
+	if v.Type() != vector.TypeArr || v.Limit() != 3 || !bytes.Equal(vec.Get("1").Bytes(), []byte("bar")) {
 		t.Error("arr 1 mismatch")
 	}
-	v.Each(func(idx int, node *Node) {
+	v.Each(func(idx int, node *vector.Node) {
 		switch idx {
 		case 0:
 			if v := node.String(); v != "foo" {
@@ -141,14 +142,14 @@ func testArr(t testing.TB) {
 	_ = vec.Parse(arr2)
 	v = vec.Get()
 	f, _ := vec.Get("0").Float()
-	if v.Type() != TypeArr || v.Len() != 2 || f != 3.14156 {
+	if v.Type() != vector.TypeArr || v.Limit() != 2 || f != 3.14156 {
 		t.Error("arr 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(arr3)
 	v = vec.Get()
-	if v.Type() != TypeArr || v.Len() != 3 || vec.Get("1").Type() != TypeNull {
+	if v.Type() != vector.TypeArr || v.Limit() != 3 || vec.Get("1").Type() != vector.TypeNull {
 		t.Error("arr 3 mismatch")
 	}
 }
@@ -158,31 +159,31 @@ func testObj(t testing.TB) {
 	_ = vec.Parse(obj0)
 	v := vec.Get()
 	i, _ := vec.Get("b").Int()
-	if v.Type() != TypeObj && v.Len() != 3 || i != 2 {
+	if v.Type() != vector.TypeObj && v.Limit() != 3 || i != 2 {
 		t.Error("obj 0 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(obj1)
 	v = vec.Get()
-	if v.Type() != TypeObj && v.Len() != 3 || vec.Get("c").String() != "string" {
+	if v.Type() != vector.TypeObj && v.Limit() != 3 || vec.Get("c").String() != "string" {
 		t.Error("obj 1 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.ParseCopy(obj2)
 	v = vec.Get()
-	if v.Type() != TypeObj && v.Len() != 2 || vec.Get("key0").String() != "\"quoted\"" {
+	if v.Type() != vector.TypeObj && v.Limit() != 2 || vec.Get("key0").String() != "\"quoted\"" {
 		t.Error("obj 2 mismatch")
 	}
 
 	vec.Reset()
 	_ = vec.Parse(obj3)
 	v = vec.Get()
-	if v.Type() != TypeObj && v.Len() != 2 {
+	if v.Type() != vector.TypeObj && v.Limit() != 2 {
 		t.Error("obj 3 mismatch")
 	}
-	v.Each(func(idx int, node *Node) {
+	v.Each(func(idx int, node *vector.Node) {
 		switch idx {
 		case 0:
 			if k := node.KeyString(); k != "pi" {
@@ -204,7 +205,7 @@ func testObj(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(objFmt)
 	v = vec.Get()
-	if v.Type() != TypeObj {
+	if v.Type() != vector.TypeObj {
 		t.Error("obj fmt mismatch")
 	}
 }
@@ -213,7 +214,7 @@ func testFmt(t testing.TB) {
 	vec.Reset()
 	_ = vec.Parse(objFmt1)
 	v := vec.Get()
-	if v.Type() != TypeObj {
+	if v.Type() != vector.TypeObj {
 		t.Error("obj fmt mismatch")
 	}
 }
