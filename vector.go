@@ -53,7 +53,9 @@ var (
 
 // Make new parser.
 func NewVector() *Vector {
-	return &Vector{}
+	vec := &Vector{}
+	vec.PrepareBytesFn = PrepareBytes
+	return vec
 }
 
 // Parse source bytes.
@@ -74,14 +76,6 @@ func (vec *Vector) ParseCopy(s []byte) error {
 // Copy source string and parse it.
 func (vec *Vector) ParseCopyStr(s string) error {
 	return vec.parse(fastconv.S2B(s), true)
-}
-
-func (vec *Vector) PrepareBytes(p *vector.Byteptr) []byte {
-	b := p.RawBytes()
-	if p.GetFlag(vector.FlagEscape) {
-		return unescape(b)
-	}
-	return p.Bytes()
 }
 
 // // Get length of nodes array.
@@ -137,6 +131,7 @@ func (vec *Vector) Beautify(w io.Writer) error {
 	r := vec.Root()
 	return vec.beautify(w, r, 0)
 }
+
 //
 // // Check if node exists.
 // func (vec *Vector) Exists(key string) bool {
@@ -177,3 +172,11 @@ func (vec *Vector) Beautify(w io.Writer) error {
 // func (vec *Vector) ptr() uintptr {
 // 	return uintptr(unsafe.Pointer(vec))
 // }
+
+func PrepareBytes(p *vector.Byteptr) []byte {
+	b := p.RawBytes()
+	if p.GetFlag(vector.FlagEscape) {
+		return unescape(b)
+	}
+	return b
+}
