@@ -44,6 +44,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		return err
 	}
 	// vec.v[i] = *root
+	vec.ReleaseNode(i, root)
 
 	// Check unparsed tail.
 	if offset < vec.SrcLen() {
@@ -233,6 +234,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		// vec.v[i] = *c
+		vec.ReleaseNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
 		}
@@ -286,6 +288,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		// vec.v[i] = *c
+		vec.ReleaseNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
 		}
