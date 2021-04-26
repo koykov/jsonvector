@@ -33,7 +33,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 
 	offset := 0
 	// Create root node and register it.
-	root := vec.AcquireNode(0)
+	root := vec.GetNode(0)
 	i := vec.Len() - 1
 	vec.Index.Register(0, i)
 
@@ -44,7 +44,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		return err
 	}
 	// vec.v[i] = *root
-	vec.ReleaseNode(i, root)
+	vec.PutNode(i, root)
 
 	// Check unparsed tail.
 	if offset < vec.SrcLen() {
@@ -179,7 +179,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		offset++
 		// Register new node.
-		child := vec.AcquireNode(depth)
+		child := vec.GetNode(depth)
 		i := vec.Len() - 1
 		node.SetLimit(vec.Index.Register(depth, i))
 		// Fill up key's offset and length.
@@ -234,7 +234,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		// vec.v[i] = *c
-		vec.ReleaseNode(i, child)
+		vec.PutNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
 		}
@@ -279,7 +279,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			break
 		}
 		// Register new node.
-		child := vec.AcquireNode(depth)
+		child := vec.GetNode(depth)
 		i := vec.Len() - 1
 		node.SetLimit(vec.Index.Register(depth, i))
 		// Parse the value.
@@ -288,7 +288,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		// vec.v[i] = *c
-		vec.ReleaseNode(i, child)
+		vec.PutNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
 		}
