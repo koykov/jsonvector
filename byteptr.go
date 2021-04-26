@@ -5,7 +5,22 @@ import (
 	"unsafe"
 
 	"github.com/koykov/fastconv"
+	"github.com/koykov/vector"
 )
+
+var (
+	jsonUnesc = &JsonUnescapeHelper{}
+)
+
+type JsonUnescapeHelper struct{}
+
+func (h *JsonUnescapeHelper) ConvertByteptr(p *vector.Byteptr) []byte {
+	b := p.RawBytes()
+	if p.GetFlag(vector.FlagEscape) {
+		return unescape(b)
+	}
+	return b
+}
 
 // Byte sequence.
 type byteptr struct {

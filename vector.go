@@ -54,7 +54,7 @@ var (
 // Make new parser.
 func NewVector() *Vector {
 	vec := &Vector{}
-	vec.PrepareBytesFn = PrepareBytes
+	vec.Helper = jsonUnesc
 	return vec
 }
 
@@ -172,11 +172,3 @@ func (vec *Vector) Beautify(w io.Writer) error {
 // func (vec *Vector) ptr() uintptr {
 // 	return uintptr(unsafe.Pointer(vec))
 // }
-
-func PrepareBytes(p *vector.Byteptr) []byte {
-	b := p.RawBytes()
-	if p.GetFlag(vector.FlagEscape) {
-		return unescape(b)
-	}
-	return b
-}
