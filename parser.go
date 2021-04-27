@@ -9,24 +9,7 @@ import (
 
 // Main internal parser helper.
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
-	// if len(s) == 0 {
-	// 	err = ErrEmptySrc
-	// 	return
-	// }
 	s = bytealg.Trim(s, bFmt)
-	// if copy {
-	// 	// Copy input data.
-	// 	vec.b = append(vec.b[:0], s...)
-	// 	vec.s = vec.b
-	// } else {
-	// 	// Use input data as source.
-	// 	vec.s = s
-	// }
-	//
-	// // Get source data address and raw parser pointer.
-	// h := (*reflect.SliceHeader)(unsafe.Pointer(&vec.s))
-	// vec.a = uint64(h.Data)
-	// vec.p = vec.ptr()
 	if err = vec.SetSrc(s, copy); err != nil {
 		return
 	}
@@ -43,7 +26,6 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		vec.SetErrOffset(offset)
 		return err
 	}
-	// vec.v[i] = *root
 	vec.PutNode(i, root)
 
 	// Check unparsed tail.
@@ -233,7 +215,6 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			return offset, err
 		}
 		// Save node to the vector.
-		// vec.v[i] = *c
 		vec.PutNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
@@ -287,7 +268,6 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			return offset, err
 		}
 		// Save node to the vector.
-		// vec.v[i] = *c
 		vec.PutNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, ErrUnexpEOF
