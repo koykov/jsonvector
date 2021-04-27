@@ -9,12 +9,12 @@ import (
 )
 
 var (
-	jsonUnesc = &JsonUnescapeHelper{}
+	jsonHelper = &JsonHelper{}
 )
 
-type JsonUnescapeHelper struct{}
+type JsonHelper struct{}
 
-func (h *JsonUnescapeHelper) ConvertByteptr(p *vector.Byteptr) []byte {
+func (h *JsonHelper) ConvertByteptr(p *vector.Byteptr) []byte {
 	b := p.RawBytes()
 	if p.GetFlag(vector.FlagEscape) {
 		return unescape(b)

@@ -20,7 +20,7 @@ func (p *Pool) Get() *Vector {
 	v := p.p.Get()
 	if v != nil {
 		if vec, ok := v.(*Vector); ok {
-			vec.Helper = jsonUnesc
+			vec.Helper = jsonHelper
 			return vec
 		}
 	}

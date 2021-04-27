@@ -54,7 +54,7 @@ var (
 // Make new parser.
 func NewVector() *Vector {
 	vec := &Vector{}
-	vec.Helper = jsonUnesc
+	vec.Helper = jsonHelper
 	return vec
 }
 
