@@ -7,6 +7,14 @@ import (
 	"github.com/koykov/vector"
 )
 
+var (
+	// Byte constants.
+	bNull  = []byte("null")
+	bTrue  = []byte("true")
+	bFalse = []byte("false")
+	bFmt   = []byte(" \t\n\r")
+)
+
 // Main internal parser helper.
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	s = bytealg.Trim(s, bFmt)
@@ -31,7 +39,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	// Check unparsed tail.
 	if offset < vec.SrcLen() {
 		vec.SetErrOffset(offset)
-		return ErrUnparsedTail
+		return vector.ErrUnparsedTail
 	}
 
 	return
@@ -48,7 +56,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			node.SetType(vector.TypeNull)
 			offset += 4
 		} else {
-			return offset, ErrUnexpId
+			return offset, vector.ErrUnexpId
 		}
 	case vec.SrcAt(offset) == '{':
 		// Check open object node.
@@ -66,7 +74,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Get index of end of string value.
 		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
 		if e < 0 {
-			return vec.SrcLen(), ErrUnexpEOS
+			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
 		node.Value().SetFlag(vector.FlagEscape, true)
 		if vec.SrcAt(e-1) != '\\' {
@@ -111,7 +119,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			offset = i
 		} else {
 			vec.SetErrOffset(offset)
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 	case vec.SrcAt(offset) == 't':
 		// Check bool (true) node.
@@ -120,7 +128,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			node.Value().Set(vec.SrcAddr()+uint64(offset), 4)
 			offset += 4
 		} else {
-			return offset, ErrUnexpId
+			return offset, vector.ErrUnexpId
 		}
 	case vec.SrcAt(offset) == 'f':
 		// Check bool (false) node.
@@ -129,10 +137,10 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			node.Value().Set(vec.SrcAddr()+uint64(offset), 5)
 			offset += 5
 		} else {
-			return offset, ErrUnexpId
+			return offset, vector.ErrUnexpId
 		}
 	default:
-		err = ErrUnexpId
+		err = vector.ErrUnexpId
 	}
 	return offset, err
 }
@@ -152,12 +160,12 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			break
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 		// Parse key.
 		if vec.SrcAt(offset) != '"' {
 			// Key should be a string wrapped with double quotas.
-			return offset, ErrUnexpId
+			return offset, vector.ErrUnexpId
 		}
 		offset++
 		// Register new node.
@@ -168,7 +176,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		child.Key().SetOffset(vec.SrcAddr() + uint64(offset))
 		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
 		if e < 0 {
-			return vec.SrcLen(), ErrUnexpEOS
+			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
 		child.Key().SetFlag(vector.FlagEscape, false)
 		if vec.SrcAt(e-1) != '\\' {
@@ -198,16 +206,16 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			child.Key().SetFlag(vector.FlagEscape, bytealg.HasByte(child.KeyBytes(), '\\'))
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 		// Check division symbol.
 		if vec.SrcAt(offset) == ':' {
 			offset++
 		} else {
-			return offset, ErrUnexpId
+			return offset, vector.ErrUnexpId
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 		// Parse value.
 		// Value may be an arbitrary type.
@@ -217,7 +225,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		// Save node to the vector.
 		vec.PutNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 		if vec.SrcAt(offset) == '}' {
 			// End of the object caught.
@@ -228,10 +236,10 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			// Object elements separator caught.
 			offset++
 		} else {
-			return offset, ErrUnexpId
+			return offset, vector.ErrUnexpId
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 	}
 	return offset, err
@@ -252,7 +260,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			break
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 		if vec.SrcAt(offset) == ']' {
 			// Edge case: empty array.
@@ -270,7 +278,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		// Save node to the vector.
 		vec.PutNode(i, child)
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 		if vec.SrcAt(offset) == ']' {
 			// End of the array caught.
@@ -281,10 +289,10 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			// Array elements separator caught.
 			offset++
 		} else {
-			return offset, ErrUnexpId
+			return offset, vector.ErrUnexpId
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
-			return offset, ErrUnexpEOF
+			return offset, vector.ErrUnexpEOF
 		}
 	}
 	return offset, nil

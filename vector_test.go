@@ -9,6 +9,8 @@ import (
 )
 
 var (
+	bQuote = []byte(`"`)
+
 	scalarNull    = []byte("null")
 	scalarStr     = []byte(`"foo bar string"`)
 	scalarStrQ    = []byte(`"foo \"bar\" string"`)
@@ -240,25 +242,25 @@ func TestErr(t *testing.T) {
 
 	vec.Reset()
 	err = vec.Parse(badTrash)
-	if err != ErrUnexpId && vec.ErrorOffset() != 0 {
+	if err != vector.ErrUnexpId && vec.ErrorOffset() != 0 {
 		t.Error("error assertion failed")
 	}
 
 	vec.Reset()
 	err = vec.Parse(badScalarStr)
-	if err != ErrUnexpEOS || vec.ErrorOffset() != 24 {
+	if err != vector.ErrUnexpEOS || vec.ErrorOffset() != 24 {
 		t.Error("error assertion failed")
 	}
 
 	vec.Reset()
 	err = vec.Parse(badNumDiv)
-	if err != ErrUnparsedTail && vec.ErrorOffset() != 1 {
+	if err != vector.ErrUnparsedTail && vec.ErrorOffset() != 1 {
 		t.Error("error assertion failed")
 	}
 
 	vec.Reset()
 	err = vec.Parse(badUnparsedTail)
-	if err != ErrUnparsedTail && vec.ErrorOffset() != 16 {
+	if err != vector.ErrUnparsedTail && vec.ErrorOffset() != 16 {
 		t.Error("error assertion failed")
 	}
 }

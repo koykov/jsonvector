@@ -8,6 +8,10 @@ import (
 	"github.com/koykov/fastconv"
 )
 
+var (
+	bSlash = []byte(`\`)
+)
+
 // Unescape byte array using itself as a destination.
 func unescape(p []byte) []byte {
 	l, i := len(p), 0

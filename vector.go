@@ -12,16 +12,6 @@ type Vector struct {
 	vector.Vector
 }
 
-var (
-	// Byte constants.
-	bNull  = []byte("null")
-	bTrue  = []byte("true")
-	bFalse = []byte("false")
-	bQuote = []byte(`"`)
-	bSlash = []byte(`\`)
-	bFmt   = []byte(" \t\n\r")
-)
-
 // Make new parser.
 func NewVector() *Vector {
 	vec := &Vector{}
