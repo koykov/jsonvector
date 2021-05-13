@@ -16,7 +16,7 @@ var (
 func unescape(p []byte) []byte {
 	l, i := len(p), 0
 	for {
-		i = bytealg.IndexAt(p, bSlash, i)
+		i = bytealg.IndexByteAtRL(p, '\\', i)
 		if i < 0 || i+1 == l {
 			break
 		}
