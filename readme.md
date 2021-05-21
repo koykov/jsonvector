@@ -1,7 +1,7 @@
 # JSON vector
 
-JSON parser with minimum memory consumption. This project is a part of policy
-to reducing memory consumption and amount of pointers.
+JSON parser based on [Vector API](https://github.com/koykov/vector) with minimum memory consumption.
+This project is a part of policy to reducing memory consumption and amount of pointers.
 
 As we know, JSON is a data interchange format that stores data as a tree.
 And all known json parsers reproduces that tree in a memory somehow or other. 
