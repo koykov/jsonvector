@@ -68,7 +68,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Check string node.
 		node.SetType(vector.TypeStr)
 		// Save offset of string value.
-		node.Value().SetOffset(vec.SrcAddr() + uint64(offset+1))
+		node.Value().TakeAddr(vec.Src()).SetOffset(offset + 1)
 		// Get index of end of string value.
 		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
 		if e < 0 {
@@ -113,7 +113,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 				}
 			}
 			node.SetType(vector.TypeNum)
-			node.Value().Set(vec.SrcAddr()+uint64(offset), i-offset)
+			node.Value().Init(vec.Src(), offset, i-offset)
 			offset = i
 		} else {
 			vec.SetErrOffset(offset)
@@ -123,7 +123,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Check bool (true) node.
 		if len(vec.Src()[offset:]) > 3 && bytes.Equal(bTrue, vec.Src()[offset:offset+4]) {
 			node.SetType(vector.TypeBool)
-			node.Value().Set(vec.SrcAddr()+uint64(offset), 4)
+			node.Value().Init(vec.Src(), offset, 4)
 			offset += 4
 		} else {
 			return offset, vector.ErrUnexpId
@@ -132,7 +132,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Check bool (false) node.
 		if len(vec.Src()[offset:]) > 4 && bytes.Equal(bFalse, vec.Src()[offset:offset+5]) {
 			node.SetType(vector.TypeBool)
-			node.Value().Set(vec.SrcAddr()+uint64(offset), 5)
+			node.Value().Init(vec.Src(), offset, 5)
 			offset += 5
 		} else {
 			return offset, vector.ErrUnexpId
@@ -169,7 +169,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		// Register new node.
 		child, i := vec.GetChild(node, depth)
 		// Fill up key's offset and length.
-		child.Key().SetOffset(vec.SrcAddr() + uint64(offset))
+		child.Key().TakeAddr(vec.Src()).SetOffset(offset)
 		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
 		if e < 0 {
 			return vec.SrcLen(), vector.ErrUnexpEOS
