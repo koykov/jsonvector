@@ -8,15 +8,11 @@ import (
 	"github.com/koykov/fastconv"
 )
 
-var (
-	bSlash = []byte(`\`)
-)
-
 // Unescape byte array using itself as a destination.
 func unescape(p []byte) []byte {
 	l, i := len(p), 0
 	for {
-		i = bytealg.IndexByteAtRL(p, '\\', i)
+		i = bytealg.IndexByteAtLR(p, '\\', i)
 		if i < 0 || i+1 == l {
 			break
 		}

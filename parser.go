@@ -70,7 +70,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Save offset of string value.
 		node.Value().TakeAddr(vec.Src()).SetOffset(offset + 1)
 		// Get index of end of string value.
-		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
+		e := bytealg.IndexByteAtLR(vec.Src(), '"', offset+1)
 		if e < 0 {
 			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
@@ -83,7 +83,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			// Walk over double quotas and look for unescaped.
 			_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < vec.SrcLen(); {
-				i = bytealg.IndexByteAtRL(vec.Src(), '"', i+1)
+				i = bytealg.IndexByteAtLR(vec.Src(), '"', i+1)
 				if i < 0 {
 					e = vec.SrcLen() - 1
 					break
@@ -99,7 +99,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		}
 		if !node.Value().CheckFlag(flagEscape) {
 			// Extra check of escaping sequences.
-			node.Value().SetFlag(flagEscape, bytealg.HasByte(node.Value().RawBytes(), '\\'))
+			node.Value().SetFlag(flagEscape, bytealg.HasByteLR(node.Value().RawBytes(), '\\'))
 		}
 	case isDigit(vec.SrcAt(offset)):
 		// Check number node.
@@ -170,7 +170,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		child, i := vec.GetChild(node, depth)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(vec.Src()).SetOffset(offset)
-		e := bytealg.IndexByteAtRL(vec.Src(), '"', offset+1)
+		e := bytealg.IndexByteAtLR(vec.Src(), '"', offset+1)
 		if e < 0 {
 			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
@@ -183,7 +183,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			// Key contains escaped bytes.
 			_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < len(vec.Src()); {
-				i = bytealg.IndexByteAtRL(vec.Src(), '"', i+1)
+				i = bytealg.IndexByteAtLR(vec.Src(), '"', i+1)
 				if i < 0 {
 					e = vec.SrcLen() - 1
 					break
@@ -199,7 +199,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		if !child.Key().CheckFlag(flagEscape) {
 			// Extra check of escaped sequences in the key.
-			child.Key().SetFlag(flagEscape, bytealg.HasByte(child.KeyBytes(), '\\'))
+			child.Key().SetFlag(flagEscape, bytealg.HasByteLR(child.KeyBytes(), '\\'))
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, vector.ErrUnexpEOF
