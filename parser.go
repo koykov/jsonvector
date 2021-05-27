@@ -74,7 +74,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		if e < 0 {
 			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
-		node.Value().SetFlag(flagEscape, true)
+		node.Value().SetBit(flagEscape, true)
 		if vec.SrcAt(e-1) != '\\' {
 			// Good case - string isn't escaped.
 			node.Value().SetLimit(e - offset - 1)
@@ -94,12 +94,12 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 				}
 			}
 			node.Value().SetLimit(e - offset - 1)
-			node.Value().SetFlag(flagEscape, true)
+			node.Value().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		if !node.Value().CheckFlag(flagEscape) {
+		if !node.Value().CheckBit(flagEscape) {
 			// Extra check of escaping sequences.
-			node.Value().SetFlag(flagEscape, bytealg.HasByteLR(node.Value().RawBytes(), '\\'))
+			node.Value().SetBit(flagEscape, bytealg.HasByteLR(node.Value().RawBytes(), '\\'))
 		}
 	case isDigit(vec.SrcAt(offset)):
 		// Check number node.
@@ -174,7 +174,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		if e < 0 {
 			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
-		child.Key().SetFlag(flagEscape, false)
+		child.Key().SetBit(flagEscape, false)
 		if vec.SrcAt(e-1) != '\\' {
 			// Key is an unescaped string, good case.
 			child.Key().SetLimit(e - offset)
@@ -194,12 +194,12 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 				}
 			}
 			child.Key().SetLimit(e - offset)
-			child.Key().SetFlag(flagEscape, true)
+			child.Key().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		if !child.Key().CheckFlag(flagEscape) {
+		if !child.Key().CheckBit(flagEscape) {
 			// Extra check of escaped sequences in the key.
-			child.Key().SetFlag(flagEscape, bytealg.HasByteLR(child.KeyBytes(), '\\'))
+			child.Key().SetBit(flagEscape, bytealg.HasByteLR(child.KeyBytes(), '\\'))
 		}
 		if offset, eof = vec.skipFmt(offset); eof {
 			return offset, vector.ErrUnexpEOF
