@@ -14,7 +14,7 @@ var (
 	jsonHelper = &JsonHelper{}
 )
 
-func (h *JsonHelper) ConvertByteptr(p *vector.Byteptr) []byte {
+func (h *JsonHelper) Indirect(p *vector.Byteptr) []byte {
 	b := p.RawBytes()
 	if p.CheckBit(flagEscape) {
 		p.SetBit(flagEscape, false)
