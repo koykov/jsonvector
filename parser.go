@@ -77,7 +77,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		node.Value().SetBit(flagEscape, true)
 		if vec.SrcAt(e-1) != '\\' {
 			// Good case - string isn't escaped.
-			node.Value().SetLimit(e - offset - 1)
+			node.Value().SetLen(e - offset - 1)
 			offset = e + 1
 		} else {
 			// Walk over double quotas and look for unescaped.
@@ -93,7 +93,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 					break
 				}
 			}
-			node.Value().SetLimit(e - offset - 1)
+			node.Value().SetLen(e - offset - 1)
 			node.Value().SetBit(flagEscape, true)
 			offset = e + 1
 		}
@@ -177,7 +177,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		child.Key().SetBit(flagEscape, false)
 		if vec.SrcAt(e-1) != '\\' {
 			// Key is an unescaped string, good case.
-			child.Key().SetLimit(e - offset)
+			child.Key().SetLen(e - offset)
 			offset = e + 1
 		} else {
 			// Key contains escaped bytes.
@@ -193,7 +193,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 					break
 				}
 			}
-			child.Key().SetLimit(e - offset)
+			child.Key().SetLen(e - offset)
 			child.Key().SetBit(flagEscape, true)
 			offset = e + 1
 		}
