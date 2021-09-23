@@ -47,13 +47,146 @@ var (
   }
 }`)
 
-	badTrash        = []byte(`foo bar`)
-	badScalarStr    = []byte(`"unclosed string example`)
-	badNumDiv       = []byte("3,14151")
-	badUnparsedTail = []byte(`{"a": 1, "b": 2}foo`)
-
 	vec = NewVector()
 )
+
+func TestScalar(t *testing.T) {
+	vec := NewVector()
+	t.Run("scalarNull", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNull)
+	})
+	t.Run("scalarString", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeStr)
+		assertNode(t, vec, "", "foo bar string")
+	})
+	t.Run("scalarStringQuoted", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeStr)
+		assertNode(t, vec, "", `foo "bar" string`)
+	})
+	t.Run("scalarNumber", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNum)
+		assertNode(t, vec, "", 123456)
+	})
+	t.Run("scalarFloat", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNum)
+		assertNode(t, vec, "", 123.456)
+	})
+	t.Run("scalarFloatScientific", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeNum)
+		assertNode(t, vec, "", 3.7e-5)
+	})
+	t.Run("scalarTrue", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeBool)
+		assertNode(t, vec, "", true)
+	})
+	t.Run("scalarFalse", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeBool)
+		assertNode(t, vec, "", false)
+	})
+}
+
+func TestArray(t *testing.T) {
+	vec := NewVector()
+	t.Run("arrayNumber", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeArr)
+		assertLen(t, vec, "", 5)
+		assertNode(t, vec, "0", 1)
+		assertNode(t, vec, "2", 3)
+		assertNode(t, vec, "4", 5)
+	})
+	t.Run("arrayString", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeArr)
+		assertLen(t, vec, "", 3)
+		assertNode(t, vec, "0", "foo")
+		assertNode(t, vec, "1", "bar")
+		assertNode(t, vec, "2", "string")
+	})
+	t.Run("arrayStringQuoted", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeArr)
+		assertLen(t, vec, "", 2)
+		assertNode(t, vec, "0", `quoted "str" value`)
+		assertNode(t, vec, "1", "foo")
+	})
+	t.Run("arrayFloat", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeArr)
+		assertLen(t, vec, "", 2)
+		assertNode(t, vec, "0", 3.14156)
+		assertNode(t, vec, "1", 6.23e-4)
+	})
+}
+
+func TestObject(t *testing.T) {
+	vec := NewVector()
+	t.Run("objectNumber", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeObj)
+		assertLen(t, vec, "", 3)
+		assertNode(t, vec, "a", 1)
+		assertNode(t, vec, "b", 2)
+		assertNode(t, vec, "c", 3)
+	})
+	t.Run("objectString", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeObj)
+		assertLen(t, vec, "", 3)
+		assertNode(t, vec, "a", "foo")
+		assertNode(t, vec, "b", "bar")
+		assertNode(t, vec, "c", "string")
+	})
+	t.Run("objectStringQuoted", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeObj)
+		assertLen(t, vec, "", 2)
+		assertNode(t, vec, "key0", `"quoted"`)
+		assertNode(t, vec, `key"1"`, "str")
+	})
+	t.Run("objectFloat", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeObj)
+		assertLen(t, vec, "", 2)
+		assertNode(t, vec, "pi", 3.1415)
+		assertNode(t, vec, "e", 2.718281828459045)
+	})
+	t.Run("objectFmt", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeObj)
+		assertLen(t, vec, "", 3)
+		assertNode(t, vec, "c", 15)
+		assertType(t, vec, "foo", vector.TypeNull)
+		assertNode(t, vec, "bar", `qwerty "encoded"`)
+	})
+	t.Run("objectFmt1", func(t *testing.T) {
+		vec = assertParse(t, vec, nil, 0)
+		assertType(t, vec, "", vector.TypeObj)
+		assertLen(t, vec, "", 2)
+		assertNode(t, vec, "a", true)
+		assertNode(t, vec, "b.c", "foo")
+		assertLen(t, vec, "b.d", 3)
+		assertNode(t, vec, "b.d.0", 5)
+		assertNode(t, vec, "b.d.1", 3.1415)
+		assertNode(t, vec, "b.d.2", 812.48927)
+	})
+}
+
+func TestError(t *testing.T) {
+	vec := NewVector()
+	t.Run("badToken", func(t *testing.T) { assertParse(t, vec, vector.ErrUnexpId, 0) })
+	t.Run("badUnclosedString", func(t *testing.T) { assertParse(t, vec, vector.ErrUnexpEOS, 24) })
+	t.Run("badFloatSeparator", func(t *testing.T) { assertParse(t, vec, vector.ErrUnparsedTail, 1) })
+	t.Run("badUnparsedTail", func(t *testing.T) { assertParse(t, vec, vector.ErrUnparsedTail, 16) })
+}
 
 func testScalar(t testing.TB) {
 	vec.Reset()
@@ -218,50 +351,6 @@ func testFmt(t testing.TB) {
 	v := vec.Get()
 	if v.Type() != vector.TypeObj {
 		t.Error("obj fmt mismatch")
-	}
-}
-
-func TestVector_ParseScalar(t *testing.T) {
-	testScalar(t)
-}
-
-func TestVector_ParseArr(t *testing.T) {
-	testArr(t)
-}
-
-func TestVector_ParseObj(t *testing.T) {
-	testObj(t)
-}
-
-func TestVector_ParseFmt(t *testing.T) {
-	testFmt(t)
-}
-
-func TestErr(t *testing.T) {
-	var err error
-
-	vec.Reset()
-	err = vec.Parse(badTrash)
-	if err != vector.ErrUnexpId && vec.ErrorOffset() != 0 {
-		t.Error("error assertion failed")
-	}
-
-	vec.Reset()
-	err = vec.Parse(badScalarStr)
-	if err != vector.ErrUnexpEOS || vec.ErrorOffset() != 24 {
-		t.Error("error assertion failed")
-	}
-
-	vec.Reset()
-	err = vec.Parse(badNumDiv)
-	if err != vector.ErrUnparsedTail && vec.ErrorOffset() != 1 {
-		t.Error("error assertion failed")
-	}
-
-	vec.Reset()
-	err = vec.Parse(badUnparsedTail)
-	if err != vector.ErrUnparsedTail && vec.ErrorOffset() != 16 {
-		t.Error("error assertion failed")
 	}
 }
 
