@@ -6,10 +6,6 @@ import (
 	"github.com/koykov/vector"
 )
 
-var (
-	vec = NewVector()
-)
-
 func TestScalar(t *testing.T) {
 	vec := NewVector()
 	t.Run("scalarNull", func(t *testing.T) {
