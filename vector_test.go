@@ -288,12 +288,3 @@ func BenchmarkObject(b *testing.B) {
 		})
 	})
 }
-
-func bench(b *testing.B, fn func(vec *Vector)) {
-	vec := NewVector()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		vec = assertParse(b, vec, nil, 0)
-		fn(vec)
-	}
-}

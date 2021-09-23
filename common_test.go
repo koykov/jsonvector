@@ -121,3 +121,23 @@ func assertFmt(tb testing.TB, vec *Vector, buf *bytes.Buffer) {
 		tb.Error(key, "fmt mismatch")
 	}
 }
+
+func bench(b *testing.B, fn func(vec *Vector)) {
+	vec := NewVector()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		vec = assertParse(b, vec, nil, 0)
+		fn(vec)
+	}
+}
+
+func benchFmt(b *testing.B) {
+	vec := NewVector()
+	buf := &bytes.Buffer{}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		assertFmt(b, vec, buf)
+	}
+}
