@@ -1,6 +1,8 @@
 package jsonvector
 
 import (
+	"bytes"
+	"github.com/koykov/bytealg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -11,8 +13,9 @@ import (
 )
 
 type stage struct {
-	key    string
-	origin []byte
+	key string
+
+	origin, fmt []byte
 }
 
 var (
@@ -21,10 +24,13 @@ var (
 
 func init() {
 	_ = filepath.Walk("testdata", func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) == ".json" {
+		if filepath.Ext(path) == ".json" && !strings.Contains(filepath.Base(path), ".fmt.json") {
 			st := stage{}
 			st.key = strings.Replace(filepath.Base(path), ".json", "", 1)
 			st.origin, _ = ioutil.ReadFile(path)
+			if st.fmt, _ = ioutil.ReadFile(strings.Replace(path, ".json", ".fmt.json", 1)); len(st.fmt) > 0 {
+				st.fmt = bytealg.Trim(st.fmt, btNl)
+			}
 			stages = append(stages, st)
 		}
 		return nil
@@ -95,5 +101,23 @@ func assertNode(tb testing.TB, vec *Vector, path string, val interface{}) {
 	}
 	if !eq {
 		tb.Error("value mismatch, need", val, "got", node)
+	}
+}
+
+func assertFmt(tb testing.TB, vec *Vector, buf *bytes.Buffer) {
+	key := getTBName(tb)
+	st := getStage(key)
+	if st == nil {
+		tb.Fatal("stage not found")
+	}
+	vec.Reset()
+	buf.Reset()
+	_ = vec.ParseCopy(st.origin)
+	err := vec.Beautify(buf)
+	if err != nil {
+		tb.Error(key, err)
+	}
+	if !bytes.Equal(buf.Bytes(), st.fmt) {
+		tb.Error(key, "fmt mismatch")
 	}
 }
