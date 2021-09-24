@@ -18,7 +18,7 @@ func (h *JsonHelper) Indirect(p *vector.Byteptr) []byte {
 	b := p.RawBytes()
 	if p.CheckBit(flagEscape) {
 		p.SetBit(flagEscape, false)
-		b = unescape(b)
+		b = Unescape(b)
 		p.SetLen(len(b))
 	}
 	return b

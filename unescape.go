@@ -9,7 +9,7 @@ import (
 )
 
 // Unescape byte array using itself as a destination.
-func unescape(p []byte) []byte {
+func Unescape(p []byte) []byte {
 	l, i := len(p), 0
 	for {
 		i = bytealg.IndexByteAtLR(p, '\\', i)
