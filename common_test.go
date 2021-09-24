@@ -133,11 +133,12 @@ func bench(b *testing.B, fn func(vec *Vector)) {
 }
 
 func benchFmt(b *testing.B) {
-	vec := NewVector()
 	buf := &bytes.Buffer{}
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		vec := Acquire()
 		assertFmt(b, vec, buf)
+		Release(vec)
 	}
 }
