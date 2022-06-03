@@ -8,13 +8,13 @@ const (
 	flagEscape = 0
 )
 
-type JsonHelper struct{}
+type Helper struct{}
 
 var (
-	jsonHelper = &JsonHelper{}
+	helper = Helper{}
 )
 
-func (h *JsonHelper) Indirect(p *vector.Byteptr) []byte {
+func (h Helper) Indirect(p *vector.Byteptr) []byte {
 	b := p.RawBytes()
 	if p.CheckBit(flagEscape) {
 		p.SetBit(flagEscape, false)

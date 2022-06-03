@@ -15,7 +15,7 @@ type Vector struct {
 // Make new parser.
 func NewVector() *Vector {
 	vec := &Vector{}
-	vec.Helper = jsonHelper
+	vec.Helper = helper
 	return vec
 }
 
