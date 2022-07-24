@@ -26,7 +26,7 @@ var (
 // Internal beautifier helper.
 //
 // Writes beautified JSON to w.
-func (vec *Vector) beautify(w io.Writer, node *vector.Node, depth int) (err error) {
+func beautify(w io.Writer, node *vector.Node, depth int) (err error) {
 	switch node.Type() {
 	case vector.TypeNull:
 		_, err = w.Write(btNull)
@@ -42,13 +42,13 @@ func (vec *Vector) beautify(w io.Writer, node *vector.Node, depth int) (err erro
 		} else {
 			_, err = w.Write(btArrO)
 			_, err = w.Write(btNl)
-			node.Each(func(idx int, node *vector.Node){
+			node.Each(func(idx int, node *vector.Node) {
 				if idx > 0 {
 					_, err = w.Write(btComma)
 					_, err = w.Write(btNl)
 				}
 				writePad(w, node.Depth())
-				err = vec.beautify(w, node, depth+1)
+				err = beautify(w, node, depth+1)
 			})
 			_, err = w.Write(btNl)
 			writePad(w, node.Depth())
@@ -60,7 +60,7 @@ func (vec *Vector) beautify(w io.Writer, node *vector.Node, depth int) (err erro
 		} else {
 			_, err = w.Write(btObjO)
 			_, err = w.Write(btNl)
-			node.Each(func(idx int, node *vector.Node){
+			node.Each(func(idx int, node *vector.Node) {
 				if idx > 0 {
 					_, err = w.Write(btComma)
 					_, err = w.Write(btNl)
@@ -71,7 +71,7 @@ func (vec *Vector) beautify(w io.Writer, node *vector.Node, depth int) (err erro
 				_, err = w.Write(btQuote)
 				_, err = w.Write(btDotDot)
 				_, err = w.Write(btSpace)
-				err = vec.beautify(w, node, depth+1)
+				err = beautify(w, node, depth+1)
 			})
 			_, err = w.Write(btNl)
 			writePad(w, node.Depth())

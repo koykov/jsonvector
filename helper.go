@@ -2,6 +2,7 @@ package jsonvector
 
 import (
 	"github.com/koykov/vector"
+	"io"
 )
 
 const (
@@ -22,4 +23,8 @@ func (h Helper) Indirect(p *vector.Byteptr) []byte {
 		p.SetLen(len(b))
 	}
 	return b
+}
+
+func (h Helper) Beautify(w io.Writer, node *vector.Node) error {
+	return beautify(w, node, 0)
 }

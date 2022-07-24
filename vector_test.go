@@ -1,6 +1,7 @@
 package jsonvector
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/koykov/vector"
@@ -144,6 +145,14 @@ func TestError(t *testing.T) {
 	t.Run("badUnparsedTail", func(t *testing.T) { assertParse(t, vec, vector.ErrUnparsedTail, 16) })
 }
 
+func TestMulti(t *testing.T) {
+	vec := NewVector()
+	var buf bytes.Buffer
+	t.Run("multi0", func(t *testing.T) {
+		vec = assertParseMulti(t, vec, &buf, nil, 0)
+	})
+}
+
 func BenchmarkScalar(b *testing.B) {
 	b.Run("scalarNull", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
 	b.Run("scalarString", func(b *testing.B) {
@@ -282,5 +291,12 @@ func BenchmarkObject(b *testing.B) {
 			assertNode(b, vec, "b.d.1", 3.1415)
 			assertNode(b, vec, "b.d.2", 812.48927)
 		})
+	})
+}
+
+func BenchmarkMulti(b *testing.B) {
+	var buf bytes.Buffer
+	b.Run("multi0", func(b *testing.B) {
+		benchMulti(b, &buf, func(vec *Vector) {})
 	})
 }
