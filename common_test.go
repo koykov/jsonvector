@@ -88,6 +88,11 @@ func getTBName(tb testing.TB) string {
 }
 
 func assertParse(tb testing.TB, dst *Vector, err error, errOffset int) *Vector {
+	dst, _ = assertParseStage(tb, dst, err, errOffset)
+	return dst
+}
+
+func assertParseStage(tb testing.TB, dst *Vector, err error, errOffset int) (*Vector, *stage) {
 	key := getTBName(tb)
 	st := getStage(key)
 	if st == nil {
@@ -104,7 +109,7 @@ func assertParse(tb testing.TB, dst *Vector, err error, errOffset int) *Vector {
 			tb.Fatalf(`err "%s" caught by offset %d`, err1.Error(), dst.ErrorOffset())
 		}
 	}
-	return dst
+	return dst, st
 }
 
 func assertParseMulti(tb testing.TB, dst *Vector, buf *bytes.Buffer, err error, errOffset int) *Vector {

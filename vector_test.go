@@ -153,6 +153,35 @@ func TestMulti(t *testing.T) {
 	})
 }
 
+func TestSort(t *testing.T) {
+	t.Run("object", func(t *testing.T) {
+		vec := NewVector()
+		var (
+			buf bytes.Buffer
+			st  *stage
+		)
+		vec, st = assertParseStage(t, vec, nil, 0)
+		vec.Root().SortKeys()
+		_ = vec.Root().Beautify(&buf)
+		if !bytes.Equal(buf.Bytes(), st.fmt) {
+			t.Error("sort failed")
+		}
+	})
+	t.Run("array", func(t *testing.T) {
+		vec := NewVector()
+		var (
+			buf bytes.Buffer
+			st  *stage
+		)
+		vec, st = assertParseStage(t, vec, nil, 0)
+		vec.Root().Sort()
+		_ = vec.Root().Beautify(&buf)
+		if !bytes.Equal(buf.Bytes(), st.fmt) {
+			t.Error("sort failed")
+		}
+	})
+}
+
 func BenchmarkScalar(b *testing.B) {
 	b.Run("scalarNull", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
 	b.Run("scalarString", func(b *testing.B) {
