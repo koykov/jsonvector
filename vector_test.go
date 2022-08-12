@@ -329,3 +329,40 @@ func BenchmarkMulti(b *testing.B) {
 		benchMulti(b, &buf, func(vec *Vector) {})
 	})
 }
+
+func BenchmarkSort(b *testing.B) {
+	b.Run("object", func(b *testing.B) {
+		vec := NewVector()
+		var (
+			buf bytes.Buffer
+			st  *stage
+		)
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			buf.Reset()
+			vec, st = assertParseStage(b, vec, nil, 0)
+			vec.Root().SortKeys()
+			_ = vec.Root().Beautify(&buf)
+			if !bytes.Equal(buf.Bytes(), st.fmt) {
+				b.Error("sort failed")
+			}
+		}
+	})
+	b.Run("array", func(b *testing.B) {
+		vec := NewVector()
+		var (
+			buf bytes.Buffer
+			st  *stage
+		)
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			buf.Reset()
+			vec, st = assertParseStage(b, vec, nil, 0)
+			vec.Root().Sort()
+			_ = vec.Root().Beautify(&buf)
+			if !bytes.Equal(buf.Bytes(), st.fmt) {
+				b.Error("sort failed")
+			}
+		}
+	})
+}
