@@ -164,6 +164,8 @@ func TestSort(t *testing.T) {
 		vec.Root().SortKeys()
 		_ = vec.Root().Beautify(&buf)
 		if !bytes.Equal(buf.Bytes(), st.fmt) {
+			println(buf.String())
+			println(string(st.fmt))
 			t.Error("sort failed")
 		}
 	})
@@ -177,6 +179,8 @@ func TestSort(t *testing.T) {
 		vec.Root().Sort()
 		_ = vec.Root().Beautify(&buf)
 		if !bytes.Equal(buf.Bytes(), st.fmt) {
+			println(buf.String())
+			println(string(st.fmt))
 			t.Error("sort failed")
 		}
 	})
