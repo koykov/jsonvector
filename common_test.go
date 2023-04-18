@@ -153,7 +153,7 @@ func assertLen(tb testing.TB, vec *Vector, path string, len int) {
 	}
 }
 
-func assertNode(tb testing.TB, vec *Vector, path string, val interface{}) {
+func assertNode(tb testing.TB, vec *Vector, path string, val any) {
 	node := vec.Dot(path)
 	var eq bool
 	switch val.(type) {
