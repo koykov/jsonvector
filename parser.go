@@ -17,6 +17,10 @@ var (
 
 // Main internal parser helper.
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
+	if vec.Helper == nil {
+		vec.Helper = helper
+	}
+
 	s = bytealg.Trim(s, bFmt)
 	if err = vec.SetSrc(s, copy); err != nil {
 		return
