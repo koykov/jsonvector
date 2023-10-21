@@ -23,10 +23,7 @@ var (
 	btNull   = []byte(`null`)
 )
 
-// Internal beautifier helper.
-//
-// Writes beautified JSON to w.
-func beautify(w io.Writer, node *vector.Node, depth int) (err error) {
+func serialize(w io.Writer, node *vector.Node, depth int, indent bool) (err error) {
 	switch node.Type() {
 	case vector.TypeNull:
 		_, err = w.Write(btNull)
@@ -41,17 +38,27 @@ func beautify(w io.Writer, node *vector.Node, depth int) (err error) {
 			_, err = w.Write(btArrE)
 		} else {
 			_, err = w.Write(btArrO)
-			_, err = w.Write(btNl)
+			if indent {
+				_, err = w.Write(btNl)
+			}
 			node.Each(func(idx int, node *vector.Node) {
 				if idx > 0 {
 					_, err = w.Write(btComma)
-					_, err = w.Write(btNl)
+					if indent {
+						_, err = w.Write(btNl)
+					}
 				}
-				writePad(w, node.Depth())
-				err = beautify(w, node, depth+1)
+				if indent {
+					writePad(w, node.Depth())
+				}
+				err = serialize(w, node, depth+1, indent)
 			})
-			_, err = w.Write(btNl)
-			writePad(w, node.Depth())
+			if indent {
+				_, err = w.Write(btNl)
+			}
+			if indent {
+				writePad(w, node.Depth())
+			}
 			_, err = w.Write(btArrC)
 		}
 	case vector.TypeObj:
@@ -59,22 +66,30 @@ func beautify(w io.Writer, node *vector.Node, depth int) (err error) {
 			_, err = w.Write(btObjE)
 		} else {
 			_, err = w.Write(btObjO)
-			_, err = w.Write(btNl)
+			if indent {
+				_, err = w.Write(btNl)
+			}
 			node.Each(func(idx int, node *vector.Node) {
 				if idx > 0 {
 					_, err = w.Write(btComma)
-					_, err = w.Write(btNl)
+					if indent {
+						_, err = w.Write(btNl)
+					}
 				}
-				writePad(w, node.Depth())
+				if indent {
+					writePad(w, node.Depth())
+				}
 				_, err = w.Write(btQuote)
 				_, err = w.Write(node.KeyBytes())
 				_, err = w.Write(btQuote)
 				_, err = w.Write(btDotDot)
 				_, err = w.Write(btSpace)
-				err = beautify(w, node, depth+1)
+				err = serialize(w, node, depth+1, indent)
 			})
-			_, err = w.Write(btNl)
-			writePad(w, node.Depth())
+			if indent {
+				_, err = w.Write(btNl)
+				writePad(w, node.Depth())
+			}
 			_, err = w.Write(btObjC)
 		}
 	}
