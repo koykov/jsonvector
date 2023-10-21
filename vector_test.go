@@ -162,10 +162,8 @@ func TestSort(t *testing.T) {
 		)
 		vec, st = assertParseStage(t, vec, nil, 0)
 		vec.Root().SortKeys()
-		_ = vec.Root().Beautify(&buf)
-		if !bytes.Equal(buf.Bytes(), st.fmt) {
-			println(buf.String())
-			println(string(st.fmt))
+		_ = vec.Root().Marshal(&buf)
+		if !bytes.Equal(buf.Bytes(), st.flat) {
 			t.Error("sort failed")
 		}
 	})
@@ -177,10 +175,8 @@ func TestSort(t *testing.T) {
 		)
 		vec, st = assertParseStage(t, vec, nil, 0)
 		vec.Root().Sort()
-		_ = vec.Root().Beautify(&buf)
-		if !bytes.Equal(buf.Bytes(), st.fmt) {
-			println(buf.String())
-			println(string(st.fmt))
+		_ = vec.Root().Marshal(&buf)
+		if !bytes.Equal(buf.Bytes(), st.flat) {
 			t.Error("sort failed")
 		}
 	})
@@ -346,8 +342,8 @@ func BenchmarkSort(b *testing.B) {
 			buf.Reset()
 			vec, st = assertParseStage(b, vec, nil, 0)
 			vec.Root().SortKeys()
-			_ = vec.Root().Beautify(&buf)
-			if !bytes.Equal(buf.Bytes(), st.fmt) {
+			_ = vec.Root().Marshal(&buf)
+			if !bytes.Equal(buf.Bytes(), st.flat) {
 				b.Error("sort failed")
 			}
 		}
@@ -363,8 +359,8 @@ func BenchmarkSort(b *testing.B) {
 			buf.Reset()
 			vec, st = assertParseStage(b, vec, nil, 0)
 			vec.Root().Sort()
-			_ = vec.Root().Beautify(&buf)
-			if !bytes.Equal(buf.Bytes(), st.fmt) {
+			_ = vec.Root().Marshal(&buf)
+			if !bytes.Equal(buf.Bytes(), st.flat) {
 				b.Error("sort failed")
 			}
 		}

@@ -2,8 +2,8 @@ package jsonvector
 
 import (
 	"bytes"
+	"errors"
 	"github.com/koykov/bytealg"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,7 +15,7 @@ import (
 type stage struct {
 	key string
 
-	origin, fmt []byte
+	origin, fmt, flat []byte
 }
 
 type multiStage struct {
@@ -33,9 +33,12 @@ func init() {
 		if filepath.Ext(path) == ".json" && !strings.Contains(filepath.Base(path), ".fmt.json") {
 			st := stage{}
 			st.key = strings.Replace(filepath.Base(path), ".json", "", 1)
-			st.origin, _ = ioutil.ReadFile(path)
-			if st.fmt, _ = ioutil.ReadFile(strings.Replace(path, ".json", ".fmt.json", 1)); len(st.fmt) > 0 {
+			st.origin, _ = os.ReadFile(path)
+			if st.fmt, _ = os.ReadFile(strings.Replace(path, ".json", ".fmt.json", 1)); len(st.fmt) > 0 {
 				st.fmt = bytealg.Trim(st.fmt, btNl)
+			}
+			if st.flat, _ = os.ReadFile(strings.Replace(path, ".json", ".flat.json", 1)); len(st.flat) > 0 {
+				st.flat = bytealg.Trim(st.flat, btNl)
 			}
 			stages = append(stages, st)
 			return nil
@@ -47,9 +50,12 @@ func init() {
 				if filepath.Ext(path1) == ".json" && !strings.Contains(filepath.Base(path1), ".fmt.json") {
 					st := stage{}
 					st.key = strings.Replace(filepath.Base(path1), ".json", "", 1)
-					st.origin, _ = ioutil.ReadFile(path1)
-					if st.fmt, _ = ioutil.ReadFile(strings.Replace(path1, ".json", ".fmt.json", 1)); len(st.fmt) > 0 {
+					st.origin, _ = os.ReadFile(path1)
+					if st.fmt, _ = os.ReadFile(strings.Replace(path1, ".json", ".fmt.json", 1)); len(st.fmt) > 0 {
 						st.fmt = bytealg.Trim(st.fmt, btNl)
+					}
+					if st.flat, _ = os.ReadFile(strings.Replace(path1, ".json", ".flat.json", 1)); len(st.flat) > 0 {
+						st.flat = bytealg.Trim(st.flat, btNl)
 					}
 					mstg.buf = append(mstg.buf, st)
 					return nil
@@ -102,7 +108,7 @@ func assertParseStage(tb testing.TB, dst *Vector, err error, errOffset int) (*Ve
 	err1 := dst.ParseCopy(st.origin)
 	if err1 != nil {
 		if err != nil {
-			if err != err1 || dst.ErrorOffset() != errOffset {
+			if !errors.Is(err1, err) || dst.ErrorOffset() != errOffset {
 				tb.Fatalf(`error mismatch, need "%s" at %d, got "%s" at %d`, err.Error(), errOffset, err1.Error(), dst.ErrorOffset())
 			}
 		} else {
@@ -124,7 +130,7 @@ func assertParseMulti(tb testing.TB, dst *Vector, buf *bytes.Buffer, err error, 
 		err1 := dst.ParseCopy(st.origin)
 		if err1 != nil {
 			if err != nil {
-				if err != err1 || dst.ErrorOffset() != errOffset {
+				if !errors.Is(err1, err) || dst.ErrorOffset() != errOffset {
 					tb.Fatalf(`error mismatch, need "%s" at %d, got "%s" at %d`, err.Error(), errOffset, err1.Error(), dst.ErrorOffset())
 				}
 			} else {
