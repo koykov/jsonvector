@@ -83,7 +83,9 @@ func serialize(w io.Writer, node *vector.Node, depth int, indent bool) (err erro
 				_, err = w.Write(node.KeyBytes())
 				_, err = w.Write(btQuote)
 				_, err = w.Write(btDotDot)
-				_, err = w.Write(btSpace)
+				if indent {
+					_, err = w.Write(btSpace)
+				}
 				err = serialize(w, node, depth+1, indent)
 			})
 			if indent {
