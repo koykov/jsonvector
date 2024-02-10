@@ -300,12 +300,14 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 //
 // Returns the next non-format symbol index.
 func (vec *Vector) skipFmt(offset int) (int, bool) {
+	src := vec.Src()
+	_ = src[vec.SrcLen()-1]
 loop:
 	if offset >= vec.SrcLen() {
 		return offset, true
 	}
-	c := vec.SrcAt(offset)
-	if c != bFmt[0] && c != bFmt[1] && c != bFmt[2] && c != bFmt[3] {
+	c := src[offset]
+	if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
 		return offset, false
 	}
 	offset++

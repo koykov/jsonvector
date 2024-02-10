@@ -5,15 +5,11 @@ import (
 	"io"
 )
 
-const (
-	flagEscape = 0
-)
+const flagEscape = 0
 
 type Helper struct{}
 
-var (
-	helper = Helper{}
-)
+var helper = Helper{}
 
 func (h Helper) Indirect(p *vector.Byteptr) []byte {
 	b := p.RawBytes()
