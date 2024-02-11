@@ -298,20 +298,20 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 
 // Skip formatting symbols like tabs, spaces, ...
 //
-// Returns the next non-format symbol index.
+// Returns index of next non-format symbol.
 func (vec *Vector) skipFmt(offset int) (int, bool) {
-	src := vec.Src()
-	_ = src[vec.SrcLen()-1]
-loop:
-	if offset >= vec.SrcLen() {
-		return offset, true
-	}
-	c := src[offset]
-	if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
+	src, n := vec.Src(), vec.SrcLen()
+	if src[offset] > ' ' {
 		return offset, false
 	}
-	offset++
-	goto loop
+	_ = src[n-1]
+	for ; offset < n; offset++ {
+		c := src[offset]
+		if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
+			return offset, false
+		}
+	}
+	return offset, true
 }
 
 // Check if given byte is a part of the number.
