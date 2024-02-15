@@ -12,7 +12,6 @@ var (
 	bNull  = []byte("null")
 	bTrue  = []byte("true")
 	bFalse = []byte("false")
-	bFmt   = []byte(" \t\n\r")
 )
 
 // Main internal parser helper.
@@ -21,7 +20,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		vec.Helper = helper
 	}
 
-	s = bytealg.Trim(s, bFmt)
+	s = bytealg.TrimFmt4(s)
 	if err = vec.SetSrc(s, copy); err != nil {
 		return
 	}
