@@ -73,7 +73,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Save offset of string value.
 		node.Value().TakeAddr(vec.Src()).SetOffset(offset + 1)
 		// Get index of end of string value.
-		e := bytealg.IndexByteAt(vec.Src(), '"', offset+1)
+		e := bytealg.IndexByteAtBytes(vec.Src(), '"', offset+1)
 		if e < 0 {
 			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
@@ -86,7 +86,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			// Walk over double quotas and look for unescaped.
 			_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < vec.SrcLen(); {
-				i = bytealg.IndexByteAt(vec.Src(), '"', i+1)
+				i = bytealg.IndexByteAtBytes(vec.Src(), '"', i+1)
 				if i < 0 {
 					e = vec.SrcLen() - 1
 					break
@@ -173,7 +173,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		child, i := vec.GetChild(node, depth)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(vec.Src()).SetOffset(offset)
-		e := bytealg.IndexByteAt(vec.Src(), '"', offset+1)
+		e := bytealg.IndexByteAtBytes(vec.Src(), '"', offset+1)
 		if e < 0 {
 			return vec.SrcLen(), vector.ErrUnexpEOS
 		}
@@ -186,7 +186,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			// Key contains escaped bytes.
 			_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < len(vec.Src()); {
-				i = bytealg.IndexByteAt(vec.Src(), '"', i+1)
+				i = bytealg.IndexByteAtBytes(vec.Src(), '"', i+1)
 				if i < 0 {
 					e = vec.SrcLen() - 1
 					break
@@ -299,7 +299,8 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 //
 // Returns index of next non-format symbol.
 func (vec *Vector) skipFmt(offset int) (int, bool) {
-	src, n := vec.Src(), vec.SrcLen()
+	src := vec.Src()
+	n := len(src)
 	if src[offset] > ' ' {
 		return offset, false
 	}
