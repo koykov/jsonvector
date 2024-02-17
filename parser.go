@@ -20,7 +20,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		vec.Helper = helper
 	}
 
-	s = bytealg.TrimFmt4(s)
+	s = bytealg.TrimBytesFmt4(s)
 	if err = vec.SetSrc(s, copy); err != nil {
 		return
 	}
@@ -80,7 +80,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
-		node.Value().SetBit(flagEscape, true)
+		node.Value().SetBit(flagEscape, false)
 		if src[e-1] != '\\' {
 			// Good case - string isn't escaped.
 			node.Value().SetLen(e - offset - 1)
@@ -208,7 +208,8 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		if !child.Key().CheckBit(flagEscape) {
 			// Extra check of escaped sequences in the key.
-			child.Key().SetBit(flagEscape, bytealg.HasByteBytes(child.KeyBytes(), '\\'))
+			ko, kl := child.Key().Offset(), child.Key().Len()
+			child.Key().SetBit(flagEscape, bytealg.HasByteBytes(src[ko:ko+kl], '\\'))
 		}
 		if offset, eof = vec.skipFmt(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
