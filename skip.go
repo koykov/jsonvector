@@ -3,6 +3,7 @@ package jsonvector
 // Skip formatting symbols like tabs, spaces, ...
 //
 // Returns index of next non-format symbol.
+// DEPRECATED: use skipFmtTable instead.
 func skipFmt(src []byte, n, offset int) (int, bool) {
 	if src[offset] > ' ' {
 		return offset, false
