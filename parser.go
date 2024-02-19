@@ -167,7 +167,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			offset++
 			break
 		}
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse key.
@@ -212,7 +212,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			ko, kl := child.Key().Offset(), child.Key().Len()
 			child.Key().SetBit(flagEscape, bytealg.HasByteBytes(src[ko:ko+kl], '\\'))
 		}
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Check division symbol.
@@ -221,7 +221,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse value.
@@ -231,7 +231,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		vec.PutNode(i, child)
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == '}' {
@@ -245,7 +245,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
@@ -269,7 +269,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			offset++
 			break
 		}
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == ']' {
@@ -285,7 +285,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		vec.PutNode(i, child)
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == ']' {
@@ -299,28 +299,11 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = vec.skipFmt(src, n, offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
 	return offset, nil
-}
-
-// Skip formatting symbols like tabs, spaces, ...
-//
-// Returns index of next non-format symbol.
-func (vec *Vector) skipFmt(src []byte, n, offset int) (int, bool) {
-	if src[offset] > ' ' {
-		return offset, false
-	}
-	_ = src[n-1]
-	for ; offset < n; offset++ {
-		c := src[offset]
-		if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
-			return offset, false
-		}
-	}
-	return offset, true
 }
 
 // Check if given byte is a part of the number.
