@@ -104,13 +104,14 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			node.Value().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		if !node.Value().CheckBit(flagEscape) {
-			// Extra check of escaping sequences.
-			node.Value().SetBit(flagEscape, bytealg.HasByteBytes(node.Value().RawBytes(), '\\'))
-		}
+		// todo check test/bench for bugs
+		//if !node.Value().CheckBit(flagEscape) {
+		//	// Extra check of escaping sequences.
+		//	node.Value().SetBit(flagEscape, bytealg.HasByteBytes(node.Value().RawBytes(), '\\'))
+		//}
 	case isDigit(src[offset]):
 		// Check number node.
-		if len(src[offset:]) > 0 {
+		if offset < n {
 			// Get the edges of number.
 			i := offset
 			for isDigitDot(src[i]) {
@@ -304,14 +305,4 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		}
 	}
 	return offset, nil
-}
-
-// Check if given byte is a part of the number.
-func isDigit(c byte) bool {
-	return (c >= '0' && c <= '9') || c == '-' || c == '+' || c == 'e' || c == 'E'
-}
-
-// Check if given is a part of the number, including dot.
-func isDigitDot(c byte) bool {
-	return isDigit(c) || c == '.'
 }

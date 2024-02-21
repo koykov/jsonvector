@@ -20,9 +20,6 @@ func skipFmt(src []byte, n, offset int) (int, bool) {
 
 // Table based approach of skipFmt.
 func skipFmtTable(src []byte, n, offset int) (int, bool) {
-	if src[offset] > ' ' {
-		return offset, false
-	}
 	_ = src[n-1]
 	_ = trimTable[255]
 	for ; trimTable[src[offset]]; offset++ {
