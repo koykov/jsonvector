@@ -208,11 +208,12 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			child.Key().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		if !child.Key().CheckBit(flagEscape) {
-			// Extra check of escaped sequences in the key.
-			ko, kl := child.Key().Offset(), child.Key().Len()
-			child.Key().SetBit(flagEscape, bytealg.HasByteBytes(src[ko:ko+kl], '\\'))
-		}
+		// todo check test/bench for bugs
+		//if !child.Key().CheckBit(flagEscape) {
+		//	// Extra check of escaped sequences in the key.
+		//	ko, kl := child.Key().Offset(), child.Key().Len()
+		//	child.Key().SetBit(flagEscape, bytealg.HasByteBytes(src[ko:ko+kl], '\\'))
+		//}
 		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
