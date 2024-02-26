@@ -1,7 +1,6 @@
 package jsonvector
 
 import (
-	"encoding/binary"
 	"unsafe"
 )
 
@@ -26,46 +25,42 @@ func skipFmt(src []byte, n, offset int) (int, bool) {
 // Table based approach of skipFmt.
 func skipFmtTable(src []byte, n, offset int) (int, bool) {
 	_ = src[n-1]
-	_ = trimTable[255]
+	_ = skipTable[255]
 	if n-offset > 512 {
-		offset, _ = skipFmtTable1(src, n, offset)
+		offset, _ = skipFmtBin8(src, n, offset)
 	}
-	for ; trimTable[src[offset]]; offset++ {
+	for ; skipTable[src[offset]]; offset++ {
 	}
 	return offset, offset == n
 }
 
-func skipFmtTable1(src []byte, n, offset int) (int, bool) {
+// Binary based approach of skipFmt.
+func skipFmtBin8(src []byte, n, offset int) (int, bool) {
 	_ = src[n-1]
-	_ = trimTable[255]
+	_ = skipTable[255]
 	if *(*uint64)(unsafe.Pointer(&src[offset])) == binNlSpace7 {
 		offset += 8
 		for offset < n && *(*uint64)(unsafe.Pointer(&src[offset])) == binSpace8 {
 			offset += 8
 		}
 	}
-	if *(*uint32)(unsafe.Pointer(&src[offset])) == binNlSpace3 {
-		offset += 4
-		for offset < n && *(*uint32)(unsafe.Pointer(&src[offset])) == binSpace4 {
-			offset += 4
-		}
-	}
 	return offset, false
 }
 
 var (
-	trimTable   = [256]bool{}
-	binNlSpace3 = binary.LittleEndian.Uint32([]byte("\n   "))
-	binSpace4   = binary.LittleEndian.Uint32([]byte("    "))
-	binNlSpace7 = binary.LittleEndian.Uint64([]byte("\n       "))
-	binSpace8   = binary.LittleEndian.Uint64([]byte("        "))
+	skipTable   = [256]bool{}
+	binNlSpace7 uint64
+	binSpace8   uint64
 )
 
 func init() {
-	trimTable[' '] = true
-	trimTable['\t'] = true
-	trimTable['\n'] = true
-	trimTable['\t'] = true
+	skipTable[' '] = true
+	skipTable['\t'] = true
+	skipTable['\n'] = true
+	skipTable['\t'] = true
+
+	binNlSpace7Bytes, binSpace8Bytes := []byte("\n       "), []byte("        ")
+	binNlSpace7, binSpace8 = *(*uint64)(unsafe.Pointer(&binNlSpace7Bytes[0])), *(*uint64)(unsafe.Pointer(&binSpace8Bytes[0]))
 }
 
 var _ = skipFmt
