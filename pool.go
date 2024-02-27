@@ -1,6 +1,9 @@
 package jsonvector
 
-import "sync"
+import (
+	"github.com/koykov/vector"
+	"sync"
+)
 
 // Pool represents JSON vectors pool.
 type Pool struct {
@@ -12,7 +15,7 @@ var (
 	// Just call urlvector.Acquire() and urlvector.Release().
 	P Pool
 	// Suppress go vet warnings.
-	_, _ = Acquire, Release
+	_, _, _ = Acquire, AcquireNoClear, Release
 )
 
 // Get old vector from the pool or create new one.
@@ -36,6 +39,13 @@ func (p *Pool) Put(vec *Vector) {
 // Acquire returns vector from default pool instance.
 func Acquire() *Vector {
 	return P.Get()
+}
+
+// AcquireNoClear returns vector and skip clear step.
+func AcquireNoClear() *Vector {
+	vec := P.Get()
+	vec.SetBit(vector.FlagNoClear, true)
+	return vec
 }
 
 // Release puts vector back to default pool instance.
