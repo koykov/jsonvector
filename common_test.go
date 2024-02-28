@@ -3,12 +3,12 @@ package jsonvector
 import (
 	"bytes"
 	"errors"
-	"github.com/koykov/bytealg"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
 )
 

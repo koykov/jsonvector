@@ -88,7 +88,6 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			offset = e + 1
 		} else {
 			// Walk over double quotas and look for unescaped.
-			//_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < n; {
 				i = bytealg.IndexByteAtBytes(src, '"', i+1)
 				if i < 0 {
@@ -104,11 +103,6 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			node.Value().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		// todo check test/bench for bugs
-		//if !node.Value().CheckBit(flagEscape) {
-		//	// Extra check of escaping sequences.
-		//	node.Value().SetBit(flagEscape, bytealg.HasByteBytes(node.Value().RawBytes(), '\\'))
-		//}
 	case isDigit(src[offset]):
 		// Check number node.
 		if offset < n {
@@ -192,7 +186,6 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			offset = e + 1
 		} else {
 			// Key contains escaped bytes.
-			//_ = vec.Src()[vec.SrcLen()-1]
 			for i := e; i < n; {
 				i = bytealg.IndexByteAtBytes(src, '"', i+1)
 				if i < 0 {
@@ -208,12 +201,6 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			child.Key().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		// todo check test/bench for bugs
-		//if !child.Key().CheckBit(flagEscape) {
-		//	// Extra check of escaped sequences in the key.
-		//	ko, kl := child.Key().Offset(), child.Key().Len()
-		//	child.Key().SetBit(flagEscape, bytealg.HasByteBytes(src[ko:ko+kl], '\\'))
-		//}
 		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
