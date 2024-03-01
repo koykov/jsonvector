@@ -5,7 +5,7 @@ import (
 	"unicode/utf16"
 
 	"github.com/koykov/bytealg"
-	"github.com/koykov/fastconv"
+	"github.com/koykov/byteconv"
 )
 
 // Unescape byte array using itself as a destination.
@@ -51,7 +51,7 @@ func Unescape(p []byte) []byte {
 				continue
 			}
 			x := p[i+2 : i+6]
-			u, err := strconv.ParseUint(fastconv.B2S(x), 16, 16)
+			u, err := strconv.ParseUint(byteconv.B2S(x), 16, 16)
 			if err != nil {
 				i++
 				continue
@@ -76,7 +76,7 @@ func Unescape(p []byte) []byte {
 					continue
 				} else {
 					x = p[i+8 : i+12]
-					u1, err := strconv.ParseUint(fastconv.B2S(x), 16, 16)
+					u1, err := strconv.ParseUint(byteconv.B2S(x), 16, 16)
 					if err != nil {
 						i++
 						continue
