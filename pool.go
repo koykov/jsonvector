@@ -1,8 +1,9 @@
 package jsonvector
 
 import (
-	"github.com/koykov/vector"
 	"sync"
+
+	"github.com/koykov/vector"
 )
 
 // Pool represents JSON vectors pool.
@@ -15,7 +16,7 @@ var (
 	// Just call urlvector.Acquire() and urlvector.Release().
 	P Pool
 	// Suppress go vet warnings.
-	_, _, _ = Acquire, AcquireNoClear, Release
+	_, _, _ = Acquire, Release, ReleaseNC
 )
 
 // Get old vector from the pool or create new one.
@@ -41,14 +42,13 @@ func Acquire() *Vector {
 	return P.Get()
 }
 
-// AcquireNoClear returns vector and skip clear step.
-func AcquireNoClear() *Vector {
-	vec := P.Get()
-	vec.SetBit(vector.FlagNoClear, true)
-	return vec
-}
-
 // Release puts vector back to default pool instance.
 func Release(vec *Vector) {
+	P.Put(vec)
+}
+
+// ReleaseNC puts vector back to pool with enforced no-clear flag.
+func ReleaseNC(vec *Vector) {
+	vec.SetBit(vector.FlagNoClear, true)
 	P.Put(vec)
 }
