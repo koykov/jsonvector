@@ -172,7 +172,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		offset++
 		// Register new node.
-		child, i := vec.GetChild(node, depth)
+		child, i := vec.GetChildWT(node, depth, vector.TypeUnk)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(src).SetOffset(offset)
 		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
@@ -267,7 +267,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			break
 		}
 		// Register new node.
-		child, i := vec.GetChild(node, depth)
+		child, i := vec.GetChildWT(node, depth, vector.TypeUnk)
 		// Parse the value.
 		if offset, err = vec.parseGeneric(depth, offset, child); err != nil {
 			return offset, err
