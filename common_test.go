@@ -3,12 +3,12 @@ package jsonvector
 import (
 	"bytes"
 	"errors"
-	"github.com/koykov/bytealg"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
 )
 
@@ -140,8 +140,8 @@ func assertParseMulti(tb testing.TB, dst *Vector, buf *bytes.Buffer, err error, 
 		root := dst.RootTop()
 		buf.Reset()
 		_ = root.Beautify(buf)
-		if fmt1 := buf.Bytes(); !bytes.Equal(buf.Bytes(), st.fmt) {
-			tb.Fatalf("node mismatch, need '%s'\ngot '%s'", string(fmt1), string(st.fmt))
+		if fmt1 := buf.Bytes(); !bytes.Equal(fmt1, st.fmt) {
+			tb.Fatalf("node mismatch, need '%s'\ngot '%s'", string(st.fmt), string(fmt1))
 		}
 	}
 	return dst

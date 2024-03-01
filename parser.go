@@ -12,7 +12,6 @@ var (
 	bNull  = []byte("null")
 	bTrue  = []byte("true")
 	bFalse = []byte("false")
-	bFmt   = []byte(" \t\n\r")
 )
 
 // Main internal parser helper.
@@ -21,7 +20,7 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		vec.Helper = helper
 	}
 
-	s = bytealg.Trim(s, bFmt)
+	s = bytealg.TrimBytesFmt4(s)
 	if err = vec.SetSrc(s, copy); err != nil {
 		return
 	}
@@ -51,49 +50,52 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, error) {
 	var err error
 	node.SetOffset(vec.Index.Len(depth))
+	src := vec.Src()
+	srcp := vec.SrcAddr()
+	n := len(src)
+	_ = src[n-1]
 	switch {
-	case vec.SrcAt(offset) == 'n':
+	case src[offset] == 'n':
 		// Check null node.
-		if len(vec.Src()[offset:]) > 3 && bytes.Equal(bNull, vec.Src()[offset:offset+4]) {
+		if len(src[offset:]) > 3 && bytes.Equal(bNull, src[offset:offset+4]) {
 			node.SetType(vector.TypeNull)
 			offset += 4
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-	case vec.SrcAt(offset) == '{':
+	case src[offset] == '{':
 		// Check open object node.
 		node.SetType(vector.TypeObj)
 		offset, err = vec.parseObj(depth+1, offset, node)
-	case vec.SrcAt(offset) == '[':
+	case src[offset] == '[':
 		// Check open array node.
 		node.SetType(vector.TypeArr)
 		offset, err = vec.parseArr(depth+1, offset, node)
-	case vec.SrcAt(offset) == '"':
+	case src[offset] == '"':
 		// Check string node.
 		node.SetType(vector.TypeStr)
 		// Save offset of string value.
-		node.Value().TakeAddr(vec.Src()).SetOffset(offset + 1)
+		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
 		// Get index of end of string value.
-		e := bytealg.IndexByteAtLUR(vec.Src(), '"', offset+1)
+		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
 		if e < 0 {
-			return vec.SrcLen(), vector.ErrUnexpEOS
+			return n, vector.ErrUnexpEOS
 		}
-		node.Value().SetBit(flagEscape, true)
-		if vec.SrcAt(e-1) != '\\' {
+		node.Value().SetBit(flagEscape, false)
+		if src[e-1] != '\\' {
 			// Good case - string isn't escaped.
 			node.Value().SetLen(e - offset - 1)
 			offset = e + 1
 		} else {
 			// Walk over double quotas and look for unescaped.
-			_ = vec.Src()[vec.SrcLen()-1]
-			for i := e; i < vec.SrcLen(); {
-				i = bytealg.IndexByteAtLUR(vec.Src(), '"', i+1)
+			for i := e; i < n; {
+				i = bytealg.IndexByteAtBytes(src, '"', i+1)
 				if i < 0 {
-					e = vec.SrcLen() - 1
+					e = n - 1
 					break
 				}
 				e = i
-				if vec.SrcAt(e-1) != '\\' {
+				if src[e-1] != '\\' {
 					break
 				}
 			}
@@ -101,42 +103,38 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			node.Value().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		if !node.Value().CheckBit(flagEscape) {
-			// Extra check of escaping sequences.
-			node.Value().SetBit(flagEscape, bytealg.HasByteLUR(node.Value().RawBytes(), '\\'))
-		}
-	case isDigit(vec.SrcAt(offset)):
+	case isDigit(src[offset]):
 		// Check number node.
-		if len(vec.Src()[offset:]) > 0 {
+		if offset < n {
 			// Get the edges of number.
 			i := offset
-			for isDigitDot(vec.SrcAt(i)) {
+			for isDigitDot(src[i]) {
 				i++
-				if i == vec.SrcLen() {
+				if i == n {
 					break
 				}
 			}
 			node.SetType(vector.TypeNum)
-			node.Value().Init(vec.Src(), offset, i-offset)
+			node.Value().InitRaw(srcp, offset, i-offset)
 			offset = i
 		} else {
 			vec.SetErrOffset(offset)
 			return offset, vector.ErrUnexpEOF
 		}
-	case vec.SrcAt(offset) == 't':
+	case src[offset] == 't':
 		// Check bool (true) node.
-		if len(vec.Src()[offset:]) > 3 && bytes.Equal(bTrue, vec.Src()[offset:offset+4]) {
+		if len(src[offset:]) > 3 && bytes.Equal(bTrue, src[offset:offset+4]) {
 			node.SetType(vector.TypeBool)
-			node.Value().Init(vec.Src(), offset, 4)
+			node.Value().InitRaw(srcp, offset, 4)
 			offset += 4
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-	case vec.SrcAt(offset) == 'f':
+	case src[offset] == 'f':
 		// Check bool (false) node.
-		if len(vec.Src()[offset:]) > 4 && bytes.Equal(bFalse, vec.Src()[offset:offset+5]) {
+		if len(src[offset:]) > 4 && bytes.Equal(bFalse, src[offset:offset+5]) {
 			node.SetType(vector.TypeBool)
-			node.Value().Init(vec.Src(), offset, 5)
+			node.Value().InitRaw(srcp, offset, 5)
 			offset += 5
 		} else {
 			return offset, vector.ErrUnexpId
@@ -155,45 +153,47 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		err error
 		eof bool
 	)
-	for offset < vec.SrcLen() {
-		if vec.SrcAt(offset) == '}' {
+	src := vec.Src()
+	n := len(src)
+	_ = src[n-1]
+	for offset < n {
+		if src[offset] == '}' {
 			// Edge case: empty object.
 			offset++
 			break
 		}
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse key.
-		if vec.SrcAt(offset) != '"' {
+		if src[offset] != '"' {
 			// Key should be a string wrapped with double quotas.
 			return offset, vector.ErrUnexpId
 		}
 		offset++
 		// Register new node.
-		child, i := vec.GetChild(node, depth)
+		child, i := vec.GetChildWT(node, depth, vector.TypeUnk)
 		// Fill up key's offset and length.
-		child.Key().TakeAddr(vec.Src()).SetOffset(offset)
-		e := bytealg.IndexByteAtLUR(vec.Src(), '"', offset+1)
+		child.Key().TakeAddr(src).SetOffset(offset)
+		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
 		if e < 0 {
-			return vec.SrcLen(), vector.ErrUnexpEOS
+			return n, vector.ErrUnexpEOS
 		}
 		child.Key().SetBit(flagEscape, false)
-		if vec.SrcAt(e-1) != '\\' {
+		if src[e-1] != '\\' {
 			// Key is an unescaped string, good case.
 			child.Key().SetLen(e - offset)
 			offset = e + 1
 		} else {
 			// Key contains escaped bytes.
-			_ = vec.Src()[vec.SrcLen()-1]
-			for i := e; i < len(vec.Src()); {
-				i = bytealg.IndexByteAtLUR(vec.Src(), '"', i+1)
+			for i := e; i < n; {
+				i = bytealg.IndexByteAtBytes(src, '"', i+1)
 				if i < 0 {
-					e = vec.SrcLen() - 1
+					e = n - 1
 					break
 				}
 				e = i
-				if vec.SrcAt(e-1) != '\\' {
+				if src[e-1] != '\\' {
 					break
 				}
 			}
@@ -201,20 +201,16 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			child.Key().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		if !child.Key().CheckBit(flagEscape) {
-			// Extra check of escaped sequences in the key.
-			child.Key().SetBit(flagEscape, bytealg.HasByteLUR(child.KeyBytes(), '\\'))
-		}
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Check division symbol.
-		if vec.SrcAt(offset) == ':' {
+		if src[offset] == ':' {
 			offset++
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse value.
@@ -224,21 +220,21 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		vec.PutNode(i, child)
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
-		if vec.SrcAt(offset) == '}' {
+		if src[offset] == '}' {
 			// End of the object caught.
 			offset++
 			break
 		}
-		if vec.SrcAt(offset) == ',' {
+		if src[offset] == ',' {
 			// Object elements separator caught.
 			offset++
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
@@ -253,71 +249,48 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		err error
 		eof bool
 	)
-	for offset < vec.SrcLen() {
-		if vec.SrcAt(offset) == ']' {
+	src := vec.Src()
+	n := len(src)
+	_ = src[n-1]
+	for offset < n {
+		if src[offset] == ']' {
 			// Edge case: empty array.
 			offset++
 			break
 		}
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
-		if vec.SrcAt(offset) == ']' {
+		if src[offset] == ']' {
 			// Edge case: empty array.
 			offset++
 			break
 		}
 		// Register new node.
-		child, i := vec.GetChild(node, depth)
+		child, i := vec.GetChildWT(node, depth, vector.TypeUnk)
 		// Parse the value.
 		if offset, err = vec.parseGeneric(depth, offset, child); err != nil {
 			return offset, err
 		}
 		// Save node to the vector.
 		vec.PutNode(i, child)
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
-		if vec.SrcAt(offset) == ']' {
+		if src[offset] == ']' {
 			// End of the array caught.
 			offset++
 			break
 		}
-		if vec.SrcAt(offset) == ',' {
+		if src[offset] == ',' {
 			// Array elements separator caught.
 			offset++
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = vec.skipFmt(offset); eof {
+		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
 	return offset, nil
-}
-
-// Skip formatting symbols like tabs, spaces, ...
-//
-// Returns the next non-format symbol index.
-func (vec *Vector) skipFmt(offset int) (int, bool) {
-loop:
-	if offset >= vec.SrcLen() {
-		return offset, true
-	}
-	c := vec.SrcAt(offset)
-	if c != bFmt[0] && c != bFmt[1] && c != bFmt[2] && c != bFmt[3] {
-		return offset, false
-	}
-	offset++
-	goto loop
-}
-
-// Check if given byte is a part of the number.
-func isDigit(c byte) bool {
-	return (c >= '0' && c <= '9') || c == '-' || c == '+' || c == 'e' || c == 'E'
-}
-
-// Check if given is a part of the number, including dot.
-func isDigitDot(c byte) bool {
-	return isDigit(c) || c == '.'
 }

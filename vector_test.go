@@ -155,7 +155,8 @@ func TestMulti(t *testing.T) {
 
 func TestSort(t *testing.T) {
 	t.Run("object", func(t *testing.T) {
-		vec := NewVector()
+		vec := Acquire()
+		defer Release(vec)
 		var (
 			buf bytes.Buffer
 			st  *stage
@@ -168,7 +169,8 @@ func TestSort(t *testing.T) {
 		}
 	})
 	t.Run("array", func(t *testing.T) {
-		vec := NewVector()
+		vec := Acquire()
+		defer Release(vec)
 		var (
 			buf bytes.Buffer
 			st  *stage
