@@ -99,8 +99,8 @@ func serialize(w io.Writer, node *vector.Node, depth int, indent bool) (err erro
 }
 
 // Write number of tabs to w.
-func writePad(w io.Writer, cnt int) {
-	for i := 0; i < cnt; i++ {
+func writePad(w io.Writer, cnt uint32) {
+	for i := uint32(0); i < cnt; i++ {
 		_, _ = w.Write(btTab)
 	}
 }

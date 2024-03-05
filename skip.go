@@ -23,7 +23,7 @@ func skipFmt(src []byte, n, offset int) (int, bool) {
 }
 
 // Table based approach of skipFmt.
-func skipFmtTable(src []byte, n, offset int) (int, bool) {
+func skipFmtTable(src []byte, n, offset uint32) (uint32, bool) {
 	_ = src[n-1]
 	_ = skipTable[255]
 	if n-offset > 512 {
@@ -35,7 +35,7 @@ func skipFmtTable(src []byte, n, offset int) (int, bool) {
 }
 
 // Binary based approach of skipFmt.
-func skipFmtBin8(src []byte, n, offset int) (int, bool) {
+func skipFmtBin8(src []byte, n, offset uint32) (uint32, bool) {
 	_ = src[n-1]
 	_ = skipTable[255]
 	if *(*uint64)(unsafe.Pointer(&src[offset])) == binNlSpace7 {

@@ -25,21 +25,21 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		return
 	}
 
-	offset := 0
+	var offset uint32
 	// Create root node and register it.
 	root, i := vec.GetNode(0)
 
 	// Parse source data.
 	offset, err = vec.parseGeneric(0, offset, root)
 	if err != nil {
-		vec.SetErrOffset(offset)
+		vec.SetErrOffset(int(offset))
 		return err
 	}
 	vec.PutNode(i, root)
 
 	// Check unparsed tail.
-	if offset < vec.SrcLen() {
-		vec.SetErrOffset(offset)
+	if int(offset) < vec.SrcLen() {
+		vec.SetErrOffset(int(offset))
 		return vector.ErrUnparsedTail
 	}
 
@@ -47,12 +47,12 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 }
 
 // Generic parser helper.
-func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, error) {
+func (vec *Vector) parseGeneric(depth, offset uint32, node *vector.Node) (uint32, error) {
 	var err error
 	node.SetOffset(vec.Index.Len(depth))
 	src := vec.Src()
 	srcp := vec.SrcAddr()
-	n := len(src)
+	n := uint32(len(src))
 	_ = src[n-1]
 	switch {
 	case src[offset] == 'n':
@@ -77,21 +77,21 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Save offset of string value.
 		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
 		// Get index of end of string value.
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
+		e := bytealg.IndexByteAtBytes(src, '"', int(offset+1))
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
 		node.Value().SetBit(flagEscape, false)
 		if src[e-1] != '\\' {
 			// Good case - string isn't escaped.
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
+			node.Value().SetLen(uint32(e) - offset - 1)
+			offset = uint32(e) + 1
 		} else {
 			// Walk over double quotas and look for unescaped.
-			for i := e; i < n; {
+			for i := e; i < int(n); {
 				i = bytealg.IndexByteAtBytes(src, '"', i+1)
 				if i < 0 {
-					e = n - 1
+					e = int(n - 1)
 					break
 				}
 				e = i
@@ -99,9 +99,9 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 					break
 				}
 			}
-			node.Value().SetLen(e - offset - 1)
+			node.Value().SetLen(uint32(e) - offset - 1)
 			node.Value().SetBit(flagEscape, true)
-			offset = e + 1
+			offset = uint32(e) + 1
 		}
 	case isDigit(src[offset]):
 		// Check number node.
@@ -118,7 +118,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 			node.Value().InitRaw(srcp, offset, i-offset)
 			offset = i
 		} else {
-			vec.SetErrOffset(offset)
+			vec.SetErrOffset(int(offset))
 			return offset, vector.ErrUnexpEOF
 		}
 	case src[offset] == 't':
@@ -146,7 +146,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 }
 
 // Object parsing helper.
-func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
+func (vec *Vector) parseObj(depth, offset uint32, node *vector.Node) (uint32, error) {
 	node.SetOffset(vec.Index.Len(depth))
 	offset++
 	var (
@@ -154,7 +154,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		eof bool
 	)
 	src := vec.Src()
-	n := len(src)
+	n := uint32(len(src))
 	_ = src[n-1]
 	for offset < n {
 		if src[offset] == '}' {
@@ -175,21 +175,21 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		child, i := vec.GetChildWT(node, depth, vector.TypeUnk)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(src).SetOffset(offset)
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
+		e := bytealg.IndexByteAtBytes(src, '"', int(offset+1))
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
 		child.Key().SetBit(flagEscape, false)
 		if src[e-1] != '\\' {
 			// Key is an unescaped string, good case.
-			child.Key().SetLen(e - offset)
-			offset = e + 1
+			child.Key().SetLen(uint32(e) - offset)
+			offset = uint32(e) + 1
 		} else {
 			// Key contains escaped bytes.
-			for i := e; i < n; {
+			for i := e; i < int(n); {
 				i = bytealg.IndexByteAtBytes(src, '"', i+1)
 				if i < 0 {
-					e = n - 1
+					e = int(n - 1)
 					break
 				}
 				e = i
@@ -197,9 +197,9 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 					break
 				}
 			}
-			child.Key().SetLen(e - offset)
+			child.Key().SetLen(uint32(e) - offset)
 			child.Key().SetBit(flagEscape, true)
-			offset = e + 1
+			offset = uint32(e) + 1
 		}
 		if offset, eof = skipFmtTable(src, n, offset); eof {
 			return offset, vector.ErrUnexpEOF
@@ -242,7 +242,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 }
 
 // Array parsing helper.
-func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
+func (vec *Vector) parseArr(depth, offset uint32, node *vector.Node) (uint32, error) {
 	node.SetOffset(vec.Index.Len(depth))
 	offset++
 	var (
@@ -250,7 +250,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		eof bool
 	)
 	src := vec.Src()
-	n := len(src)
+	n := uint32(len(src))
 	_ = src[n-1]
 	for offset < n {
 		if src[offset] == ']' {

@@ -1,8 +1,9 @@
 package jsonvector
 
 import (
-	"github.com/koykov/vector"
 	"io"
+
+	"github.com/koykov/vector"
 )
 
 const flagEscape = 0
@@ -16,7 +17,7 @@ func (h Helper) Indirect(p *vector.Byteptr) []byte {
 	if p.CheckBit(flagEscape) {
 		p.SetBit(flagEscape, false)
 		b = Unescape(b)
-		p.SetLen(len(b))
+		p.SetLen(uint32(len(b)))
 	}
 	return b
 }

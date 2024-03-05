@@ -154,7 +154,7 @@ func assertType(tb testing.TB, vec *Vector, path string, typ vector.Type) {
 }
 
 func assertLen(tb testing.TB, vec *Vector, path string, len int) {
-	if node := vec.Dot(path); node.Limit() != len {
+	if node := vec.Dot(path); node.Limit() != uint32(len) {
 		tb.Error("length mismatch, need", len, "got", node.Limit())
 	}
 }
