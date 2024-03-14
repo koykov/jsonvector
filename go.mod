@@ -3,9 +3,9 @@ module github.com/koykov/jsonvector
 go 1.18
 
 require (
-	github.com/koykov/bytealg v1.0.4-0.20240218202342-096dfeea1dfa
+	github.com/koykov/bytealg v1.0.4-0.20240304210918-a851188c7945
 	github.com/koykov/byteconv v1.0.0
-	github.com/koykov/vector v1.2.5-0.20240305200912-cee9593db908
+	github.com/koykov/vector v1.2.5-0.20240314214600-a5f862dc67a5
 )
 
 require (
