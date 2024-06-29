@@ -2,6 +2,7 @@ package jsonvector
 
 import (
 	"bytes"
+	"errors"
 
 	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
@@ -12,12 +13,15 @@ var (
 	bNull  = []byte("null")
 	bTrue  = []byte("true")
 	bFalse = []byte("false")
+
+	errBadInit = errors.New("bad vector initialization, use jsonvector.NewVector() or jsonvector.Acquire()")
 )
 
 // Main internal parser helper.
 func (vec *Vector) parse(s []byte, copy bool) (err error) {
-	if vec.Helper == nil {
-		vec.Helper = helper
+	if !vec.init {
+		err = errBadInit
+		return
 	}
 
 	s = bytealg.TrimBytesFmt4(s)
