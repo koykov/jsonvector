@@ -85,13 +85,13 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
-		node.Value().SetBit(flagEscape, false)
+		node.Value().SetBit(flagEscape, true) // Always mark string as escaped to avoid double indexing.
 		if src[e-1] != '\\' {
-			// Good case - string isn't escaped.
+			// Good case - quote isn't escaped.
 			node.Value().SetLen(e - offset - 1)
 			offset = e + 1
 		} else {
-			// Walk over double quotas and look for unescaped.
+			// Walk over quotas and look for unescaped one.
 			for i := e; i < n; {
 				i = bytealg.IndexByteAtBytes(src, '"', i+1)
 				if i < 0 {
@@ -104,7 +104,6 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 				}
 			}
 			node.Value().SetLen(e - offset - 1)
-			node.Value().SetBit(flagEscape, true)
 			offset = e + 1
 		}
 	case isDigit(src[offset]):
