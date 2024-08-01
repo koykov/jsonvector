@@ -3,7 +3,7 @@ module github.com/koykov/jsonvector
 go 1.18
 
 require (
-	github.com/koykov/bytealg v1.0.4
+	github.com/koykov/bytealg v1.0.5-0.20240801210612-588023157ba1
 	github.com/koykov/byteconv v1.0.0
 	github.com/koykov/vector v1.2.6
 )
