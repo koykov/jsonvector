@@ -30,15 +30,15 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 	}
 
 	offset := 0
-	// Create root node and register it.
+	// Acquire root node.
 	root, i := vec.GetNode(0)
 
 	// Parse source data.
-	offset, err = vec.parseGeneric(0, offset, root)
-	if err != nil {
+	if offset, err = vec.parseGeneric(0, offset, root); err != nil {
 		vec.SetErrOffset(offset)
 		return err
 	}
+	// Update root node in vector.
 	vec.PutNode(i, root)
 
 	// Check unparsed tail.
@@ -70,11 +70,11 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 	case src[offset] == '{':
 		// Check open object node.
 		node.SetType(vector.TypeObj)
-		offset, err = vec.parseObj(depth+1, offset, node)
+		offset, err = vec.parseObject(depth+1, offset, node)
 	case src[offset] == '[':
 		// Check open array node.
 		node.SetType(vector.TypeArr)
-		offset, err = vec.parseArr(depth+1, offset, node)
+		offset, err = vec.parseArray(depth+1, offset, node)
 	case src[offset] == '"':
 		// Check string node.
 		node.SetType(vector.TypeStr)
@@ -149,7 +149,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 }
 
 // Object parsing helper.
-func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
+func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error) {
 	node.SetOffset(vec.Index.Len(depth))
 	offset++
 	var (
@@ -174,7 +174,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			return offset, vector.ErrUnexpId
 		}
 		offset++
-		// Register new node.
+		// Acquire new node.
 		child, i := vec.GetChildWT(node, depth, vector.TypeUnk)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(src).SetOffset(offset)
@@ -221,7 +221,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		if offset, err = vec.parseGeneric(depth, offset, child); err != nil {
 			return offset, err
 		}
-		// Save node to the vector.
+		// Return updated node to the vector.
 		vec.PutNode(i, child)
 		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
@@ -245,7 +245,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 }
 
 // Array parsing helper.
-func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
+func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error) {
 	node.SetOffset(vec.Index.Len(depth))
 	offset++
 	var (
@@ -269,13 +269,13 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			offset++
 			break
 		}
-		// Register new node.
+		// Acquire new node.
 		child, i := vec.GetChildWT(node, depth, vector.TypeUnk)
 		// Parse the value.
 		if offset, err = vec.parseGeneric(depth, offset, child); err != nil {
 			return offset, err
 		}
-		// Save node to the vector.
+		// Return updated node to the vector.
 		vec.PutNode(i, child)
 		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
