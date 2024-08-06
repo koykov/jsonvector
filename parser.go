@@ -165,7 +165,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			offset++
 			break
 		}
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse key.
@@ -204,7 +204,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 			child.Key().SetBit(flagEscape, true)
 			offset = e + 1
 		}
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Check division symbol.
@@ -213,7 +213,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse value.
@@ -223,7 +223,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		vec.PutNode(i, child)
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == '}' {
@@ -237,7 +237,7 @@ func (vec *Vector) parseObj(depth, offset int, node *vector.Node) (int, error) {
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
@@ -261,7 +261,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 			offset++
 			break
 		}
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == ']' {
@@ -277,7 +277,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		}
 		// Save node to the vector.
 		vec.PutNode(i, child)
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == ']' {
@@ -291,7 +291,7 @@ func (vec *Vector) parseArr(depth, offset int, node *vector.Node) (int, error) {
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = skipFmtTable(src, n, offset); eof {
+		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
