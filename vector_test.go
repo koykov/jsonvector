@@ -155,13 +155,16 @@ func TestMulti(t *testing.T) {
 
 func TestSort(t *testing.T) {
 	t.Run("object", func(t *testing.T) {
+		key := getTBName(t)
+		st := getStage(key)
+		if st == nil {
+			t.Fatal("stage not found")
+		}
+
 		vec := Acquire()
 		defer Release(vec)
-		var (
-			buf bytes.Buffer
-			st  *stage
-		)
-		vec, st = assertParseStage(t, vec, nil, 0)
+		var buf bytes.Buffer
+		vec = assertParseStage(t, st, vec, nil, 0)
 		vec.Root().SortKeys()
 		_ = vec.Root().Marshal(&buf)
 		if !bytes.Equal(buf.Bytes(), st.flat) {
@@ -169,13 +172,16 @@ func TestSort(t *testing.T) {
 		}
 	})
 	t.Run("array", func(t *testing.T) {
+		key := getTBName(t)
+		st := getStage(key)
+		if st == nil {
+			t.Fatal("stage not found")
+		}
+
 		vec := Acquire()
 		defer Release(vec)
-		var (
-			buf bytes.Buffer
-			st  *stage
-		)
-		vec, st = assertParseStage(t, vec, nil, 0)
+		var buf bytes.Buffer
+		vec = assertParseStage(t, st, vec, nil, 0)
 		vec.Root().Sort()
 		_ = vec.Root().Marshal(&buf)
 		if !bytes.Equal(buf.Bytes(), st.flat) {
@@ -334,15 +340,20 @@ func BenchmarkMulti(b *testing.B) {
 
 func BenchmarkSort(b *testing.B) {
 	b.Run("object", func(b *testing.B) {
+		key := getTBName(b)
+		st := getStage(key)
+		if st == nil {
+			b.Fatal("stage not found")
+		}
+
 		vec := NewVector()
 		var (
 			buf bytes.Buffer
-			st  *stage
 		)
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			buf.Reset()
-			vec, st = assertParseStage(b, vec, nil, 0)
+			vec = assertParseStage(b, st, vec, nil, 0)
 			vec.Root().SortKeys()
 			_ = vec.Root().Marshal(&buf)
 			if !bytes.Equal(buf.Bytes(), st.flat) {
@@ -351,15 +362,18 @@ func BenchmarkSort(b *testing.B) {
 		}
 	})
 	b.Run("array", func(b *testing.B) {
+		key := getTBName(b)
+		st := getStage(key)
+		if st == nil {
+			b.Fatal("stage not found")
+		}
+
 		vec := NewVector()
-		var (
-			buf bytes.Buffer
-			st  *stage
-		)
+		var buf bytes.Buffer
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			buf.Reset()
-			vec, st = assertParseStage(b, vec, nil, 0)
+			vec = assertParseStage(b, st, vec, nil, 0)
 			vec.Root().Sort()
 			_ = vec.Root().Marshal(&buf)
 			if !bytes.Equal(buf.Bytes(), st.flat) {
