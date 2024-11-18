@@ -40,11 +40,11 @@ func (vec *Vector) ParseCopyStr(s string) error {
 	return vec.parse(byteconv.S2B(s), true)
 }
 
+// ParseReader reads source from r and parse it.
 func (vec *Vector) ParseReader(r io.Reader) error {
 	err := vec.Vector.ParseReader(r)
 	if err != vector.ErrNotImplement {
 		return err
 	}
-	// todo implement me
-	return nil
+	return vec.parse(vec.Buf(), false)
 }
