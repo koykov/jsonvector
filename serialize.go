@@ -1,6 +1,7 @@
 package jsonvector
 
 import (
+	"errors"
 	"io"
 
 	"github.com/koykov/vector"
@@ -21,19 +22,21 @@ var (
 	btObjC   = []byte(`}`)
 	btObjE   = []byte(`{}`)
 	btNull   = []byte(`null`)
+
+	ErrUnsupportedType = errors.New("unsupported type")
 )
 
 func serialize(w io.Writer, node *vector.Node, depth int, indent bool) (err error) {
 	switch node.Type() {
 	case vector.TypeNull:
 		_, err = w.Write(btNull)
-	case vector.TypeNum, vector.TypeBool:
+	case vector.TypeNumber, vector.TypeBool:
 		_, err = w.Write(node.ForceBytes())
-	case vector.TypeStr:
+	case vector.TypeString:
 		_, err = w.Write(btQuote)
 		_, err = w.Write(node.RawBytes())
 		_, err = w.Write(btQuote)
-	case vector.TypeArr:
+	case vector.TypeArray:
 		if node.Limit() == 0 {
 			_, err = w.Write(btArrE)
 		} else {
@@ -61,7 +64,7 @@ func serialize(w io.Writer, node *vector.Node, depth int, indent bool) (err erro
 			}
 			_, err = w.Write(btArrC)
 		}
-	case vector.TypeObj:
+	case vector.TypeObject:
 		if node.Limit() == 0 {
 			_, err = w.Write(btObjE)
 		} else {
@@ -94,6 +97,8 @@ func serialize(w io.Writer, node *vector.Node, depth int, indent bool) (err erro
 			}
 			_, err = w.Write(btObjC)
 		}
+	default:
+		err = ErrUnsupportedType
 	}
 	return
 }
