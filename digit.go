@@ -57,3 +57,5 @@ func init() {
 	digitDotTable['E'] = true
 	digitDotTable['.'] = true
 }
+
+var _, _ = isDigitTable, isDigitDotTable
