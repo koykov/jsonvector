@@ -190,6 +190,25 @@ func TestSort(t *testing.T) {
 	})
 }
 
+func TestReader(t *testing.T) {
+	t.Run("reader", func(t *testing.T) {
+		src := []byte(`{"pi": 3.1415, "e": 2.718281828459045}`)
+		rdr := bytes.NewReader(src)
+		vec := NewVector()
+		err := vec.ParseReader(rdr)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+	t.Run("file", func(t *testing.T) {
+		vec := NewVector()
+		err := vec.ParseFile("testdata/multi0/complex0.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
 func BenchmarkScalar(b *testing.B) {
 	b.Run("scalarNull", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
 	b.Run("scalarString", func(b *testing.B) {

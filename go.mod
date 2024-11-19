@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/koykov/bytealg v1.0.6
 	github.com/koykov/byteconv v1.0.1
-	github.com/koykov/vector v1.2.7-0.20241119180543-f0b7911bd34c
+	github.com/koykov/vector v1.2.7-0.20241119180603-e5f3cbfa0d42
 )
 
 require (
