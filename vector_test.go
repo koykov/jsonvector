@@ -15,27 +15,27 @@ func TestScalar(t *testing.T) {
 	})
 	t.Run("scalarString", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeStr)
+		assertType(t, vec, "", vector.TypeString)
 		assertNode(t, vec, "", "foo bar string")
 	})
 	t.Run("scalarStringQuoted", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeStr)
+		assertType(t, vec, "", vector.TypeString)
 		assertNode(t, vec, "", `foo "bar" string`)
 	})
 	t.Run("scalarNumber", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNum)
+		assertType(t, vec, "", vector.TypeNumber)
 		assertNode(t, vec, "", 123456)
 	})
 	t.Run("scalarFloat", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNum)
+		assertType(t, vec, "", vector.TypeNumber)
 		assertNode(t, vec, "", 123.456)
 	})
 	t.Run("scalarFloatScientific", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeNum)
+		assertType(t, vec, "", vector.TypeNumber)
 		assertNode(t, vec, "", 3.7e-5)
 	})
 	t.Run("scalarTrue", func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestArray(t *testing.T) {
 	vec := NewVector()
 	t.Run("arrayNumber", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeArr)
+		assertType(t, vec, "", vector.TypeArray)
 		assertLen(t, vec, "", 5)
 		assertNode(t, vec, "0", 1)
 		assertNode(t, vec, "2", 3)
@@ -62,7 +62,7 @@ func TestArray(t *testing.T) {
 	})
 	t.Run("arrayString", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeArr)
+		assertType(t, vec, "", vector.TypeArray)
 		assertLen(t, vec, "", 3)
 		assertNode(t, vec, "0", "foo")
 		assertNode(t, vec, "1", "bar")
@@ -70,14 +70,14 @@ func TestArray(t *testing.T) {
 	})
 	t.Run("arrayStringQuoted", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeArr)
+		assertType(t, vec, "", vector.TypeArray)
 		assertLen(t, vec, "", 2)
 		assertNode(t, vec, "0", `quoted "str" value`)
 		assertNode(t, vec, "1", "foo")
 	})
 	t.Run("arrayFloat", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeArr)
+		assertType(t, vec, "", vector.TypeArray)
 		assertLen(t, vec, "", 2)
 		assertNode(t, vec, "0", 3.14156)
 		assertNode(t, vec, "1", 6.23e-4)
@@ -88,7 +88,7 @@ func TestObject(t *testing.T) {
 	vec := NewVector()
 	t.Run("objectNumber", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeObj)
+		assertType(t, vec, "", vector.TypeObject)
 		assertLen(t, vec, "", 3)
 		assertNode(t, vec, "a", 1)
 		assertNode(t, vec, "b", 2)
@@ -96,7 +96,7 @@ func TestObject(t *testing.T) {
 	})
 	t.Run("objectString", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeObj)
+		assertType(t, vec, "", vector.TypeObject)
 		assertLen(t, vec, "", 3)
 		assertNode(t, vec, "a", "foo")
 		assertNode(t, vec, "b", "bar")
@@ -104,21 +104,21 @@ func TestObject(t *testing.T) {
 	})
 	t.Run("objectStringQuoted", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeObj)
+		assertType(t, vec, "", vector.TypeObject)
 		assertLen(t, vec, "", 2)
 		assertNode(t, vec, "key0", `"quoted"`)
 		assertNode(t, vec, `key"1"`, "str")
 	})
 	t.Run("objectFloat", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeObj)
+		assertType(t, vec, "", vector.TypeObject)
 		assertLen(t, vec, "", 2)
 		assertNode(t, vec, "pi", 3.1415)
 		assertNode(t, vec, "e", 2.718281828459045)
 	})
 	t.Run("objectFmt", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeObj)
+		assertType(t, vec, "", vector.TypeObject)
 		assertLen(t, vec, "", 3)
 		assertNode(t, vec, "c", 15)
 		assertType(t, vec, "foo", vector.TypeNull)
@@ -126,7 +126,7 @@ func TestObject(t *testing.T) {
 	})
 	t.Run("objectFmt1", func(t *testing.T) {
 		vec = assertParse(t, vec, nil, 0)
-		assertType(t, vec, "", vector.TypeObj)
+		assertType(t, vec, "", vector.TypeObject)
 		assertLen(t, vec, "", 2)
 		assertNode(t, vec, "a", true)
 		assertNode(t, vec, "b.c", "foo")
@@ -194,31 +194,31 @@ func BenchmarkScalar(b *testing.B) {
 	b.Run("scalarNull", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
 	b.Run("scalarString", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeStr)
+			assertType(b, vec, "", vector.TypeString)
 			assertNode(b, vec, "", "foo bar string")
 		})
 	})
 	b.Run("scalarStringQuoted", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeStr)
+			assertType(b, vec, "", vector.TypeString)
 			assertNode(b, vec, "", `foo "bar" string`)
 		})
 	})
 	b.Run("scalarNumber", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNum)
+			assertType(b, vec, "", vector.TypeNumber)
 			assertNode(b, vec, "", 123456)
 		})
 	})
 	b.Run("scalarFloat", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNum)
+			assertType(b, vec, "", vector.TypeNumber)
 			assertNode(b, vec, "", 123.456)
 		})
 	})
 	b.Run("scalarFloatScientific", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeNum)
+			assertType(b, vec, "", vector.TypeNumber)
 			assertNode(b, vec, "", 3.7e-5)
 		})
 	})
@@ -239,7 +239,7 @@ func BenchmarkScalar(b *testing.B) {
 func BenchmarkArray(b *testing.B) {
 	b.Run("arrayNumber", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeArr)
+			assertType(b, vec, "", vector.TypeArray)
 			assertLen(b, vec, "", 5)
 			assertNode(b, vec, "0", 1)
 			assertNode(b, vec, "2", 3)
@@ -248,7 +248,7 @@ func BenchmarkArray(b *testing.B) {
 	})
 	b.Run("arrayString", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeArr)
+			assertType(b, vec, "", vector.TypeArray)
 			assertLen(b, vec, "", 3)
 			assertNode(b, vec, "0", "foo")
 			assertNode(b, vec, "1", "bar")
@@ -257,7 +257,7 @@ func BenchmarkArray(b *testing.B) {
 	})
 	b.Run("arrayStringQuoted", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeArr)
+			assertType(b, vec, "", vector.TypeArray)
 			assertLen(b, vec, "", 2)
 			assertNode(b, vec, "0", `quoted "str" value`)
 			assertNode(b, vec, "1", "foo")
@@ -265,7 +265,7 @@ func BenchmarkArray(b *testing.B) {
 	})
 	b.Run("arrayFloat", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeArr)
+			assertType(b, vec, "", vector.TypeArray)
 			assertLen(b, vec, "", 2)
 			assertNode(b, vec, "0", 3.14156)
 			assertNode(b, vec, "1", 6.23e-4)
@@ -276,7 +276,7 @@ func BenchmarkArray(b *testing.B) {
 func BenchmarkObject(b *testing.B) {
 	b.Run("objectNumber", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeObj)
+			assertType(b, vec, "", vector.TypeObject)
 			assertLen(b, vec, "", 3)
 			assertNode(b, vec, "a", 1)
 			assertNode(b, vec, "b", 2)
@@ -285,7 +285,7 @@ func BenchmarkObject(b *testing.B) {
 	})
 	b.Run("objectString", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeObj)
+			assertType(b, vec, "", vector.TypeObject)
 			assertLen(b, vec, "", 3)
 			assertNode(b, vec, "a", "foo")
 			assertNode(b, vec, "b", "bar")
@@ -294,7 +294,7 @@ func BenchmarkObject(b *testing.B) {
 	})
 	b.Run("objectStringQuoted", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeObj)
+			assertType(b, vec, "", vector.TypeObject)
 			assertLen(b, vec, "", 2)
 			assertNode(b, vec, "key0", `"quoted"`)
 			assertNode(b, vec, `key"1"`, "str")
@@ -302,7 +302,7 @@ func BenchmarkObject(b *testing.B) {
 	})
 	b.Run("objectFloat", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeObj)
+			assertType(b, vec, "", vector.TypeObject)
 			assertLen(b, vec, "", 2)
 			assertNode(b, vec, "pi", 3.1415)
 			assertNode(b, vec, "e", 2.718281828459045)
@@ -310,7 +310,7 @@ func BenchmarkObject(b *testing.B) {
 	})
 	b.Run("objectFmt", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeObj)
+			assertType(b, vec, "", vector.TypeObject)
 			assertLen(b, vec, "", 3)
 			assertNode(b, vec, "c", 15)
 			assertType(b, vec, "foo", vector.TypeNull)
@@ -319,7 +319,7 @@ func BenchmarkObject(b *testing.B) {
 	})
 	b.Run("objectFmt1", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
-			assertType(b, vec, "", vector.TypeObj)
+			assertType(b, vec, "", vector.TypeObject)
 			assertLen(b, vec, "", 2)
 			assertNode(b, vec, "a", true)
 			assertNode(b, vec, "b.c", "foo")
