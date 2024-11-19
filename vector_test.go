@@ -401,3 +401,26 @@ func BenchmarkSort(b *testing.B) {
 		}
 	})
 }
+
+func BenchmarkReader(b *testing.B) {
+	b.Run("reader", func(b *testing.B) {
+		b.ReportAllocs()
+		src := []byte(`{"pi": 3.1415, "e": 2.718281828459045}`)
+		var buf bytes.Buffer
+		vec := NewVector()
+		for i := 0; i < b.N; i++ {
+			buf.Reset()
+			vec.Reset()
+			_, _ = buf.Write(src)
+			_ = vec.ParseReader(&buf)
+		}
+	})
+	b.Run("file", func(b *testing.B) {
+		b.ReportAllocs()
+		vec := NewVector()
+		for i := 0; i < b.N; i++ {
+			vec.Reset()
+			_ = vec.ParseFile("testdata/multi0/complex0.json")
+		}
+	})
+}
