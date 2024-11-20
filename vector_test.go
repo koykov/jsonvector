@@ -190,6 +190,25 @@ func TestSort(t *testing.T) {
 	})
 }
 
+func TestReader(t *testing.T) {
+	t.Run("reader", func(t *testing.T) {
+		src := []byte(`{"pi": 3.1415, "e": 2.718281828459045}`)
+		rdr := bytes.NewReader(src)
+		vec := NewVector()
+		err := vec.ParseReader(rdr)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+	t.Run("file", func(t *testing.T) {
+		vec := NewVector()
+		err := vec.ParseFile("testdata/multi0/complex0.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
 func BenchmarkScalar(b *testing.B) {
 	b.Run("scalarNull", func(b *testing.B) { bench(b, func(vec *Vector) { assertType(b, vec, "", vector.TypeNull) }) })
 	b.Run("scalarString", func(b *testing.B) {
@@ -379,6 +398,29 @@ func BenchmarkSort(b *testing.B) {
 			if !bytes.Equal(buf.Bytes(), st.flat) {
 				b.Error("sort failed")
 			}
+		}
+	})
+}
+
+func BenchmarkReader(b *testing.B) {
+	b.Run("reader", func(b *testing.B) {
+		b.ReportAllocs()
+		src := []byte(`{"pi": 3.1415, "e": 2.718281828459045}`)
+		var buf bytes.Buffer
+		vec := NewVector()
+		for i := 0; i < b.N; i++ {
+			buf.Reset()
+			vec.Reset()
+			_, _ = buf.Write(src)
+			_ = vec.ParseReader(&buf)
+		}
+	})
+	b.Run("file", func(b *testing.B) {
+		b.ReportAllocs()
+		vec := NewVector()
+		for i := 0; i < b.N; i++ {
+			vec.Reset()
+			_ = vec.ParseFile("testdata/multi0/complex0.json")
 		}
 	})
 }
