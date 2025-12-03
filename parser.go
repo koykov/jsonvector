@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/simd/indexbyte"
 	"github.com/koykov/vector"
 )
 
@@ -81,31 +82,31 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Save offset of string value.
 		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
 		// Get index of end of string value.
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
+		e := indexbyte.IndexAtNE(src, '"', offset+1)
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
 		node.Value().SetBit(flagEscape, true) // Always mark string as escaped to avoid double indexing.
-		if src[e-1] != '\\' {
-			// Good case - quote isn't escaped.
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		} else {
-			// Walk over quotas and look for unescaped one.
-			for i := e; i < n; {
-				i = bytealg.IndexByteAtBytes(src, '"', i+1)
-				if i < 0 {
-					e = n - 1
-					break
-				}
-				e = i
-				if src[e-1] != '\\' {
-					break
-				}
-			}
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		}
+		// if src[e-1] != '\\' {
+		// Good case - quote isn't escaped.
+		node.Value().SetLen(e - offset - 1)
+		offset = e + 1
+		// } else {
+		// 	// Walk over quotas and look for unescaped one.
+		// 	for i := e; i < n; {
+		// 		i = bytealg.IndexByteAtBytes(src, '"', i+1)
+		// 		if i < 0 {
+		// 			e = n - 1
+		// 			break
+		// 		}
+		// 		e = i
+		// 		if src[e-1] != '\\' {
+		// 			break
+		// 		}
+		// 	}
+		// 	node.Value().SetLen(e - offset - 1)
+		// 	offset = e + 1
+		// }
 	case isDigit(src[offset]):
 		// Check number node.
 		if offset < n {
@@ -178,32 +179,32 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 		child, i := vec.AcquireChildWithType(node, depth, vector.TypeUnknown)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(src).SetOffset(offset)
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
+		e := indexbyte.IndexAtNE(src, '"', offset+1)
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
 		child.Key().SetBit(flagEscape, false)
-		if src[e-1] != '\\' {
-			// Key is an unescaped string, good case.
-			child.Key().SetLen(e - offset)
-			offset = e + 1
-		} else {
-			// Key contains escaped bytes.
-			for i := e; i < n; {
-				i = bytealg.IndexByteAtBytes(src, '"', i+1)
-				if i < 0 {
-					e = n - 1
-					break
-				}
-				e = i
-				if src[e-1] != '\\' {
-					break
-				}
-			}
-			child.Key().SetLen(e - offset)
-			child.Key().SetBit(flagEscape, true)
-			offset = e + 1
-		}
+		// if src[e-1] != '\\' {
+		// Key is an unescaped string, good case.
+		child.Key().SetLen(e - offset)
+		offset = e + 1
+		// } else {
+		// 	// Key contains escaped bytes.
+		// 	for i := e; i < n; {
+		// 		i = bytealg.IndexByteAtBytes(src, '"', i+1)
+		// 		if i < 0 {
+		// 			e = n - 1
+		// 			break
+		// 		}
+		// 		e = i
+		// 		if src[e-1] != '\\' {
+		// 			break
+		// 		}
+		// 	}
+		child.Key().SetLen(e - offset)
+		child.Key().SetBit(flagEscape, true)
+		offset = e + 1
+		// }
 		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
