@@ -186,8 +186,8 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 		child.Key().SetBit(flagEscape, false)
 		// if src[e-1] != '\\' {
 		// Key is an unescaped string, good case.
-		child.Key().SetLen(e - offset)
-		offset = e + 1
+		// child.Key().SetLen(e - offset)
+		// offset = e + 1
 		// } else {
 		// 	// Key contains escaped bytes.
 		// 	for i := e; i < n; {
