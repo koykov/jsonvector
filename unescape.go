@@ -4,15 +4,15 @@ import (
 	"strconv"
 	"unicode/utf16"
 
-	"github.com/koykov/bytealg"
 	"github.com/koykov/byteconv"
+	"github.com/koykov/simd/indexbyte"
 )
 
 // Unescape byte array using itself as a destination.
 func Unescape(p []byte) []byte {
 	l, i := len(p), 0
 	for {
-		i = bytealg.IndexByteAtBytes(p, '\\', i)
+		i = indexbyte.IndexAt(p, '\\', i)
 		if i < 0 || i+1 == l {
 			break
 		}
