@@ -223,6 +223,11 @@ func BenchmarkScalar(b *testing.B) {
 			assertNode(b, vec, "", `foo "bar" string`)
 		})
 	})
+	b.Run("scalarString1KB", func(b *testing.B) {
+		bench(b, func(vec *Vector) {
+			assertType(b, vec, "", vector.TypeString)
+		})
+	})
 	b.Run("scalarNumber", func(b *testing.B) {
 		bench(b, func(vec *Vector) {
 			assertType(b, vec, "", vector.TypeNumber)
