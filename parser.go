@@ -161,7 +161,7 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 		child, i := vec.AcquireChildWithType(node, depth, vector.TypeUnknown)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(src).SetOffset(offset)
-		e := indexbyte.IndexAtNE(src, '"', offset+1)
+		e := vec.parseKey(src, offset+1)
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
@@ -260,4 +260,26 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 		}
 	}
 	return offset, nil
+}
+
+func (vec *Vector) parseKey(src []byte, offset int) int {
+	n := len(src)
+	_ = src[n-1]
+	mn := imin(n, 8)
+	for i := offset; i < offset+mn; i++ {
+		if src[i] == '"' {
+			return i
+		}
+		if src[i] == '\\' {
+			break
+		}
+	}
+	return indexbyte.IndexAtNE(src, '"', offset)
+}
+
+func imin(a, b int) (r int) {
+	if r = a; r > b {
+		r = b
+	}
+	return
 }
