@@ -8,15 +8,8 @@ import (
 
 // Unescape byte array using itself as a destination.
 func Unescape(p []byte) []byte {
-	i := indexbyte.Index(p, '\\')
-	if i < 0 {
-		return p
-	}
-	return unescapeSlow(p, i)
-}
-
-func unescapeSlow(p []byte, i int) []byte {
 	l := len(p)
+	var i int
 	for {
 		i = indexbyte.IndexAt(p, '\\', i)
 		if i < 0 || i+1 == l {
