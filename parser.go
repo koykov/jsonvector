@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/koykov/bytealg"
+	"github.com/koykov/simd/indexbyte"
 	"github.com/koykov/vector"
 )
 
@@ -81,31 +82,13 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Save offset of string value.
 		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
 		// Get index of end of string value.
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
+		e := indexbyte.IndexAtNE(src, '"', offset+1)
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
 		node.Value().SetBit(flagEscape, true) // Always mark string as escaped to avoid double indexing.
-		if src[e-1] != '\\' {
-			// Good case - quote isn't escaped.
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		} else {
-			// Walk over quotas and look for unescaped one.
-			for i := e; i < n; {
-				i = bytealg.IndexByteAtBytes(src, '"', i+1)
-				if i < 0 {
-					e = n - 1
-					break
-				}
-				e = i
-				if src[e-1] != '\\' {
-					break
-				}
-			}
-			node.Value().SetLen(e - offset - 1)
-			offset = e + 1
-		}
+		node.Value().SetLen(e - offset - 1)
+		offset = e + 1
 	case isDigit(src[offset]):
 		// Check number node.
 		if offset < n {
@@ -165,7 +148,7 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 			offset++
 			break
 		}
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse key.
@@ -178,33 +161,14 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 		child, i := vec.AcquireChildWithType(node, depth, vector.TypeUnknown)
 		// Fill up key's offset and length.
 		child.Key().TakeAddr(src).SetOffset(offset)
-		e := bytealg.IndexByteAtBytes(src, '"', offset+1)
+		e := vec.parseKey(src, offset+1)
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
-		child.Key().SetBit(flagEscape, false)
-		if src[e-1] != '\\' {
-			// Key is an unescaped string, good case.
-			child.Key().SetLen(e - offset)
-			offset = e + 1
-		} else {
-			// Key contains escaped bytes.
-			for i := e; i < n; {
-				i = bytealg.IndexByteAtBytes(src, '"', i+1)
-				if i < 0 {
-					e = n - 1
-					break
-				}
-				e = i
-				if src[e-1] != '\\' {
-					break
-				}
-			}
-			child.Key().SetLen(e - offset)
-			child.Key().SetBit(flagEscape, true)
-			offset = e + 1
-		}
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		child.Key().SetLen(e - offset)
+		child.Key().SetBit(flagEscape, true)
+		offset = e + 1
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Check division symbol.
@@ -213,7 +177,7 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		// Parse value.
@@ -223,7 +187,7 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 		}
 		// Return updated node to the vector.
 		vec.ReleaseNode(i, child)
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == '}' {
@@ -237,7 +201,7 @@ func (vec *Vector) parseObject(depth, offset int, node *vector.Node) (int, error
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
@@ -261,7 +225,7 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 			offset++
 			break
 		}
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == ']' {
@@ -277,7 +241,7 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 		}
 		// Return updated node to the vector.
 		vec.ReleaseNode(i, child)
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 		if src[offset] == ']' {
@@ -291,9 +255,31 @@ func (vec *Vector) parseArray(depth, offset int, node *vector.Node) (int, error)
 		} else {
 			return offset, vector.ErrUnexpId
 		}
-		if offset, eof = bytealg.SkipBytesFmt4(src, offset); eof {
+		if offset, eof = skipfmt(src, offset); eof {
 			return offset, vector.ErrUnexpEOF
 		}
 	}
 	return offset, nil
+}
+
+func (vec *Vector) parseKey(src []byte, offset int) int {
+	n := len(src)
+	_ = src[n-1]
+	mn := imin(n, 8)
+	for i := offset; i < offset+mn; i++ {
+		if src[i] == '"' {
+			return i
+		}
+		if src[i] == '\\' {
+			break
+		}
+	}
+	return indexbyte.IndexAtNE(src, '"', offset)
+}
+
+func imin(a, b int) (r int) {
+	if r = a; r > b {
+		r = b
+	}
+	return
 }

@@ -1,18 +1,17 @@
 package jsonvector
 
 import (
-	"strconv"
 	"unicode/utf16"
 
-	"github.com/koykov/bytealg"
-	"github.com/koykov/byteconv"
+	"github.com/koykov/simd/indexbyte"
 )
 
 // Unescape byte array using itself as a destination.
 func Unescape(p []byte) []byte {
-	l, i := len(p), 0
+	l := len(p)
+	var i int
 	for {
-		i = bytealg.IndexByteAtBytes(p, '\\', i)
+		i = indexbyte.IndexAt(p, '\\', i)
 		if i < 0 || i+1 == l {
 			break
 		}
@@ -51,11 +50,7 @@ func Unescape(p []byte) []byte {
 				continue
 			}
 			x := p[i+2 : i+6]
-			u, err := strconv.ParseUint(byteconv.B2S(x), 16, 16)
-			if err != nil {
-				i++
-				continue
-			}
+			u := xtouTable(x)
 			r := rune(u)
 			if !utf16.IsSurrogate(r) {
 				// Regular utf8 symbol.
@@ -76,11 +71,7 @@ func Unescape(p []byte) []byte {
 					continue
 				} else {
 					x = p[i+8 : i+12]
-					u1, err := strconv.ParseUint(byteconv.B2S(x), 16, 16)
-					if err != nil {
-						i++
-						continue
-					}
+					u1 := xtouTable(x)
 					r = utf16.DecodeRune(r, rune(u1))
 					s := string(r)
 					z := len(s)
