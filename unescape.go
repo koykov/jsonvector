@@ -3,7 +3,7 @@ package jsonvector
 import (
 	"unicode/utf16"
 
-	"github.com/koykov/simd/indexbyte"
+	"github.com/koykov/vector"
 )
 
 // Unescape byte array using itself as a destination.
@@ -11,7 +11,7 @@ func Unescape(p []byte) []byte {
 	l := len(p)
 	var i int
 	for {
-		i = indexbyte.IndexAt(p, '\\', i)
+		i = vector.IndexByteAt(p, '\\', i)
 		if i < 0 || i+1 == l {
 			break
 		}
