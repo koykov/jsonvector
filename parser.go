@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/koykov/bytealg"
-	"github.com/koykov/simd/indexbyte"
 	"github.com/koykov/vector"
 )
 
@@ -82,7 +81,7 @@ func (vec *Vector) parseGeneric(depth, offset int, node *vector.Node) (int, erro
 		// Save offset of string value.
 		node.Value().SetAddr(srcp, n).SetOffset(offset + 1)
 		// Get index of end of string value.
-		e := indexbyte.IndexAtNE(src, '"', offset+1)
+		e := vector.IndexByteAtNE(src, '"', offset+1)
 		if e < 0 {
 			return n, vector.ErrUnexpEOS
 		}
@@ -274,7 +273,7 @@ func (vec *Vector) parseKey(src []byte, offset int) int {
 			break
 		}
 	}
-	return indexbyte.IndexAtNE(src, '"', offset)
+	return vector.IndexByteAtNE(src, '"', offset)
 }
 
 func imin(a, b int) (r int) {
