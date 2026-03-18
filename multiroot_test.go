@@ -1,11 +1,14 @@
 package jsonvector
 
 import (
+	"bytes"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
+
+	"github.com/koykov/vector"
 )
 
 type multirootStage struct {
@@ -14,7 +17,8 @@ type multirootStage struct {
 }
 
 var (
-	multiroots [][]byte
+	multiroots    [][]byte
+	multirootsFmt [][]byte
 
 	multirootStages    []multirootStage
 	multirootStagesReg = map[string]int{}
@@ -25,6 +29,13 @@ func init() {
 		if filepath.Ext(path) == ".json" {
 			b, _ := os.ReadFile(path)
 			multiroots = append(multiroots, b)
+			vec := NewVector()
+			if err = vec.ParseCopy(b); err != nil {
+				os.Exit(1)
+			}
+			var buf bytes.Buffer
+			_ = vec.Beautify(&buf)
+			multirootsFmt = append(multirootsFmt, buf.Bytes())
 			return nil
 		}
 		return nil
@@ -60,8 +71,24 @@ func TestMultiroot(t *testing.T) {
 		t.Run(key, func(t *testing.T) {
 			idx := multirootStagesReg[key]
 			st := &multirootStages[idx]
-			t.Log(key)
-			_ = st
+			vec := NewVector()
+			if err := vec.ParseCopy(st.buf); err != nil {
+				t.Error(err)
+			}
+			for j := 0; ; j++ {
+				root := vec.RootByIndex(j)
+				if root.Type() == vector.TypeNull {
+					break
+				}
+				var buf bytes.Buffer
+				_ = root.Beautify(&buf)
+
+				origin := multirootsFmt[j%len(multirootsFmt)]
+				fmtv := buf.Bytes()
+				if !bytes.Equal(origin, fmtv) {
+					t.Error(string(origin), "\n\n\n", string(fmtv))
+				}
+			}
 		})
 	}
 }
