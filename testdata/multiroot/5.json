@@ -1,0 +1,15 @@
+{
+  "teams": [
+	{
+	  "name": "Arizona Cardinals",
+	  "abbreviation": "ARI",
+	  "city": "Glendale",
+	  "state": "Arizona",
+	  "conference": "NFC",
+	  "division": "West",
+	  "founded": 1898,
+	  "stadium": "State Farm Stadium",
+	  "primary_color": "#97233F"
+	}
+  ]
+}

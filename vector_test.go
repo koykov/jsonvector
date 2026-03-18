@@ -141,8 +141,8 @@ func TestError(t *testing.T) {
 	vec := NewVector()
 	t.Run("badToken", func(t *testing.T) { assertParse(t, vec, vector.ErrUnexpId, 0) })
 	t.Run("badUnclosedString", func(t *testing.T) { assertParse(t, vec, vector.ErrUnexpEOS, 24) })
-	t.Run("badFloatSeparator", func(t *testing.T) { assertParse(t, vec, vector.ErrUnparsedTail, 1) })
-	t.Run("badUnparsedTail", func(t *testing.T) { assertParse(t, vec, vector.ErrUnparsedTail, 16) })
+	t.Run("badFloatSeparator", func(t *testing.T) { assertParse(t, vec, vector.ErrUnexpId, 1) })
+	t.Run("badUnparsedTail", func(t *testing.T) { assertParse(t, vec, vector.ErrUnexpId, 16) })
 }
 
 func TestMulti(t *testing.T) {
