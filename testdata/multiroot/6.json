@@ -1,0 +1,16 @@
+{
+  "states": [
+	{
+	  "name": "Alabama",
+	  "abbreviation": "AL",
+	  "capital": "Montgomery",
+	  "founded": "1819-12-14",
+	  "borders": [
+		"Florida",
+		"Georgia",
+		"Mississippi",
+		"Tennessee"
+	  ]
+	}
+  ]
+}
