@@ -95,3 +95,23 @@ func TestMultiroot(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkMultiroot(b *testing.B) {
+	for i := 10; i <= 100; i += 10 {
+		key := strconv.Itoa(i)
+		b.Run(key, func(b *testing.B) {
+			idx := multirootStagesReg[key]
+			st := &multirootStages[idx]
+
+			vec := Acquire()
+			defer Release(vec)
+			b.ReportAllocs()
+			for j := 0; j < b.N; j++ {
+				vec.Reset()
+				if err := vec.Parse(st.buf); err != nil {
+					b.Error(err)
+				}
+			}
+		})
+	}
+}
