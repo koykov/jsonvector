@@ -78,20 +78,16 @@ func TestMultiroot(t *testing.T) {
 				t.Error(err)
 			}
 
-			for j := 0; ; j++ {
-				root := vec.RootByIndex(j)
-				if root.Type() == vector.TypeNull {
-					break
-				}
+			vec.Each(func(idx int, root *vector.Node) {
 				var buf bytes.Buffer
 				_ = root.Beautify(&buf)
 
-				origin := multirootsFmt[j%len(multirootsFmt)]
+				origin := multirootsFmt[idx%len(multirootsFmt)]
 				fmtv := buf.Bytes()
 				if !bytes.Equal(origin, fmtv) {
-					t.Errorf("key %s root %d", key, j)
+					t.Errorf("key %s root %d", key, idx)
 				}
-			}
+			})
 		})
 	}
 }
