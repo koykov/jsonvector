@@ -71,10 +71,13 @@ func TestMultiroot(t *testing.T) {
 		t.Run(key, func(t *testing.T) {
 			idx := multirootStagesReg[key]
 			st := &multirootStages[idx]
-			vec := NewVector()
+
+			vec := Acquire()
+			defer Release(vec)
 			if err := vec.ParseCopy(st.buf); err != nil {
 				t.Error(err)
 			}
+
 			for j := 0; ; j++ {
 				root := vec.RootByIndex(j)
 				if root.Type() == vector.TypeNull {
@@ -86,7 +89,7 @@ func TestMultiroot(t *testing.T) {
 				origin := multirootsFmt[j%len(multirootsFmt)]
 				fmtv := buf.Bytes()
 				if !bytes.Equal(origin, fmtv) {
-					t.Error(string(origin), "\n\n\n", string(fmtv))
+					t.Errorf("key %s root %d", key, j)
 				}
 			}
 		})
