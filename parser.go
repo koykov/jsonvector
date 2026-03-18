@@ -29,17 +29,26 @@ func (vec *Vector) parse(s []byte, copy bool) (err error) {
 		return
 	}
 
-	offset := 0
-	// Acquire root node.
-	root, i := vec.AcquireNode(0)
+	var (
+		offset int
+		eof    bool
+	)
+	for offset < len(s) {
+		if offset, eof = skipfmt(s, offset); eof {
+			break
+		}
 
-	// Parse source data.
-	if offset, err = vec.parseGeneric(0, offset, root); err != nil {
-		vec.SetErrOffset(offset)
-		return err
+		// Acquire root node.
+		root, i := vec.AcquireNode(0)
+
+		// Parse source data.
+		if offset, err = vec.parseGeneric(0, offset, root); err != nil {
+			vec.SetErrOffset(offset)
+			return err
+		}
+		// Update root node in vector.
+		vec.ReleaseNode(i, root)
 	}
-	// Update root node in vector.
-	vec.ReleaseNode(i, root)
 
 	// Check unparsed tail.
 	if offset < vec.SrcLen() {
