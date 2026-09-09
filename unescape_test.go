@@ -111,3 +111,56 @@ func BenchmarkUnescape(b *testing.B) {
 	b.Run("unicodeSurrogate", func(b *testing.B) { benchUnescape(b) })
 	b.Run("complex", func(b *testing.B) { benchUnescape(b) })
 }
+
+func testAppendUnescape(tb testing.TB) []byte {
+	key := getTBName(tb)
+	st := getStageUnescape(key)
+	if st == nil {
+		tb.Fatal("stage not found")
+	}
+	var dst []byte
+	dst = AppendUnescape(dst, st.origin)
+	if !bytes.Equal(dst, st.expect) {
+		tb.Errorf("AppendEscape() = %q, want %q", dst, st.expect)
+	}
+	return dst
+}
+
+func benchAppendUnescape(b *testing.B) {
+	key := getTBName(b)
+	st := getStageUnescape(key)
+	if st == nil {
+		b.Fatal("stage not found")
+	}
+	var buf []byte
+	b.SetBytes(int64(len(st.origin)))
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf = AppendUnescape(buf[:0], st.origin)
+	}
+}
+
+func TestAppendUnescape(t *testing.T) {
+	t.Run("fmt0", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("fmt1", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("fmt2", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("unicodeChinese", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("unicodeArabic", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("unicodeGreek", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("unicodeCyrillic", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("unicodeSurrogate", func(t *testing.T) { testAppendUnescape(t) })
+	t.Run("complex", func(t *testing.T) { testAppendUnescape(t) })
+}
+
+func BenchmarkAppendUnescape(b *testing.B) {
+	b.Run("fmt0", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("fmt1", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("fmt2", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("unicodeChinese", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("unicodeArabic", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("unicodeGreek", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("unicodeCyrillic", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("unicodeSurrogate", func(b *testing.B) { benchAppendUnescape(b) })
+	b.Run("complex", func(b *testing.B) { benchAppendUnescape(b) })
+}
