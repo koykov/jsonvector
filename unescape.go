@@ -87,3 +87,109 @@ func Unescape(p []byte) []byte {
 	}
 	return p
 }
+
+// AppendUnescape unescapes byte array and add result to dst.
+func AppendUnescape(dst, p []byte) []byte {
+	l := len(p)
+	var i int
+	for {
+		i = vector.IndexByteAt(p, '\\', i)
+		if i < 0 || i+1 == l {
+			break
+		}
+		switch p[i+1] {
+		case '\\':
+			dst = append(dst, p[:i]...)
+			dst = append(dst, '\\')
+			p = p[i+2:]
+			l = len(p)
+			i = 0
+		case '"', '/':
+			dst = append(dst, p[:i]...)
+			dst = append(dst, p[i+1])
+			p = p[i+2:]
+			l = len(p)
+			i = 0
+		case 'n':
+			dst = append(dst, p[:i]...)
+			dst = append(dst, '\n')
+			p = p[i+2:]
+			l = len(p)
+			i = 0
+		case 'r':
+			dst = append(dst, p[:i]...)
+			dst = append(dst, '\r')
+			p = p[i+2:]
+			l = len(p)
+			i = 0
+		case 't':
+			dst = append(dst, p[:i]...)
+			dst = append(dst, '\t')
+			p = p[i+2:]
+			l = len(p)
+			i = 0
+		case 'b':
+			dst = append(dst, p[:i]...)
+			dst = append(dst, '\b')
+			p = p[i+2:]
+			l = len(p)
+			i = 0
+		case 'f':
+			dst = append(dst, p[:i]...)
+			dst = append(dst, '\f')
+			p = p[i+2:]
+			l = len(p)
+			i = 0
+		case 'u':
+			if l-i < 6 {
+				dst = append(dst, p[:i+1]...)
+				p = p[i+1:]
+				l = len(p)
+				i = 0
+				continue
+			}
+			x := p[i+2 : i+6]
+			u := xtouTable(x)
+			r := rune(u)
+			if !utf16.IsSurrogate(r) {
+				s := string(r)
+				dst = append(dst, p[:i]...)
+				dst = append(dst, s...)
+				p = p[i+6:]
+				l = len(p)
+				i = 0
+			} else {
+				if l-i < 12 {
+					dst = append(dst, p[:i+1]...)
+					p = p[i+1:]
+					l = len(p)
+					i = 0
+					continue
+				}
+				if p[i+6] != '\\' || p[i+7] != 'u' {
+					dst = append(dst, p[:i+1]...)
+					p = p[i+1:]
+					l = len(p)
+					i = 0
+					continue
+				}
+				x = p[i+8 : i+12]
+				u1 := xtouTable(x)
+				r = utf16.DecodeRune(r, rune(u1))
+				s := string(r)
+				dst = append(dst, p[:i]...)
+				dst = append(dst, s...)
+				p = p[i+12:]
+				l = len(p)
+				i = 0
+			}
+		default:
+			dst = append(dst, p[:i+1]...)
+			p = p[i+1:]
+			l = len(p)
+			i = 0
+		}
+	}
+	dst = append(dst, p...)
+	return dst
+}
