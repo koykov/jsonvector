@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/koykov/vector"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestScalar(t *testing.T) {
@@ -157,9 +159,7 @@ func TestSort(t *testing.T) {
 	t.Run("object", func(t *testing.T) {
 		key := getTBName(t)
 		st := getStage(key)
-		if st == nil {
-			t.Fatal("stage not found")
-		}
+		require.NotNil(t, st, "stage not found")
 
 		vec := Acquire()
 		defer Release(vec)
@@ -167,16 +167,12 @@ func TestSort(t *testing.T) {
 		vec = assertParseStage(t, st, vec, nil, 0)
 		vec.Root().SortKeys()
 		_ = vec.Root().Marshal(&buf)
-		if !bytes.Equal(buf.Bytes(), st.flat) {
-			t.Error("sort failed")
-		}
+		assert.Equal(t, st.flat, buf.Bytes(), "sort failed")
 	})
 	t.Run("array", func(t *testing.T) {
 		key := getTBName(t)
 		st := getStage(key)
-		if st == nil {
-			t.Fatal("stage not found")
-		}
+		require.NotNil(t, st, "stage not found")
 
 		vec := Acquire()
 		defer Release(vec)
@@ -184,9 +180,7 @@ func TestSort(t *testing.T) {
 		vec = assertParseStage(t, st, vec, nil, 0)
 		vec.Root().Sort()
 		_ = vec.Root().Marshal(&buf)
-		if !bytes.Equal(buf.Bytes(), st.flat) {
-			t.Error("sort failed")
-		}
+		assert.Equal(t, st.flat, buf.Bytes(), "sort failed")
 	})
 }
 
@@ -196,16 +190,12 @@ func TestReader(t *testing.T) {
 		rdr := bytes.NewReader(src)
 		vec := NewVector()
 		err := vec.ParseReader(rdr)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 	})
 	t.Run("file", func(t *testing.T) {
 		vec := NewVector()
 		err := vec.ParseFile("testdata/multi0/complex0.json")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 	})
 }
 
@@ -371,18 +361,14 @@ func BenchmarkSort(b *testing.B) {
 		}
 
 		vec := NewVector()
-		var (
-			buf bytes.Buffer
-		)
+		var buf bytes.Buffer
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			buf.Reset()
 			vec = assertParseStage(b, st, vec, nil, 0)
 			vec.Root().SortKeys()
 			_ = vec.Root().Marshal(&buf)
-			if !bytes.Equal(buf.Bytes(), st.flat) {
-				b.Error("sort failed")
-			}
+			assert.True(b, bytes.Equal(st.flat, buf.Bytes()), "sort failed")
 		}
 	})
 	b.Run("array", func(b *testing.B) {
@@ -400,9 +386,7 @@ func BenchmarkSort(b *testing.B) {
 			vec = assertParseStage(b, st, vec, nil, 0)
 			vec.Root().Sort()
 			_ = vec.Root().Marshal(&buf)
-			if !bytes.Equal(buf.Bytes(), st.flat) {
-				b.Error("sort failed")
-			}
+			assert.True(b, bytes.Equal(st.flat, buf.Bytes()), "sort failed")
 		}
 	})
 }

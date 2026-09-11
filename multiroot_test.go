@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/koykov/vector"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type multirootStage struct {
@@ -74,19 +76,14 @@ func TestMultiroot(t *testing.T) {
 
 			vec := Acquire()
 			defer Release(vec)
-			if err := vec.ParseCopy(st.buf); err != nil {
-				t.Error(err)
-			}
+			require.NoError(t, vec.ParseCopy(st.buf))
 
 			vec.Each(func(idx int, root *vector.Node) {
 				var buf bytes.Buffer
 				_ = root.Beautify(&buf)
 
 				origin := multirootsFmt[idx%len(multirootsFmt)]
-				fmtv := buf.Bytes()
-				if !bytes.Equal(origin, fmtv) {
-					t.Errorf("key %s root %d", key, idx)
-				}
+				assert.Equal(t, origin, buf.Bytes(), "key %s root %d", key, idx)
 			})
 		})
 	}
