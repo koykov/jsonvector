@@ -3,6 +3,9 @@ package jsonvector
 import (
 	"bytes"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type stageUnescape struct {
@@ -68,14 +71,10 @@ func getStageUnescape(key string) *stageUnescape {
 func testUnescape(tb testing.TB, buf []byte) []byte {
 	key := getTBName(tb)
 	st := getStageUnescape(key)
-	if st == nil {
-		tb.Fatal("stage not found")
-	}
+	require.NotNil(tb, st, "stage not found")
 	buf = append(buf[:0], st.origin...)
 	buf = Unescape(buf)
-	if !bytes.Equal(buf, st.expect) {
-		tb.Error("unescape failed")
-	}
+	assert.True(tb, bytes.Equal(st.expect, buf), "unescape failed")
 	return buf
 }
 
@@ -115,23 +114,17 @@ func BenchmarkUnescape(b *testing.B) {
 func testAppendUnescape(tb testing.TB) []byte {
 	key := getTBName(tb)
 	st := getStageUnescape(key)
-	if st == nil {
-		tb.Fatal("stage not found")
-	}
+	require.NotNil(tb, st, "stage not found")
 	var dst []byte
 	dst = AppendUnescape(dst, st.origin)
-	if !bytes.Equal(dst, st.expect) {
-		tb.Errorf("AppendEscape() = %q, want %q", dst, st.expect)
-	}
+	assert.Equal(tb, st.expect, dst, "AppendUnescape failed")
 	return dst
 }
 
 func benchAppendUnescape(b *testing.B) {
 	key := getTBName(b)
 	st := getStageUnescape(key)
-	if st == nil {
-		b.Fatal("stage not found")
-	}
+	require.NotNil(b, st, "stage not found")
 	var buf []byte
 	b.SetBytes(int64(len(st.origin)))
 	b.ReportAllocs()

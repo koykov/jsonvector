@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAppendEscape(t *testing.T) {
@@ -108,20 +111,14 @@ func TestAppendEscape(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			input := []byte(tt.input)
 			expected := []byte(tt.expected)
-			result := AppendEscape(nil, input)
+			result := AppendEscape([]byte(""), input)
 
-			if string(result) != string(expected) {
-				t.Errorf("AppendEscape() = %q, want %q", result, expected)
-				t.Logf("Input: %q", input)
-				t.Logf("Got:   %q", result)
-				t.Logf("Want:  %q", expected)
-			}
+			assert.Equal(t, expected, result, "AppendEscape() mismatch\nInput: %q", input)
 
 			jsonStr := `"` + string(result) + `"`
 			var decoded string
-			if err := json.Unmarshal([]byte(jsonStr), &decoded); err != nil {
-				t.Errorf("Result is not valid JSON: %v", err)
-			}
+			err := json.Unmarshal([]byte(jsonStr), &decoded)
+			require.NoError(t, err, "Result is not valid JSON")
 		})
 	}
 }

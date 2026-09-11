@@ -10,6 +10,8 @@ import (
 
 	"github.com/koykov/bytealg"
 	"github.com/koykov/vector"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type stage struct {
@@ -96,9 +98,7 @@ func getTBName(tb testing.TB) string {
 func assertParse(tb testing.TB, dst *Vector, err error, errOffset int) *Vector {
 	key := getTBName(tb)
 	st := getStage(key)
-	if st == nil {
-		tb.Fatal("stage not found")
-	}
+	require.NotNil(tb, st, "stage not found")
 	dst = assertParseStage(tb, st, dst, err, errOffset)
 	return dst
 }
@@ -108,9 +108,8 @@ func assertParseStage(tb testing.TB, st *stage, dst *Vector, err error, errOffse
 	err1 := dst.ParseCopy(st.origin)
 	if err1 != nil {
 		if err != nil {
-			if !errors.Is(err1, err) || dst.ErrorOffset() != errOffset {
-				tb.Fatalf(`error mismatch, need "%s" at %d, got "%s" at %d`, err.Error(), errOffset, err1.Error(), dst.ErrorOffset())
-			}
+			assert.True(tb, errors.Is(err1, err), `error mismatch, need "%s" at %d, got "%s" at %d`, err.Error(), errOffset, err1.Error(), dst.ErrorOffset())
+			assert.Equal(tb, errOffset, dst.ErrorOffset(), "error offset mismatch")
 		} else {
 			tb.Fatalf(`err "%s" caught by offset %d`, err1.Error(), dst.ErrorOffset())
 		}
@@ -121,9 +120,7 @@ func assertParseStage(tb testing.TB, st *stage, dst *Vector, err error, errOffse
 func assertParseMulti(tb testing.TB, dst *Vector, buf *bytes.Buffer, err error, errOffset int) *Vector {
 	key := getTBName(tb)
 	mst := getStageMulti(key)
-	if mst == nil {
-		tb.Fatal("stage not found")
-	}
+	require.NotNil(tb, mst, "stage not found")
 	return assertParseStageMulti(tb, mst, dst, buf, err, errOffset)
 }
 
@@ -134,9 +131,8 @@ func assertParseStageMulti(tb testing.TB, mst *multiStage, dst *Vector, buf *byt
 		err1 := dst.ParseCopy(st.origin)
 		if err1 != nil {
 			if err != nil {
-				if !errors.Is(err1, err) || dst.ErrorOffset() != errOffset {
-					tb.Fatalf(`error mismatch, need "%s" at %d, got "%s" at %d`, err.Error(), errOffset, err1.Error(), dst.ErrorOffset())
-				}
+				assert.True(tb, errors.Is(err1, err), `error mismatch, need "%s" at %d, got "%s" at %d`, err.Error(), errOffset, err1.Error(), dst.ErrorOffset())
+				assert.Equal(tb, errOffset, dst.ErrorOffset(), "error offset mismatch")
 			} else {
 				tb.Fatalf(`err "%s" caught by offset %d`, err1.Error(), dst.ErrorOffset())
 			}
@@ -144,61 +140,47 @@ func assertParseStageMulti(tb testing.TB, mst *multiStage, dst *Vector, buf *byt
 		root := dst.RootTop()
 		buf.Reset()
 		_ = root.Beautify(buf)
-		if fmt1 := buf.Bytes(); !bytes.Equal(fmt1, st.fmt) {
-			tb.Fatalf("node mismatch, need '%s'\ngot '%s'", string(st.fmt), string(fmt1))
-		}
+		assert.True(tb, bytes.Equal(st.fmt, buf.Bytes()), "node mismatch")
 	}
 	return dst
 }
 
 func assertType(tb testing.TB, vec *Vector, path string, typ vector.Type) {
-	if typ1 := vec.Dot(path).Type(); typ1 != typ {
-		tb.Error("type mismatch, need", typ, "got", typ1)
-	}
+	assert.Equal(tb, typ, vec.Dot(path).Type(), "type mismatch")
 }
 
 func assertLen(tb testing.TB, vec *Vector, path string, len int) {
-	if node := vec.Dot(path); node.Limit() != len {
-		tb.Error("length mismatch, need", len, "got", node.Limit())
-	}
+	assert.Equal(tb, len, vec.Dot(path).Limit(), "length mismatch")
 }
 
 func assertNode(tb testing.TB, vec *Vector, path string, val any) {
 	node := vec.Dot(path)
-	var eq bool
-	switch val.(type) {
+	switch v := val.(type) {
 	case string:
-		eq = node.String() == val.(string)
+		assert.True(tb, v == node.String(), "value mismatch")
 	case int:
 		i, _ := node.Int()
-		eq = int(i) == val.(int)
+		assert.True(tb, v == int(i), "value mismatch")
 	case float64:
 		f, _ := node.Float()
-		eq = f == val.(float64)
+		assert.True(tb, v == f, "value mismatch")
 	case bool:
-		eq = node.Bool() == val.(bool)
-	}
-	if !eq {
-		tb.Error("value mismatch, need", val, "got", node)
+		assert.True(tb, v == node.Bool(), "value mismatch")
+	default:
+		tb.Errorf("unsupported type %T", val)
 	}
 }
 
 func assertFmt(tb testing.TB, vec *Vector, buf *bytes.Buffer) {
 	key := getTBName(tb)
 	st := getStage(key)
-	if st == nil {
-		tb.Fatal("stage not found")
-	}
+	require.NotNil(tb, st, "stage not found")
 	vec.Reset()
 	buf.Reset()
 	_ = vec.ParseCopy(st.origin)
 	err := vec.Beautify(buf)
-	if err != nil {
-		tb.Error(key, err)
-	}
-	if !bytes.Equal(buf.Bytes(), st.fmt) {
-		tb.Error(key, "fmt mismatch")
-	}
+	assert.NoError(tb, err)
+	assert.True(tb, bytes.Equal(st.fmt, buf.Bytes()))
 }
 
 func bench(b *testing.B, fn func(vec *Vector)) {
