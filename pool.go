@@ -23,7 +23,7 @@ func (p *Pool) Get() *Vector {
 	if v != nil {
 		if vec, ok := v.(*Vector); ok {
 			vec.SetBit(vector.FlagInit, true)
-			vec.Helper = helper
+			vec.SetCodec(Codec{})
 			return vec
 		}
 	}
