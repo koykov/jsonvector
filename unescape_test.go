@@ -82,6 +82,7 @@ func benchUnescape(b *testing.B) {
 	var buf []byte
 	b.ReportAllocs()
 	b.ResetTimer()
+	b.SetBytes(int64(len(buf)))
 	for i := 0; i < b.N; i++ {
 		buf = testUnescape(b, buf)
 	}
@@ -129,6 +130,7 @@ func benchAppendUnescape(b *testing.B) {
 	b.SetBytes(int64(len(st.origin)))
 	b.ReportAllocs()
 	b.ResetTimer()
+	b.SetBytes(int64(len(st.origin)))
 	for i := 0; i < b.N; i++ {
 		buf = AppendUnescape(buf[:0], st.origin)
 	}
