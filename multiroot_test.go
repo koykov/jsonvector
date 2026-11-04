@@ -99,6 +99,7 @@ func BenchmarkMultiroot(b *testing.B) {
 			vec := Acquire()
 			defer Release(vec)
 			b.ReportAllocs()
+			b.SetBytes(int64(len(st.buf)))
 			for j := 0; j < b.N; j++ {
 				vec.Reset()
 				if err := vec.Parse(st.buf); err != nil {
